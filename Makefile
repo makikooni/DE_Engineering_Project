@@ -74,24 +74,10 @@ security-test:
 
 ## Run the flake8 code check
 run-flake:
-	$(call execute_in_env, flake8 \
-	./src/multiplication_table/*.py \
-	./src/reduce_by_steps/*.py \
-	./src/find_partner/*.py \
-	./src/find_most_repeated/*.py \
-	./src/vowel_shift/*.py \
-	./src/alternating_split/*.py \
-	./src/crack_code/*.py \
-	./src/binary_search/*.py \
-	./src/calculate_binary_score/*.py \
-	./src/justify_line/*.py \
-	./src/find_the_needle/*.py \
-	./src/validate_suduko/*.py \
-	./src/strange_sort/*.py \
-	./src/gdpr_mask/*.py )
+	$(call execute_in_env, flake8  ./src/*/*.py ./test/*/*.py)
 
 ## Run autopep8 code formatting
-run-autopep8:
+run-autopep:
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} autopep8 -a ${file_name})
 
 
@@ -108,4 +94,4 @@ check-coverage:
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} coverage run --omit 'venv/*' -m pytest && coverage report -m)
 
 ## Run all checks
-run-checks: run-flake unit-tests 
+run-checks: security-tests run-flake unit-tests check-coverage 
