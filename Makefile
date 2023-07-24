@@ -34,6 +34,10 @@ define execute_in_env
 	$(ACTIVATE_ENV) && $1
 endef
 
+## install all python packages and dependencies
+load-requirements:
+	$(call pip install -r requirements.txt)
+
 ################################################################################################################
 # Set Up
 ## Install flake8
@@ -43,6 +47,10 @@ flake:
 ## Install pytest
 pytest:
 	$(call execute_in_env, $(PIP) install pytest)
+
+## Install autopep8
+autopep8:
+	$(call execute_in_env, $(PIP) install autopep8)
 
 ## Run the flake8 code check
 run-flake:
@@ -61,7 +69,12 @@ run-flake:
 	./src/validate_suduko/*.py \
 	./src/strange_sort/*.py \
 	./src/gdpr_mask/*.py )
-	
+
+## Run autopep8 code formatting
+run-autopep8:
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} autopep8 -a ${file_name})
+
+
 ## Run a single test
 unit-test:
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest -v ${test_run})
