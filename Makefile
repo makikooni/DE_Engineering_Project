@@ -35,8 +35,8 @@ define execute_in_env
 endef
 
 ## install all python packages and dependencies
-load-requirements:
-	$(call pip install -r requirements.txt)
+requirements:
+	$(call pip install -r ./requirements.txt)
 
 ################################################################################################################
 # Set Up
