@@ -40,17 +40,37 @@ requirements:
 
 ################################################################################################################
 # Set Up
+## Install bandit
+bandit:
+	$(call execute_in_env, $(PIP) install bandit)
+
+## Install safety
+safety:
+	$(call execute_in_env, $(PIP) install safety)
+
 ## Install flake8
 flake:
 	$(call execute_in_env, $(PIP) install flake8)
+
+## Install coverage
+coverage:
+	$(call execute_in_env, $(PIP) install coverage)
 
 ## Install pytest
 pytest:
 	$(call execute_in_env, $(PIP) install pytest)
 
 ## Install autopep8
-autopep8:
+autopep:
 	$(call execute_in_env, $(PIP) install autopep8)
+
+## Set up dev requirements (bandit, safety, flake8, coverage, autopep and pytest)
+dev-setup: bandit safety flake coverage pytest, autopep
+
+# Build / Run
+security-test:
+	$(call execute_in_env, safety check -r ./requirements.txt)
+	$(call execute_in_env, bandit -lll */*.py *c/*/*.py)
 
 ## Run the flake8 code check
 run-flake:
@@ -82,6 +102,10 @@ unit-test:
 ## Run all the unit tests
 unit-tests:
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest -vrP -s)
+
+## Run the coverage check
+check-coverage:
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} coverage run --omit 'venv/*' -m pytest && coverage report -m)
 
 ## Run all checks
 run-checks: run-flake unit-tests 
