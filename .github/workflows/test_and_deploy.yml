@@ -1,5 +1,5 @@
 # This workflow will test and deploy the project code
-# It will run whenever there are any pushed changes to the main branch
+# It will run whenever there are any pushed changes or merges to the main branch
 
 name: Test-Deploy-VA
 on:
