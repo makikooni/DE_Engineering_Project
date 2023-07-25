@@ -36,7 +36,7 @@ endef
 
 ## install all python packages and dependencies
 requirements:
-	$(call pip install -r ./requirements.txt)
+	$(call execute_in_env, $(PIP) install -r ./requirements.txt)
 
 ################################################################################################################
 # Set Up
@@ -65,7 +65,7 @@ autopep:
 	$(call execute_in_env, $(PIP) install autopep8)
 
 ## Set up dev requirements (bandit, safety, flake8, coverage, autopep and pytest)
-dev-setup: bandit safety flake coverage pytest, autopep
+dev-setup: bandit safety flake coverage pytest autopep
 
 # Build / Run
 security-test:
