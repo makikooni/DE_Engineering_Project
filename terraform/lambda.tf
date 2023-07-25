@@ -2,7 +2,7 @@ resource "aws_lambda_function" "extract_data_to_ingestion_s3" {
   filename = "${path.module}/../function.zip"
   function_name = "extract_data_to_ingestion_s3"
   role = aws_iam_role.lambda_role.arn
-  handler = "../src/extract/extract.py"
+  handler = "extract.extraction_lambda_handler"
   runtime = "python3.9"
 }
 
@@ -19,6 +19,11 @@ resource "aws_lambda_permission" "allow_extract_data_to_ingestion_s3" {
 
 
 
+# resource "aws_cloudwatch_event_rule" "every_five_minutes" {
+#     name = "every-five-minutes"
+#     description = "Triggers every five minutes"
+#     schedule_expression = "rate(5 minutes)"
+# }
 
 
 
@@ -31,11 +36,6 @@ resource "aws_lambda_permission" "allow_extract_data_to_ingestion_s3" {
 #     handler = "extract.handler"
 # }
 
-# resource "aws_cloudwatch_event_rule" "every_five_minutes" {
-#     name = "every-five-minutes"
-#     description = "Triggers every five minutes"
-#     schedule_expression = "rate(5 minutes)"
-# }
 
 # resource "aws_cloudwatch_event_target" "extract_data_to_ingestion_every_five_minutes" {
 #     rule = aws_cloudwatch_event_rule.every_five_minutes.name
