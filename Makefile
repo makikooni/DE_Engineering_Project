@@ -94,4 +94,6 @@ check-coverage:
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} coverage run --omit 'venv/*' -m pytest && coverage report -m)
 
 ## Run all checks
-run-checks: security-tests run-flake unit-tests check-coverage 
+run-checks: security-tests run-flake unit-tests check-coverage
+
+# this comment is simply to test that github actions is working when a pull request is merged to the main branch
