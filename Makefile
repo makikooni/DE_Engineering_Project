@@ -70,7 +70,7 @@ dev-setup: bandit safety flake coverage pytest, autopep
 # Build / Run
 security-test:
 	$(call execute_in_env, safety check -r ./requirements.txt)
-	$(call execute_in_env, bandit -lll */*.py *c/*/*.py)
+	$(call execute_in_env, bandit -lll */*.py *t/*.py *c/*/*.py)
 
 ## Run the flake8 code check
 run-flake:
