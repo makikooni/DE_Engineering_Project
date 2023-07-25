@@ -78,7 +78,7 @@ run-flake:
 
 ## Run autopep8 code formatting
 run-autopep:
-	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} autopep8 -a ${file_name})
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} autopep8 --in-place -a ${file_name})
 
 
 ## Run a single test
