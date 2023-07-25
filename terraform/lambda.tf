@@ -2,7 +2,7 @@ resource "aws_lambda_function" "extract_data_to_ingestion_s3" {
   filename = "${path.module}/../extract_data_to_ingestion_s3.zip"
   function_name = "extract_data_to_ingestion_s3"
   role = aws_iam_role.lambda_role.arn
-  handler = "../src/extract/extract.py"g
+  handler = "../src/extract/extract.py"
   runtime = "python3.9"
 }
 
