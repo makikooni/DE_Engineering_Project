@@ -1,5 +1,5 @@
 resource "aws_iam_role" "lambda_role" {
-    name_prefix = "role-extract_data_to_ingestion_s3"
+    name_prefix = "role_extract_data_to_ingestion_s3"
     assume_role_policy = <<EOF
     {
         "Version": "2012-10-17",
@@ -23,7 +23,7 @@ resource "aws_iam_role" "lambda_role" {
 data "aws_iam_policy_document" "s3_document" {
   statement {
 
-    actions = ["s3:GetObject", "s3:PutObject"]
+    actions = ["s3:PutObject"]
 
     resources = [
       "${aws_s3_bucket.ingestion_zone.arn}/*"
