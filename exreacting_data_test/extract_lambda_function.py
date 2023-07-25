@@ -48,7 +48,7 @@ import pandas as pd
 #         print(f"Error connecting to the database: {e}")
 
 
-def put_table(tableName):
+def put_table(tableName, bucketName='test-va-0423'):
     session = boto3.Session(
     aws_access_key_id='AKIAWT3PTZCGJVV2RIGV',
     aws_secret_access_key='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'
@@ -82,7 +82,7 @@ def put_table(tableName):
         df = pd.DataFrame(data=rows[1], columns=rows[0]) # uses pandas to convert to a dataframe
         output = df.to_string()
         fileName = "test_" + tableName + ".csv"
-        obj = s3.Object('test-va-0423', fileName)# adds the data to the s3 (this case test-va-0423), as a csv file (test_design.csv)
+        obj = s3.Object(bucketName, fileName)# adds the data to the s3 (this case test-va-0423), as a csv file (test_design.csv)
         obj.put(Body=output)# adds the data to the s3 (this case test-va-0423), as a csv file (test_design.csv)
         cursor.close()
         connection.close()
