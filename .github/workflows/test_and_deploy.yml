@@ -1,0 +1,36 @@
+# This workflow will test and deploy the project code
+# It will run whenever there are any pushed changes or merges to the main branch
+
+name: Test-Deploy-VA
+on:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  hello-world:
+    runs-on: ubuntu-latest
+    steps:
+      - name: hello-world
+        run: echo "Hello VariousArtists!"
+
+  run-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repo
+        uses: actions/checkout@v3
+      
+      - name: install python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: create environment
+        run: make create-environment
+
+      - name: setup requirements
+        run: make requirements
+      
+      - name: run all checks
+        run:  make run-checks
+        
