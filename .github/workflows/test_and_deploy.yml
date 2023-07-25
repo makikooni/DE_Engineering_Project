@@ -3,7 +3,9 @@
 
 name: Test-Deploy-VA
 on:
-  - push
+  push:
+    branches:
+      - 'main'
 
 jobs:
   hello-world:
