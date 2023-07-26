@@ -1,20 +1,22 @@
 import pg8000
 import boto3
+import json
 import pandas as pd
 from pprint import pprint
 from botocore.exceptions import ClientError
 
-def put_table(tableName, bucketName='test-va-0423'):
-    session = boto3.Session(
-    aws_access_key_id='AKIAWT3PTZCGJVV2RIGV',
-    aws_secret_access_key='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'
+def put_table(tableName, bucketName='test-va-0423', secretName='ingestion/db'):
+    secretsmanager = boto3.client('secretsmanager')
+    db_credentials = secretsmanager.get_secret_value(
+        SecretId = secretName
     )
-    s3 = session.resource('s3')
-    host = 'nc-data-eng-totesys-production.chpsczt8h1nu.eu-west-2.rds.amazonaws.com'
-    port = '5432'
-    database = 'totesys'
-    user = 'project_user_3'
-    password = 'I4NX4jLv8i9VdeeM43uWBKPV'
+    db_creds = json.loads(db_credentials['SecretString'])
+    s3 = boto3.resource('s3')
+    host = db_creds['host']
+    port = db_creds['port']
+    database = db_creds['dbname']
+    user = db_creds['username']
+    password = db_creds['password']
     try:
         connection = pg8000.connect(
             host=host,
@@ -36,10 +38,11 @@ def put_table(tableName, bucketName='test-va-0423'):
         rows.append(columns)
         rows.append(cursor.fetchall())# adds the column names to the start of the data
         df = pd.DataFrame(data=rows[1], columns=rows[0]) # uses pandas to convert to a dataframe
-        output = df.to_string()
-        fileName = tableName + ".csv"
+        output = df.to_csv()
+        # fileName = tableName
+        fileName = 'for_room_2'
         obj = s3.Object(bucketName, fileName)# adds the data to the s3 (this case test-va-0423), as a csv file (test_design.csv)
-        obj.put(Body=output)# adds the data to the s3 (this case test-va-0423), as a csv file (test_design.csv)
+        obj.put(Body=str(output))# adds the data to the s3 (this case test-va-0423), as a csv file (test_design.csv)
         cursor.close()
         connection.close()
         print("Connection closed.")
@@ -57,7 +60,7 @@ def put_table(tableName, bucketName='test-va-0423'):
 
         # print(dir(e))
 
-put_table(tableName='design', bucketName='test-va-0424')
+put_table(tableName='design', bucketName='test-va-0423')
 
 # def get_table():
 #     session = boto3.Session(
