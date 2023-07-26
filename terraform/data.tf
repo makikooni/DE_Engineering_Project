@@ -2,4 +2,8 @@ data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
 
-// add 'archive_file' 'lambda' at later stage filer
+data "archive_file" "lambda" {
+  type        = "zip"
+  source_file = "${path.module}/../src/extract/extract.py"
+  output_path = "${path.module}/../function.zip"
+}

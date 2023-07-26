@@ -17,3 +17,4 @@ venv/
 .terraform*
 terraform/terraform*
 *.tfstate*
+function.zip
