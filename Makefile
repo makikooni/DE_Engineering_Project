@@ -90,7 +90,7 @@ unit-test:
 
 ## Run all the unit tests
 unit-tests:
-	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest -vrP -s)
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} pytest -vrP)
 
 ## Run the coverage check
 check-coverage:
