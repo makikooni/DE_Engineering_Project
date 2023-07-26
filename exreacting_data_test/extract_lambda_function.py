@@ -51,13 +51,13 @@ def put_table(tableName, bucketName='test-va-0423', secretName='ingestion/db'):
         raise NameError(f"Error connecting to the database: {e}")
         # print(f"Error connecting to the database: {e}")
     
-    except ClientError as e:
-        if e.response['Error']['Code'] == 'NoSuchBucket':
-            raise ClientError('Not a valid bucket')
-        elif e.response['Error']['Code'] == 'ResourceNotFoundException':
+    except ClientError as _e:
+        if _e.response['Error']['Code'] == 'NoSuchBucket':
+            raise Exception('NoSuchBucket')
+        elif _e.response['Error']['Code'] == 'ResourceNotFoundException':
             raise ClientError(f"The requested secret {secretName} was not found")
         else:
-            print(e)
+            print(_e)
         
 
 put_table(tableName='design', bucketName='test-va-0423')
