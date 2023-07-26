@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)
 
 def extraction_lambda_handler(event, context):
     logger.info(f'Hello World!')
-    #raise NameError
+    raise NameError
     return {
         'statusCode': 200
     }

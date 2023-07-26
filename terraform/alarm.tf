@@ -10,7 +10,7 @@ resource "aws_sns_topic_subscription" "extract_errors_email_target" {
 
 resource "aws_cloudwatch_event_rule" "scheduler" {
     name_prefix = "extraction-scheduler-"
-    schedule_expression = "rate(1 minute)"
+    schedule_expression = "rate(3 minutes)"
 }
 
 resource "aws_lambda_permission" "allow_scheduler" {

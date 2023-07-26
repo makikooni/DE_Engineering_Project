@@ -1,7 +1,7 @@
 resource "aws_cloudwatch_event_rule" "every_one_minute" {
     name = "every_one_minute"
     description = "Triggers every one minute"
-    schedule_expression = "rate(3 minutes)"
+    schedule_expression = "rate(1 minute)"
 }
 
 resource "aws_cloudwatch_event_target" "extract_data_to_ingestion_every_one_minute" {
