@@ -1,4 +1,4 @@
-from src.extract.extract import extraction_lambda_handler
+from src.extract.extract import extraction_lambda_function
 import pytest
 import boto3
 from moto import (
@@ -9,11 +9,11 @@ from pprint import pprint
 
 secret_string = '{"username":"project_user_3","password":"I4NX4jLv8i9VdeeM43uWBKPV","engine":"postgres","host":"nc-data-eng-totesys-production.chpsczt8h1nu.eu-west-2.rds.amazonaws.com","port":"5432","dbname":"totesys"}'
 def test_testing_function_imported_correctly():
-    assert callable(extraction_lambda_handler)
+    assert callable(extraction_lambda_function)
 
 def test_returns_error_when_passed_invalid_table_name():
     with pytest.raises(Exception) as e:
-        extraction_lambda_handler('123dhdhdh')
+        extraction_lambda_function('123dhdhdh')
 
 @mock_s3
 @mock_secretsmanager
@@ -30,7 +30,7 @@ def test_adds_object_to_s3_bucket():
         Name="test_secret",
         SecretString= secret_string 
         )
-    extraction_lambda_handler(tableName='design',bucketName='test_bucket',secretName='test_secret')
+    extraction_lambda_function(tableName='design',bucketName='test_bucket',secretName='test_secret')
     obj = conn.list_objects_v2(Bucket='test_bucket')
     assert obj['Contents'][0]['Key']== 'design'
 
@@ -49,7 +49,7 @@ def test_for_incorrect_bucket_name():
         SecretString= secret_string 
         )
     with pytest.raises(Exception) as e:
-        extraction_lambda_handler(tableName='design', bucketName='no_bucket', secretName='test_secret')
+        extraction_lambda_function(tableName='design', bucketName='no_bucket', secretName='test_secret')
     assert 'Not a valid bucket' in str(e.value) 
 
 @mock_secretsmanager
@@ -60,7 +60,7 @@ def test_for_secret_not_found():
     #     SecretString= '{"username":"project_user","password":"I4NX4jLv8i9VdeeM4","engine":"posts","host":"nc-data-eng-totesys-production.chp8h1nu.eu-west-2.rds.amazonaws.com","port":"5323","dbname":"tosys"}'
     #     )
     with pytest.raises(Exception) as e:
-        extraction_lambda_handler(tableName='design', bucketName='test_bucket', secretName='test_secret')
+        extraction_lambda_function(tableName='design', bucketName='test_bucket', secretName='test_secret')
     
     print(e)
     assert "The requested secret was not found"  in str(e.value) 
@@ -73,7 +73,7 @@ def test_for_secret_with_bad_credentials():
         SecretString= '{"username":"project_user","password":"I4NX4jLv8i9VdeeM4","engine":"posts","host":"nc-data-eng-totesys-production.chp8h1nu.eu-west-2.rds.amazonaws.com","port":"5323","dbname":"tosys"}'
         )
     with pytest.raises(Exception) as e:
-        extraction_lambda_handler(tableName='design', bucketName='test_bucket', secretName='test_secret')
+        extraction_lambda_function(tableName='design', bucketName='test_bucket', secretName='test_secret')
     print(e)
     assert "Error connecting to the database"  in str(e.value) 
     
