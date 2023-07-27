@@ -28,12 +28,14 @@ def transformation_lambda_handler():
         # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_design.parquet
 
         # dim_payment_type table
-        payment_type_table = pd.read_csv(f's3://{ingestion_bucket_name}/design.csv')
-        dim_payment_type_table = payment_type_table[['design_id', 'design_name', 'file_location', 'file_name']]
+        payment_type_table = pd.read_csv(f's3://{ingestion_bucket_name}/payment_type.csv')
+        dim_payment_type_table = payment_type_table[['payment_type_id', 'payment_type_name']]
         dim_payment_type_table.to_parquet(f's3://{processing_bucket_name}/test_dim_payment_type.parquet')
-        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_payment_type.parquet
-
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_payment_type.parque
         
+
+
+
 
 
 
