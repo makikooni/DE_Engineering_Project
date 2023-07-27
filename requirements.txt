@@ -22,6 +22,7 @@ MarkupSafe==2.1.2
 mccabe==0.7.0
 moto==4.1.1
 packaging==21.3
+pandas==2.0.3
 pbr==5.11.1
 pg8000==1.29.8
 pluggy==1.2.0
