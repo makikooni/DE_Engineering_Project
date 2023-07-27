@@ -24,12 +24,15 @@ def extraction_lambda_handler(event, context):
 
 
 def extraction_lambda_function(
-        tableName, bucketName='test-va-0423', secretName='ingestion/db'):
+        secretTableNames='ingestion/db/table-names', 
+        bucketName='test-va-AAT', 
+        dbCredentials='ingestion/db'
+        ):
     secretsmanager = boto3.client('secretsmanager')
 
     try:
-        db_credentials = secretsmanager.get_secret_value(
-            SecretId=secretName
+        database_credentials = secretsmanager.get_secret_value(
+            SecretId=dbCredentials
         )
     except ClientError as _e:
         if _e.response['Error']['Code'] == 'ResourceNotFoundException':
@@ -37,13 +40,12 @@ def extraction_lambda_function(
             raise Exception("The requested secret was not found")
         else:
             print(_e)
+    
     # gets database credentials from secrets manager
-    db_creds = json.loads(db_credentials['SecretString'])
+    db_creds = json.loads(database_credentials['SecretString'])
     s3 = boto3.resource('s3')
     host = db_creds['host']
     port = db_creds['port']
-    # port = '0808'
-
     database = db_creds['dbname']
     user = db_creds['username']
     password = db_creds['password']
