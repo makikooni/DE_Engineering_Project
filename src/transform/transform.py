@@ -22,8 +22,9 @@ def transformation_lambda_handler():
         
         design_table = pd.read_csv(f's3://{ingestion_bucket_name}/for_room_2')
         pprint(design_table)
-
-
+        
+        ## what next? SQL - transformations
+        ## need to be in a format for 
 
 
 
@@ -31,18 +32,6 @@ def transformation_lambda_handler():
         print('except')
         print(e)
         pass
-
-'''
-- connect with the relevant bucket
-
-- list bucket file contents, assuming connection was successful
-
-- 
-
-
-'''
-
-
 
 
 
