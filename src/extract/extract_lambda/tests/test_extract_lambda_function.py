@@ -1,4 +1,4 @@
-from exreacting_data_test.extract_lambda_function import put_table
+from src.extract.extract_lambda.extract_lambda_function import put_table
 import pytest
 import boto3
 from moto import (
