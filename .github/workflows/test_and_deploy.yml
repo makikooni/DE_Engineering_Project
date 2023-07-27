@@ -19,6 +19,7 @@ jobs:
     steps:
 
       - name: not_a_secret
+        uses: actions/checkout@v3
         env: 
           super_secret: ${{ secrets.AWS }}
       
