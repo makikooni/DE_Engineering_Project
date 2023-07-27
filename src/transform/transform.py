@@ -38,21 +38,22 @@ def transformation_lambda_handler():
         dim_address_table = address_table[['address_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']]
         dim_address_table.rename(columns={'address_id': 'location_id'}, inplace=True)
         dim_address_table.to_parquet(f's3://{processing_bucket_name}/test_dim_location.parquet')
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_location.parquet
 
         # dim_transaction table
         transaction_table = pd.read_csv(f's3://{ingestion_bucket_name}/transaction.csv')
         dim_transaction_table = transaction_table[['transaction_id', 'transaction_type', 'sales_order_id', 'purchase_order_id']]
         dim_transaction_table.to_parquet(f's3://{processing_bucket_name}/test_dim_transaction.parquet')
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_transaction.parquet
 
         # dim_staff table
         staff_table = pd.read_csv(f's3://{ingestion_bucket_name}/staff.csv')
         department_table = pd.read_csv(f's3://{ingestion_bucket_name}/department.csv')
-        pprint(staff_table)
-        pprint(department_table)
-
-        # dim_transaction_table = transaction_table[['transaction_id', 'transaction_type', 'sales_order_id', 'purchase_order_id']]
-        # dim_transaction_table.to_parquet(f's3://{processing_bucket_name}/test_dim_transaction.parquet')
-        
+        joined_staff_department_table = staff_table.join(department_table.set_index('department_id'), on='department_id', lsuffix="staff")
+        dim_staff_table = joined_staff_department_table[['staff_id', 'first_name', 'last_name', 'department_name', 'location', 'email_address']]
+        dim_staff_table.to_parquet(f's3://{processing_bucket_name}/dim_staff_table.parquet')
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_staff_table.parquet        
+ 
 
 
 
