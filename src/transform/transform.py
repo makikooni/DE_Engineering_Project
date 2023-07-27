@@ -11,7 +11,7 @@ logger.setLevel(logging.INFO)
 
 def transformation_lambda_handler():
     # pd.set_option('display.max_columns', None)
-    ingestion_bucket_name = 'test-va-0423'
+    ingestion_bucket_name = 'test-va-ingestion-atif'
     processing_bucket_name = 'processed-va-052023'
     try:
         s3_client = boto3.client('s3')
@@ -21,10 +21,12 @@ def transformation_lambda_handler():
         if status_code != 200:
             raise Exception('the bucket may not exist, or, you may not have the correct permissions')
         
-        address_table = pd.read_csv(f's3://{ingestion_bucket_name}/for_room_2')
-        new_address_table = address_table[['design_id', 'design_name', 'file_location', 'file_name']]
-        new_address_table.to_parquet(f's3://{processing_bucket_name}/test_new_address.parquet')
+        # dim_design table
+        design_table = pd.read_csv(f's3://{ingestion_bucket_name}/design.csv')
+        dim_design_table = design_table[['design_id', 'design_name', 'file_location', 'file_name']]
+        dim_design_table.to_parquet(f's3://{processing_bucket_name}/test_dim_design.parquet')
         # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_new_address.parquet
+
 
 
 
