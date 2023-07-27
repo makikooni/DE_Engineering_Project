@@ -3,23 +3,22 @@ from pprint import pprint
 import pg8000
 import boto3
 import pandas as pd
-
-from botocore.exceptions import (ClientError)
+from botocore.exceptions import ClientError
 
 def put_table(tableName, bucketName='test-va-0423', secretName='ingestion/db'):
     secretsmanager = boto3.client('secretsmanager')
-    # try:
+
     db_credentials = secretsmanager.get_secret_value(
     SecretId = secretName
     )
     db_creds = json.loads(db_credentials['SecretString']) # gets database credentials from secrets manager
     s3 = boto3.resource('s3')
     host = db_creds['host']
-    port = db_creds['port']
+    port = db_creds['port']     
     database = db_creds['dbname']
     user = db_creds['username']
     password = db_creds['password']
-    # except ClientError as _e:
+
 
     try:
         connection = pg8000.connect(
