@@ -8,13 +8,22 @@ from botocore.exceptions import ClientError
 def put_table(tableName, bucketName='test-va-0423', secretName='ingestion/db'):
     secretsmanager = boto3.client('secretsmanager')
 
-    db_credentials = secretsmanager.get_secret_value(
-    SecretId = secretName
-    )
+    try: 
+        db_credentials = secretsmanager.get_secret_value(
+        SecretId = secretName
+        )
+    except ClientError as _e:
+        if _e.response['Error']['Code'] == 'ResourceNotFoundException':
+            print("in error")
+            raise Exception(f"The requested secret was not found")
+        else:
+            print(_e)
     db_creds = json.loads(db_credentials['SecretString']) # gets database credentials from secrets manager
     s3 = boto3.resource('s3')
     host = db_creds['host']
-    port = db_creds['port']     
+    port = db_creds['port'] 
+    # port = '0808'     
+    
     database = db_creds['dbname']
     user = db_creds['username']
     password = db_creds['password']
@@ -53,13 +62,11 @@ def put_table(tableName, bucketName='test-va-0423', secretName='ingestion/db'):
         raise NameError(f"Error connecting to the database: {_e}")
     
     except ClientError as _e:
+        pprint(_e.response)
         if _e.response['Error']['Code'] == 'NoSuchBucket':
             raise Exception('Not a valid bucket')
-        # elif _e.response['Error']['Code'] == 'ResourceNotFoundException':
-        #     print("in error")
-        #     raise Exception(f"The requested secret was not found")
-        # else:
-        #     print(_e)
+        else:
+            print(_e)
 
 put_table(tableName='design', bucketName='test-va-0423')
 
