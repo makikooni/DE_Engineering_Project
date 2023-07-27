@@ -17,6 +17,11 @@ jobs:
   run-checks:
     runs-on: ubuntu-latest
     steps:
+
+      - name: not_a_secret
+        env: 
+          super_secret: ${{ secrets.AWS }}
+      
       - name: checkout repo
         uses: actions/checkout@v3
       
