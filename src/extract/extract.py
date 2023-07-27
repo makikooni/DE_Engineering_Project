@@ -7,14 +7,16 @@ import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
 '''
-Defines lambda function responsible for extracting the data 
+Defines lambda function responsible for extracting the data
 from the database and depositing it in the ingestion bucket
 '''
+
 
 logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
 
 def extraction_lambda_handler(event, context):
+
     extraction_lambda_function(tableName='design')
     logger.info(f'Hello World!')
     return {
@@ -83,4 +85,11 @@ def extraction_lambda_function(tableName, bucketName='test-va-0423', secretName=
             raise Exception('Not a valid bucket')
         else:
             print(_e)
+
+
+    logger.info(f'Hello World!')
+    raise NameError
+    return {
+        'statusCode': 200
+    }
 
