@@ -1,4 +1,6 @@
 import json
+import os
+import logging
 from pprint import pprint
 import pg8000
 import boto3
@@ -8,7 +10,18 @@ from botocore.exceptions import ClientError
 Defines lambda function responsible for extracting the data 
 from the database and depositing it in the ingestion bucket
 '''
-def extraction_lambda_handler(tableName, bucketName='test-va-0423', secretName='ingestion/db'):
+
+logger = logging.getLogger('MyLogger')
+logger.setLevel(logging.INFO)
+
+def extraction_lambda_handler(event, context):
+    extraction_lambda_function(tableName='design')
+    logger.info(f'Hello World!')
+    return {
+        'statusCode': 200
+    }
+
+def extraction_lambda_function(tableName, bucketName='test-va-0423', secretName='ingestion/db'):
     secretsmanager = boto3.client('secretsmanager')
 
     try: 
@@ -70,3 +83,4 @@ def extraction_lambda_handler(tableName, bucketName='test-va-0423', secretName='
             raise Exception('Not a valid bucket')
         else:
             print(_e)
+
