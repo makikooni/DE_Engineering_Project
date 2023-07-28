@@ -79,14 +79,14 @@ def transformation_lambda_handler():
         sales_order_table = pd.read_csv(f's3://{ingestion_bucket_name}/sales_order.csv')
         sales_order_table.columns.values[0] = "sales_record_id"
         
-        new_created = sales_order_table['created_at'].str.split(" ", n = 1, expand = True)
-        sales_order_table['created_date']= new_created[0]
-        sales_order_table['created_time']= new_created[1]
+        new_created_sales = sales_order_table['created_at'].str.split(" ", n = 1, expand = True)
+        sales_order_table['created_date']= new_created_sales[0]
+        sales_order_table['created_time']= new_created_sales[1]
         sales_order_table.drop(columns =['created_at'], inplace = True)
 
-        new_updated = sales_order_table['last_updated'].str.split(" ", n = 1, expand = True)
-        sales_order_table['last_updated_date']= new_updated[0]
-        sales_order_table['last_updated_time']= new_updated[1]
+        new_updated_sales = sales_order_table['last_updated'].str.split(" ", n = 1, expand = True)
+        sales_order_table['last_updated_date']= new_updated_sales[0]
+        sales_order_table['last_updated_time']= new_updated_sales[1]
         sales_order_table.drop(columns =['last_updated'], inplace = True)
 
         sales_order_table.rename(columns={'staff_id': 'sales_staff_id'}, inplace=True)
@@ -94,6 +94,23 @@ def transformation_lambda_handler():
         fact_sales_order.to_parquet(f's3://{processing_bucket_name}/test_fact_sales_order.parquet')
         # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_fact_sales_order.parquet
 
+        # fact_purchase_order table
+        purchase_order_table = pd.read_csv(f's3://{ingestion_bucket_name}/purchase_order.csv')
+        purchase_order_table.columns.values[0] = "purchase_record_id"
+
+        new_created_purchase = purchase_order_table['created_at'].str.split(" ", n = 1, expand = True)
+        purchase_order_table['created_date']= new_created_purchase[0]
+        purchase_order_table['created_time']= new_created_purchase[1]
+        purchase_order_table.drop(columns =['created_at'], inplace = True)
+
+        new_created_purchase = purchase_order_table['last_updated'].str.split(" ", n = 1, expand = True)
+        purchase_order_table['last_updated_date']= new_created_purchase[0]
+        purchase_order_table['last_updated_time']= new_created_purchase[1]
+        purchase_order_table.drop(columns =['last_updated'], inplace = True)
+
+        fact_purchase_order = purchase_order_table[['purchase_record_id', 'purchase_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'staff_id', 'counterparty_id', 'item_code', 'item_quantity', 'item_unit_price', 'currency_id', 'agreed_delivery_date', 'agreed_payment_date', 'agreed_delivery_location_id']]
+        fact_purchase_order.to_parquet(f's3://{processing_bucket_name}/test_fact_purchase_order.parquet')
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_fact_purchase_order.parquet
 
 
 
