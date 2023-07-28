@@ -89,7 +89,7 @@ def get_table(connection, table_name):
 
     table_df = pd.DataFrame(data=table_data, columns=column_names)
 
-    logging.info(f"{table_name} table successfully extracted!")
+    logging.info(f"{table_name} table successfully extracted as dataframe!")
 
     return table_df
 
