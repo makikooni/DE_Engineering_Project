@@ -1,4 +1,4 @@
-from src.extract.extract import extraction_lambda_function
+from src.extract.extract import extraction_lambda_handler
 import pytest
 import boto3
 from moto import (
@@ -9,26 +9,26 @@ from pprint import pprint
 
 secret_string = '{"username":"project_user_3","password":"I4NX4jLv8i9VdeeM43uWBKPV","engine":"postgres","host":"nc-data-eng-totesys-production.chpsczt8h1nu.eu-west-2.rds.amazonaws.com","port":"5432","dbname":"totesys"}'
 def test_testing_function_imported_correctly():
-    assert callable(extraction_lambda_function)
+    assert callable(extraction_lambda_handler)
 
 # @mock_s3
-# @mock_secretsmanager
-# def test_adds_object_to_s3_bucket():
-#     # create the secret
-#     conn = boto3.client('s3')
-#     conn.create_bucket(
-#         Bucket='test_bucket',
-#         CreateBucketConfiguration={
-#         'LocationConstraint': 'eu-west-2',
-#     })
+@mock_secretsmanager
+def test_adds_object_to_s3_bucket():
+    # create the secret
+    conn = boto3.client('s3')
+    conn.create_bucket(
+        Bucket='test_bucket',
+        CreateBucketConfiguration={
+        'LocationConstraint': 'eu-west-2',
+    })
     
-#     boto3.client("secretsmanager").create_secret(
-#         Name="test_secret",
-#         SecretString= secret_string 
-#         )
-#     extraction_lambda_function(tableName='design',bucketName='test_bucket',secretName='test_secret')
-#     obj = conn.list_objects_v2(Bucket='test_bucket')
-#     assert obj['Contents'][0]['Key']== 'design'
+    boto3.client("secretsmanager").create_secret(
+        Name="test_secret",
+        SecretString= secret_string 
+        )
+    extraction_lambda_handler(event, context)
+    obj = conn.list_objects_v2(Bucket='test_bucket')
+    assert obj['Contents'][0]['Key']== 'design'
 
 # @mock_s3
 # @mock_secretsmanager
