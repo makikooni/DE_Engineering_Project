@@ -2,7 +2,6 @@ from src.extract.extract import get_secret
 import pytest
 import boto3
 from unittest.mock import patch
-from botocore.exceptions import ClientError
 from moto import (
     mock_secretsmanager
     )
