@@ -50,10 +50,10 @@ def transformation_lambda_handler():
         # dim_staff table
         staff_table = pd.read_csv(f's3://{ingestion_bucket_name}/staff.csv')
         department_table = pd.read_csv(f's3://{ingestion_bucket_name}/department.csv')
-        joined_staff_department_table = staff_table.join(department_table.set_index('department_id'), on='department_id', lsuffix="staff")
+        joined_staff_department_table = staff_table.join(department_table.set_index('department_id'), on='department_id', lsuffix="staff", rsuffix='department')
         dim_staff_table = joined_staff_department_table[['staff_id', 'first_name', 'last_name', 'department_name', 'location', 'email_address']]
-        dim_staff_table.to_parquet(f's3://{processing_bucket_name}/test_dim_staff_table.parquet')
-        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_staff_table.parquet
+        dim_staff_table.to_parquet(f's3://{processing_bucket_name}/test_dim_staff.parquet')
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_staff.parquet
 
         # dim_currency table
         currency_table = pd.read_csv(f's3://{ingestion_bucket_name}/currency.csv')
@@ -65,8 +65,25 @@ def transformation_lambda_handler():
                 'British Pound',
                 'US Dollar']
         dim_currency_table['currency_name'] = np.select(conditions, values)
-        dim_currency_table.to_parquet(f's3://{processing_bucket_name}/test_dim_currency_table.parquet')
-        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_currency_table.parquet
+        dim_currency_table.to_parquet(f's3://{processing_bucket_name}/test_dim_currency.parquet')
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_currency.parquet
+
+        # dim_counterparty table
+        counterparty_table = pd.read_csv(f's3://{ingestion_bucket_name}/counterparty.csv')
+        address_table_for_counterparty = pd.read_csv(f's3://{ingestion_bucket_name}/address.csv')
+        joined_counterparty_address_table = counterparty_table.join(address_table_for_counterparty.set_index('address_id'), on='legal_address_id', lsuffix='counterparty', rsuffix='address')
+        dim_counterparty = joined_counterparty_address_table[['counterparty_id', 'counterparty_legal_name', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']]
+        columns_to_rename = ['address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country']
+        dim_counterparty.rename(columns={col: 'counterparty_legal_'+col for col in dim_counterparty.columns if col in columns_to_rename}, inplace=True)
+        dim_counterparty.rename(columns={'phone': 'counterparty_legal_phone_number'}, inplace=True)
+        dim_counterparty.to_parquet(f's3://{processing_bucket_name}/test_dim_counterparty.parquet')
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_counterparty.parquet
+
+        # fact_sales_order table
+        
+
+
+
 
 
 
