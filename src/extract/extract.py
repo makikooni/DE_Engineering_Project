@@ -27,7 +27,7 @@ def extraction_lambda_handler(event, context):
     table_names = json.loads(table_names_response["SecretString"]).keys()
 
     try:
-        connection = connect_totesys_db(db_credentials)
+        connection = connect_db(db_credentials, db_name = "totesys")
 
         for table_name in table_names:
             table_df = get_table(connection, table_name)
@@ -126,8 +126,8 @@ def upload_table_s3(table_df, table_name, ingestion_bucket_name):
     )
 
 
-def connect_totesys_db(db_credentials):
-    logging.info(f"Starting connection to totsys database...")
+def connect_db(db_credentials, db_name = ""):
+    logging.info(f"Starting connection to {db_name} database...")
 
     connection = pg8000.connect(
         host=db_credentials["host"],
