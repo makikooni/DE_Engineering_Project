@@ -75,6 +75,27 @@ def transformation_lambda_handler():
         dim_counterparty.to_parquet(f's3://{processing_bucket_name}/test_dim_counterparty.parquet')
         # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_counterparty.parquet
 
+        # fact_sales_order table
+        sales_order_table = pd.read_csv(f's3://{ingestion_bucket_name}/sales_order.csv')
+        sales_order_table.columns.values[0] = "sales_record_id"
+        
+        new_created = sales_order_table['created_at'].str.split(" ", n = 1, expand = True)
+        sales_order_table['created_date']= new_created[0]
+        sales_order_table['created_time']= new_created[1]
+        sales_order_table.drop(columns =['created_at'], inplace = True)
+
+        new_updated = sales_order_table['last_updated'].str.split(" ", n = 1, expand = True)
+        sales_order_table['last_updated_date']= new_updated[0]
+        sales_order_table['last_updated_time']= new_updated[1]
+        sales_order_table.drop(columns =['last_updated'], inplace = True)
+
+        sales_order_table.rename(columns={'staff_id': 'sales_staff_id'}, inplace=True)
+        fact_sales_order = sales_order_table[['sales_record_id', 'sales_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'sales_staff_id', 'counterparty_id', 'units_sold', 'unit_price', 'currency_id', 'design_id', 'agreed_payment_date', 'agreed_delivery_date', 'agreed_delivery_location_id']]
+        fact_sales_order.to_parquet(f's3://{processing_bucket_name}/test_fact_sales_order.parquet')
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_fact_sales_order.parquet
+
+
+
 
 
 
