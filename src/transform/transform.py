@@ -5,6 +5,7 @@ import boto3
 from pprint import pprint
 import csv
 import pandas as pd
+import numpy as np
 
 logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
@@ -51,9 +52,22 @@ def transformation_lambda_handler():
         department_table = pd.read_csv(f's3://{ingestion_bucket_name}/department.csv')
         joined_staff_department_table = staff_table.join(department_table.set_index('department_id'), on='department_id', lsuffix="staff")
         dim_staff_table = joined_staff_department_table[['staff_id', 'first_name', 'last_name', 'department_name', 'location', 'email_address']]
-        dim_staff_table.to_parquet(f's3://{processing_bucket_name}/dim_staff_table.parquet')
-        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_staff_table.parquet        
- 
+        dim_staff_table.to_parquet(f's3://{processing_bucket_name}/test_dim_staff_table.parquet')
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_staff_table.parquet
+
+        # dim_currency table
+        currency_table = pd.read_csv(f's3://{ingestion_bucket_name}/currency.csv')
+        dim_currency_table = currency_table[['currency_id', 'currency_code']]
+        conditions = [(dim_currency_table['currency_code'] == 'EUR'),
+                      (dim_currency_table['currency_code'] == 'GBP'),
+                      (dim_currency_table['currency_code'] == 'USD')]
+        values = ['Euro',
+                'British Pound',
+                'US Dollar']
+        dim_currency_table['currency_name'] = np.select(conditions, values)
+        dim_currency_table.to_parquet(f's3://{processing_bucket_name}/test_dim_currency_table.parquet')
+        # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_currency_table.parquet
+
 
 
 
