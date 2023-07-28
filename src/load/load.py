@@ -1,9 +1,10 @@
 import json
+import pg8000
 import logging
 import boto3
 import pandas as pd
 # import psycopg2
-from sqlalchemy import create_engine
+# from sqlalchemy import create_engine
 from botocore.exceptions import ClientError
 def update_table(s3_table_name, wh_table_name, secret_name = 'warehouse'):
     # get warehouse credentails from AWS secrets
@@ -18,6 +19,7 @@ def update_table(s3_table_name, wh_table_name, secret_name = 'warehouse'):
         raise error
    
     try:
+        
         # conecting to the process bucket
         process_bucket = 'processed-va-052023'
         # s3_resource = boto3.resource('s3')   
@@ -30,6 +32,14 @@ def update_table(s3_table_name, wh_table_name, secret_name = 'warehouse'):
         database = db_creds['dbname']
         user = db_creds['username']
         password = db_creds['password']
+        connection = pg8000.connect(
+            host=host,
+            port=port,
+            database=database,
+            user=user,
+            password=password
+        )
+        
         # connecting to warehouse
         warehouse_db = create_engine('postgresql://' + user + ':' + password + '@' + \
             host + ':' + port + '/' + database , echo = "debug")
