@@ -42,12 +42,21 @@ def update_table(s3_table_name, wh_table_name, secret_name = 'warehouse'):
                 )
         # get the table from the s3 and put it in a pandas dataframe
         table = pd.read_parquet(f's3://{process_bucket}/{s3_table_name}')
-        table_data_frame = pd.DataFrame({table})
-        table_data_frame.to_sql(wh_table_name,con = connection, if_exists= 'append')
+        table_data_frame = pd.DataFrame(table)
+        print(list(table_data_frame.columns))
         # update table with dataframe
-        # cursor = connection.cursor()
-        # update_table_sql = 'UPDATE ' + 'SET '
+        cursor = connection.cursor()
+        list_columns = ''
+        index = 0
+        for column in list(table_data_frame.columns):
+            if index != len(list(table_data_frame.columns))- 1:
+                list_columns += column + ', '
+                index += 1
+            else:
+                list_columns += column
+  
+        update_table_sql = 'INSERT INTO ' + wh_table_name + ' (' +list_columns+')' 
+        # table_data_frame.to_sql(wh_table_name,con = connection, if_exists= 'append')
     except Exception as error:
         raise error
-
 update_table('test_dim_design.parquet', 'dim_design')
