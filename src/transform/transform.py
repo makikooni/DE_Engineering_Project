@@ -58,12 +58,8 @@ def transformation_lambda_handler():
         # dim_currency table
         currency_table = pd.read_csv(f's3://{ingestion_bucket_name}/currency.csv')
         dim_currency_table = currency_table[['currency_id', 'currency_code']]
-        conditions = [(dim_currency_table['currency_code'] == 'EUR'),
-                      (dim_currency_table['currency_code'] == 'GBP'),
-                      (dim_currency_table['currency_code'] == 'USD')]
-        values = ['Euro',
-                'British Pound',
-                'US Dollar']
+        conditions = [(dim_currency_table['currency_code'] == 'EUR'), (dim_currency_table['currency_code'] == 'GBP'), (dim_currency_table['currency_code'] == 'USD')]
+        values = ['Euro', 'British Pound', 'US Dollar']
         dim_currency_table['currency_name'] = np.select(conditions, values)
         dim_currency_table.to_parquet(f's3://{processing_bucket_name}/test_dim_currency.parquet')
         # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_currency.parquet
@@ -78,11 +74,6 @@ def transformation_lambda_handler():
         dim_counterparty.rename(columns={'phone': 'counterparty_legal_phone_number'}, inplace=True)
         dim_counterparty.to_parquet(f's3://{processing_bucket_name}/test_dim_counterparty.parquet')
         # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_dim_counterparty.parquet
-
-        # fact_sales_order table
-        
-
-
 
 
 
