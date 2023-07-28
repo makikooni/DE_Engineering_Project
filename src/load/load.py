@@ -3,8 +3,6 @@ import pg8000
 import logging
 import boto3
 import pandas as pd
-# import psycopg2
-# from sqlalchemy import create_engine
 from botocore.exceptions import ClientError
 def update_table(s3_table_name, wh_table_name, secret_name = 'warehouse'):
     # get warehouse credentails from AWS secrets
@@ -32,21 +30,23 @@ def update_table(s3_table_name, wh_table_name, secret_name = 'warehouse'):
         database = db_creds['dbname']
         user = db_creds['username']
         password = db_creds['password']
-        connection = pg8000.connect(
-            host=host,
-            port=port,
-            database=database,
-            user=user,
-            password=password
-        )
+        
         
         # connecting to warehouse
-        warehouse_db = create_engine('postgresql://' + user + ':' + password + '@' + \
-            host + ':' + port + '/' + database , echo = "debug")
+        connection = pg8000.connect(
+                    host=host,
+                    port=port,
+                    database=database,
+                    user=user,
+                    password=password
+                )
         # get the table from the s3 and put it in a pandas dataframe
         table = pd.read_parquet(f's3://{process_bucket}/{s3_table_name}')
         table_data_frame = pd.DataFrame({table})
-        table_data_frame.to_sql(wh_table_name,con = warehouse_db, if_exists= 'append')
+        table_data_frame.to_sql(wh_table_name,con = connection, if_exists= 'append')
+        # update table with dataframe
+        # cursor = connection.cursor()
+        # update_table_sql = 'UPDATE ' + 'SET '
     except Exception as error:
         raise error
 
