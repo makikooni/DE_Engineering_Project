@@ -1,12 +1,10 @@
 import json
 import logging
-from pprint import pprint
-import pg8000
 import boto3
 import pandas as pd
+from sqlalchemy import create_engine
 from botocore.exceptions import ClientError
-
-def load_data(secret_name = 'warehouse'):
+def update_table(table_name, secret_name = 'warehouse'):
     # get warehouse credentails from AWS secrets
     secretsmanager = boto3.client('secretsmanager')
     try:
@@ -34,16 +32,13 @@ def load_data(secret_name = 'warehouse'):
         user = db_creds['username']
         password = db_creds['password']
         # connecting to warehouse
-        connection = pg8000.connect(
-            host=host,
-            port=port,
-            database=database,
-            user=user,
-            password=password
-        )
-        desgin_table = pd.read_parquet(f's3://{process_bucket}/test_dim_design.parquet')
+        warehouse_db = create_engine('postgresql://' + user + ':' + password + '@' + \
+            host + ':' + port + '/' + database , echo = "debug")
+        # get the table from the s3 and put it in a pandas dataframe
+        table = pd.read_parquet(f's3://{process_bucket}/{table_name}')
+        pd.DataFrame({table})
         
     except Exception as _e:
         raise _e
 
-load_data()
+update_table('test_dim_design.parquet')
