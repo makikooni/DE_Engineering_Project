@@ -1,6 +1,6 @@
 import json
 import logging
-import pg8000
+from pg8000.native import Connection 
 import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
@@ -73,9 +73,10 @@ def get_secret(secret_name):
 def get_table(connection, table_name):
     logging.info(f"Extracting {table_name} table from database...")
 
-    column_names = get_column_names(table_name, connection)
+    query = f"SELECT * FROM {table_name};"
 
-    table_data = get_table_data(table_name, connection)
+    table_data = connection.run(query)
+    column_names = [col["name"] for col in connection.columns]
 
     table_df = pd.DataFrame(data=table_data, columns=column_names)
 
@@ -84,36 +85,36 @@ def get_table(connection, table_name):
     return table_df
 
 
-def get_column_names(table, connection):
-    cursor = connection.cursor()
+# def get_column_names(table, connection):
+#     cursor = connection.cursor()
 
-    column_names = []
-    table_cols_query = (
-        "select * from "
-        "INFORMATION_SCHEMA.COLUMNS"
-        " where TABLE_NAME='" + table + "';"
-    )
+#     column_names = []
+#     table_cols_query = (
+#         "select * from "
+#         "INFORMATION_SCHEMA.COLUMNS"
+#         " where TABLE_NAME='" + table + "';"
+#     )
 
-    cursor.execute(table_cols_query)
-    columns_data = cursor.fetchall()
+#     cursor.execute(table_cols_query)
+#     columns_data = cursor.fetchall()
 
-    for column in columns_data:
-        column_names.append(column[3])
+#     for column in columns_data:
+#         column_names.append(column[3])
 
-    cursor.close()
-    return column_names
+#     cursor.close()
+#     return column_names
 
 
-def get_table_data(table, connection):
-    cursor = connection.cursor()
-    rows = []
+# def get_table_data(table, connection):
+#     cursor = connection.cursor()
+#     rows = []
 
-    table_query = "SELECT * FROM " + table + ";"
-    cursor.execute(table_query)
-    table_data = cursor.fetchall()
+#     table_query = "SELECT * FROM " + table + ";"
+#     cursor.execute(table_query)
+#     table_data = cursor.fetchall()
 
-    cursor.close()
-    return table_data
+#     cursor.close()
+#     return table_data
 
 
 def upload_table_s3(table_df, table_name, ingestion_bucket_name):
@@ -129,7 +130,7 @@ def upload_table_s3(table_df, table_name, ingestion_bucket_name):
 def connect_db(db_credentials, db_name = ""):
     logging.info(f"Starting connection to {db_name} database...")
 
-    connection = pg8000.connect(
+    connection = Connection(
         host=db_credentials["host"],
         port=db_credentials["port"],
         database=db_credentials["dbname"],
@@ -137,5 +138,8 @@ def connect_db(db_credentials, db_name = ""):
         password=db_credentials["password"],
     )
 
-    logging.info(f"Successfully connected!")
+    logging.info(f"Successfully connected to {db_name} database!")
     return connection
+
+
+extraction_lambda_handler(1, 2)
