@@ -48,6 +48,9 @@ def extraction_lambda_handler(event, context):
 
 
 def get_secret(secret_name):
+    if not isinstance(secret_name, str):
+        raise TypeError(f"secret_name is {type(secret_name)}, {str} is required")
+
     secretsmanager = boto3.client("secretsmanager")
     try:
         logging.info(f"Retrieving {secret_name} information from SecretsManager...")

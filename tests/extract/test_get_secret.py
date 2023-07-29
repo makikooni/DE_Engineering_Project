@@ -103,3 +103,8 @@ def test_raises_exception_if_incorrect_input_arguments():
 
     with pytest.raises(KeyError):
         get_secret(AWS_SECRET_TABLES_NAMES)
+
+    AWS_SECRET_TABLES_NAMES = []
+
+    with pytest.raises(TypeError):
+        get_secret(AWS_SECRET_TABLES_NAMES)
