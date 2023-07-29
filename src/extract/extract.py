@@ -1,6 +1,6 @@
 import json
 import logging
-from pg8000.native import Connection 
+from pg8000.native import Connection, InterfaceError, DatabaseError
 import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
@@ -84,39 +84,6 @@ def get_table(connection, table_name):
 
     return table_df
 
-
-# def get_column_names(table, connection):
-#     cursor = connection.cursor()
-
-#     column_names = []
-#     table_cols_query = (
-#         "select * from "
-#         "INFORMATION_SCHEMA.COLUMNS"
-#         " where TABLE_NAME='" + table + "';"
-#     )
-
-#     cursor.execute(table_cols_query)
-#     columns_data = cursor.fetchall()
-
-#     for column in columns_data:
-#         column_names.append(column[3])
-
-#     cursor.close()
-#     return column_names
-
-
-# def get_table_data(table, connection):
-#     cursor = connection.cursor()
-#     rows = []
-
-#     table_query = "SELECT * FROM " + table + ";"
-#     cursor.execute(table_query)
-#     table_data = cursor.fetchall()
-
-#     cursor.close()
-#     return table_data
-
-
 def upload_table_s3(table_df, table_name, ingestion_bucket_name):
     logging.info(
         f"uploading {table_name} table to {ingestion_bucket_name} S3 bucket..."
@@ -128,18 +95,38 @@ def upload_table_s3(table_df, table_name, ingestion_bucket_name):
 
 
 def connect_db(db_credentials, db_name = ""):
-    logging.info(f"Starting connection to {db_name} database...")
+    logging.info(f"Performing checks before connecting to database...")
+    if not isinstance(db_credentials, dict):
+        raise TypeError(f"db_credentials is {type(db_credentials)}, {dict} is required")
+    elif not isinstance(db_name,str):
+        raise TypeError(f"db_name is {type(db_name)}, {str} is required")
+    
+    db_credentials_keys = list(db_credentials.keys())
+    required_keys = ["host", "port", "dbname", "username", "password"]
 
-    connection = Connection(
-        host=db_credentials["host"],
-        port=db_credentials["port"],
-        database=db_credentials["dbname"],
-        user=db_credentials["username"],
-        password=db_credentials["password"],
-    )
+    for req_key in required_keys:
+        if req_key not in db_credentials_keys:
+            raise KeyError(f'db_credentials contains does not contain {req_key}')
+    
+    for key in db_credentials:
+        if not isinstance(db_credentials[key], str):
+            raise ValueError(f"value for {key} is {type(db_credentials[key])}, {str} is required")
 
-    logging.info(f"Successfully connected to {db_name} database!")
-    return connection
-
-
-extraction_lambda_handler(1, 2)
+    try:
+        logging.info(f"Starting connection to {db_name} database...")
+        connection = Connection(
+            host=db_credentials["host"],
+            port=db_credentials["port"],
+            database=db_credentials["dbname"],
+            user=db_credentials["username"],
+            password=db_credentials["password"],
+        )
+        logging.info(f"Successfully connected to {db_name} database!")
+        return connection
+    except InterfaceError:
+        logging.error(f"InterfaceError: please check your database credentials")
+        raise InterfaceError
+    
+    except DatabaseError:
+        logging.error(f"DatabaseError: please contact your database administrator")
+        raise DatabaseError
