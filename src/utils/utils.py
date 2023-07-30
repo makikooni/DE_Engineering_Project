@@ -58,27 +58,27 @@ def get_table_db(connection, table_name):
         raise InterfaceError
 
 
-def upload_table_s3(table_df, table_name, ingestion_bucket_name):
+def upload_table_s3(table_df, table_name, bucket_name):
     if not isinstance(table_df, pd.DataFrame):
         raise TypeError(f"table dataframe {type(table_df)}, expected {pd.DataFrame}")
     if not isinstance(table_name, str):
         raise TypeError(f"table name is {type(table_name)}, expected {str}")
-    if not isinstance(ingestion_bucket_name, str):
+    if not isinstance(bucket_name, str):
         raise TypeError(
-            f"ingestion bucket name is {type(ingestion_bucket_name)}, expected {str}"
+            f"ingestion bucket name is {type(bucket_name)}, expected {str}"
         )
 
     try:
-        boto3.client("s3").head_bucket(Bucket=ingestion_bucket_name)
+        boto3.client("s3").head_bucket(Bucket=bucket_name)
 
         logging.info(
-            f"uploading {table_name} table to {ingestion_bucket_name} S3 bucket..."
+            f"uploading {table_name} table to {bucket_name} S3 bucket..."
         )
 
-        table_df.to_csv(f"s3://{ingestion_bucket_name}/{table_name}.csv")
+        table_df.to_csv(f"s3://{bucket_name}/{table_name}.csv")
 
         logging.info(
-            f"{table_name} table successfully uploaded to {ingestion_bucket_name} S3 bucket!"
+            f"{table_name} table successfully uploaded to {bucket_name} S3 bucket!"
         )
     except Exception as e:
         error = e.response["Error"]

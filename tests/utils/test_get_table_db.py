@@ -40,4 +40,4 @@ def test_should_protect_against_sql_injection(test_connection):
 
 def test_should_raise_exception_if_incorrect_input_type():
     with pytest.raises(TypeError):
-        get_table([], "table_name")
+        get_table_db([], "table_name")
