@@ -1,21 +1,7 @@
-from src.extract.extract import connect_db, get_secret
+from src.extract.extract import connect_db
 from pg8000.native import InterfaceError
 import pytest
 from unittest.mock import patch
-
-
-# @patch('src.extract.extract.Connection')
-# def test_test(mock_connection):
-
-#     mock_connection.return_value = Connection()
-#     AWS_SECRET_DB_CREDENTIALS_NAME = "ingestion/db/credentials"
-#     db_credentials_response = get_secret(AWS_SECRET_DB_CREDENTIALS_NAME)
-#     db_credentials = json.loads(db_credentials_response["SecretString"])
-#     connection = connect_db(db_credentials, db_name = "totesys")
-#     print(type(connection))
-
-#     assert True
-
 
 def test_should_raise_exception_if_incorrect_credentials():
     test_db_credentials = {
