@@ -85,7 +85,9 @@ def upload_table_s3(table_df, table_name, bucket_name):
         if e.response["Error"]["Code"] == "NoSuchBucket":
             logging.error(f"NoSuchBucket: {error['BucketName']} does not exist")
 
-        raise KeyError(f"{error['BucketName']} does not exist")
+            raise KeyError(f"{error['BucketName']} does not exist")
+        else:
+            raise e
 
 
 def connect_db(db_credentials, db_name=""):
