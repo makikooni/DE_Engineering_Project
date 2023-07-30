@@ -26,7 +26,7 @@ def sm_client(create_sm_client):
             "dbname": "test_dbname",
         }
     )
-    mocked_sm_client = boto3.client("secretsmanager")
+    mocked_sm_client = create_sm_client
     mocked_sm_client.create_secret(
         Name=AWS_SECRET_DB_CREDENTIALS_NAME,
         Description=AWS_SECRET_DB_CREDENTIALS_NAME,
