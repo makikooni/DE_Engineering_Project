@@ -4,7 +4,7 @@ import pandas as pd
 from unittest.mock import patch
 
 
-@patch("src.extract.extract.Connection")
+@patch("src.utils.utils.Connection")
 def test_should_return_correct_dataframe_and_string(test_connection):
     test_table_name = "test_table"
 
@@ -30,7 +30,7 @@ def test_should_return_correct_dataframe_and_string(test_connection):
     assert test_result_df.equals(test_df)
 
 
-@patch("src.extract.extract.Connection")
+@patch("src.utils.utils.Connection")
 def test_should_protect_against_sql_injection(test_connection):
     test_table_name = "design; DROP *;"
     test_table_df, test_query = get_table(test_connection, test_table_name)

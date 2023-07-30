@@ -49,17 +49,12 @@ def sm_client(create_sm_client):
         SecretString=test_table_names,
     )
     yield mocked_sm_client
-    # result = mocked_sm_client.list_secrets()
-    # name_of_secrets = [secret['Name'] for secret in result['SecretList'] ]
-    # print(name_of_secrets)
-    # assert AWS_SECRET_DB_CREDENTIALS_NAME in name_of_secrets
-    # assert AWS_SECRET_TABLES_NAMES in name_of_secrets
 
 
 def test_should_return_a_dict_with_correct_keys(sm_client):
     AWS_SECRET_DB_CREDENTIALS_NAME = "test_db_credentials"
 
-    with patch("src.extract.extract.boto3.client") as mock_client:
+    with patch("src.utils.utils.boto3.client") as mock_client:
         mock_client.get_secret_value.return_value = sm_client.get_secret_value(
             SecretId=AWS_SECRET_DB_CREDENTIALS_NAME
         )
@@ -76,7 +71,7 @@ def test_should_return_a_dict_with_correct_keys(sm_client):
 def test_should_return_a_dict_with_correct_db_credential_data(sm_client):
     AWS_SECRET_DB_CREDENTIALS_NAME = "test_db_credentials"
 
-    with patch("src.extract.extract.boto3.client") as mock_client:
+    with patch("src.utils.utils.boto3.client") as mock_client:
         mock_client.get_secret_value.return_value = sm_client.get_secret_value(
             SecretId=AWS_SECRET_DB_CREDENTIALS_NAME
         )
@@ -97,7 +92,7 @@ def test_should_return_a_dict_with_correct_db_credential_data(sm_client):
 def test_should_return_a_dict_with_correct_table_name_data(sm_client):
     AWS_SECRET_TABLES_NAMES = "test_table_name"
 
-    with patch("src.extract.extract.boto3.client") as mock_client:
+    with patch("src.utils.utils.boto3.client") as mock_client:
         mock_client.get_secret_value.return_value = sm_client.get_secret_value(
             SecretId=AWS_SECRET_TABLES_NAMES
         )
