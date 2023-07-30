@@ -1,16 +1,33 @@
-from src.extract.extract import get_secret
+from src.extract.extract import get_table
 import pytest
 import boto3
+import pandas as pd
 from unittest.mock import patch
-from moto import mock_secretsmanager
 
+@patch("src.extract.extract.Connection")
+def test_should_return_correct_dataframe_and_string(test_connection):
+    test_table_name = "test_table"
 
-def test_should_return_dataframe():
-    pass
+    test_connection.run.return_value = [
+        ["r1c1", "r1c2", "r1c3"],
+        ["r2c1", "r2c2", "r2c3"],
+        ["r3c1", "r3c2", "r3c3"],
+    ]
 
+    test_connection.columns = [
+        {"name": "col1"},
+        {"name": "col2"},
+        {"name": "col3"},
+    ]
 
-def test_dataframe_should_contain_correct_data():
-    pass
+    test_df = pd.DataFrame(data=test_connection.run(), columns=["col1", "col2", "col3"])
+
+    test_result_df, test_query = get_table(test_connection, test_table_name)
+
+    assert isinstance(test_result_df, pd.DataFrame)
+    assert isinstance(test_query, str)
+    assert test_query == f"SELECT * FROM {test_table_name};"
+    assert test_result_df.equals(test_df)
 
 
 def test_should_protect_against_sql_injection():
