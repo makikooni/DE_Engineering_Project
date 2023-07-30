@@ -7,11 +7,15 @@ from botocore.exceptions import ClientError
 
 def get_secret(secret_name):
     if not isinstance(secret_name, str):
-        raise TypeError(f"secret_name is {type(secret_name)}, {str} is required")
+        raise TypeError(
+            f"secret_name is {type(secret_name)}, {str} is required"
+            )
 
     secretsmanager = boto3.client("secretsmanager")
     try:
-        logging.info(f"Retrieving {secret_name} information from SecretsManager...")
+        logging.info(
+            f"Retrieving {secret_name} information from SecretsManager..."
+            )
 
         response = secretsmanager.get_secret_value(SecretId=secret_name)
 
@@ -50,17 +54,22 @@ def get_table_db(connection, table_name):
 
         table_df = pd.DataFrame(data=table_data, columns=column_names)
 
-        logging.info(f"{table_name} table successfully extracted as dataframe!")
+        logging.info(
+            f"{table_name} table successfully extracted as dataframe!"
+            )
 
         return table_df, query
     except InterfaceError:
-        logging.error(f"InterfaceError: the query: \n {query} \n cannot be executed.")
+        logging.error(
+            f"InterfaceError: the query: \n {query} \n cannot be executed."
+            )
         raise InterfaceError
 
 
 def upload_table_s3(table_df, table_name, bucket_name):
     if not isinstance(table_df, pd.DataFrame):
-        raise TypeError(f"table dataframe {type(table_df)}, expected {pd.DataFrame}")
+        raise TypeError(
+            f"table dataframe {type(table_df)}, expected {pd.DataFrame}")
     if not isinstance(table_name, str):
         raise TypeError(f"table name is {type(table_name)}, expected {str}")
     if not isinstance(bucket_name, str):
@@ -83,7 +92,8 @@ def upload_table_s3(table_df, table_name, bucket_name):
     except Exception as e:
         error = e.response["Error"]
         if e.response["Error"]["Code"] == "NoSuchBucket":
-            logging.error(f"NoSuchBucket: {error['BucketName']} does not exist")
+            logging.error(
+                f"NoSuchBucket: {error['BucketName']} does not exist")
 
             raise KeyError(f"{error['BucketName']} does not exist")
         else:
@@ -93,7 +103,8 @@ def upload_table_s3(table_df, table_name, bucket_name):
 def connect_db(db_credentials, db_name=""):
     logging.info(f"Performing checks before connecting to database...")
     if not isinstance(db_credentials, dict):
-        raise TypeError(f"db_credentials is {type(db_credentials)}, {dict} is required")
+        raise TypeError(
+            f"db_credentials is {type(db_credentials)}, {dict} is required")
     elif not isinstance(db_name, str):
         raise TypeError(f"db_name is {type(db_name)}, {str} is required")
 
@@ -102,7 +113,9 @@ def connect_db(db_credentials, db_name=""):
 
     for req_key in required_keys:
         if req_key not in db_credentials_keys:
-            raise KeyError(f"db_credentials contains does not contain {req_key}")
+            raise KeyError(
+                f"db_credentials contains does not contain {req_key}"
+                )
 
     for key in db_credentials:
         if not isinstance(db_credentials[key], str):
@@ -122,9 +135,11 @@ def connect_db(db_credentials, db_name=""):
         logging.info(f"Successfully connected to {db_name} database!")
         return connection
     except InterfaceError:
-        logging.error(f"InterfaceError: please check your database credentials")
+        logging.error(
+            f"InterfaceError: please check your database credentials")
         raise InterfaceError
 
     except DatabaseError:
-        logging.error(f"DatabaseError: please contact your database administrator")
+        logging.error(
+            f"DatabaseError: please contact your database administrator")
         raise DatabaseError
