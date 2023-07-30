@@ -1,4 +1,4 @@
-from src.extract.extract import upload_table_s3
+from src.utils.utils import upload_table_s3
 import pytest
 import boto3
 from unittest.mock import patch

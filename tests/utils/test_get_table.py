@@ -1,4 +1,4 @@
-from src.extract.extract import get_table
+from src.utils.utils import get_table
 import pytest
 import pandas as pd
 from unittest.mock import patch

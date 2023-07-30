@@ -1,4 +1,4 @@
-from src.extract.extract import connect_db
+from src.utils.utils import connect_db
 from pg8000.native import InterfaceError
 import pytest
 

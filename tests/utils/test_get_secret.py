@@ -1,4 +1,4 @@
-from src.extract.extract import get_secret
+from src.utils.utils import get_secret
 import pytest
 import boto3
 from unittest.mock import patch
