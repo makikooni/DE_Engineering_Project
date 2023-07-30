@@ -105,17 +105,25 @@ def upload_table_s3(table_df, table_name, ingestion_bucket_name):
         raise TypeError(f"table name is {type(table_name)}, expected {str}")
     if not isinstance(ingestion_bucket_name,str):
         raise TypeError(f"ingestion bucket name is {type(ingestion_bucket_name)}, expected {str}")
-    
+
     try:
+        boto3.client('s3').head_bucket(Bucket=ingestion_bucket_name)
+
         logging.info(
             f"uploading {table_name} table to {ingestion_bucket_name} S3 bucket..."
         )
-        table_csv = table_df.to_csv(f"s3://{ingestion_bucket_name}/{table_name}.csv")
+                
+        table_df.to_csv(f"s3://{ingestion_bucket_name}/{table_name}.csv")
+        
         logging.info(
             f"{table_name} table successfully uploaded to {ingestion_bucket_name} S3 bucket!"
         )
-    except:
-        pass
+    except Exception as e:
+        error = e.response['Error']
+        if e.response['Error']['Code'] == 'NoSuchBucket':
+            logging.error(f"NoSuchBucket: {error['BucketName']} does not exist")
+
+        raise KeyError(f"{error['BucketName']} does not exist")
 
 
 def connect_db(db_credentials, db_name = ""):
