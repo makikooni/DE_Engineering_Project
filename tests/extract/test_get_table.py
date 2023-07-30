@@ -1,8 +1,8 @@
 from src.extract.extract import get_table
 import pytest
-import boto3
 import pandas as pd
 from unittest.mock import patch
+
 
 @patch("src.extract.extract.Connection")
 def test_should_return_correct_dataframe_and_string(test_connection):
@@ -30,13 +30,14 @@ def test_should_return_correct_dataframe_and_string(test_connection):
     assert test_result_df.equals(test_df)
 
 
-def test_should_protect_against_sql_injection():
-    pass
+@patch("src.extract.extract.Connection")
+def test_should_protect_against_sql_injection(test_connection):
+    test_table_name = "design; DROP *;"
+    test_table_df, test_query = get_table(test_connection, test_table_name)
+
+    assert test_query == 'SELECT * FROM "design; DROP *;";'
 
 
 def test_should_raise_exception_if_incorrect_input_type():
-    pass
-
-
-def test_should_raise_exception_if_table_name_does_not_exist():
-    pass
+    with pytest.raises(TypeError):
+        get_table([], "table_name")

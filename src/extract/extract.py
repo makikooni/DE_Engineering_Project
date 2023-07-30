@@ -1,6 +1,6 @@
 import json
 import logging
-from pg8000.native import Connection, InterfaceError, DatabaseError
+from pg8000.native import Connection, InterfaceError, DatabaseError, identifier, literal
 import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
@@ -30,7 +30,7 @@ def extraction_lambda_handler(event, context):
         connection = connect_db(db_credentials, db_name = "totesys")
 
         for table_name in table_names:
-            table_df = get_table(connection, table_name)
+            table_df, query = get_table(connection, table_name)
 
             upload_table_s3(table_df, table_name, INGESTION_BUCKET_NAME)
 
@@ -74,18 +74,27 @@ def get_secret(secret_name):
 
 
 def get_table(connection, table_name):
+    if not isinstance(table_name, str):
+        raise TypeError(f"table name is {type(table_name)}, expected {str}")
+    if not isinstance(connection, Connection):
+        raise TypeError(f"connection object is {type(connection)}, expected {Connection}")
+
+
     logging.info(f"Extracting {table_name} table from database...")
+    try:
+        query = f"SELECT * FROM {identifier(table_name)};"
 
-    query = f"SELECT * FROM {table_name};"
+        table_data = connection.run(query)
+        column_names = [col["name"] for col in connection.columns]
 
-    table_data = connection.run(query)
-    column_names = [col["name"] for col in connection.columns]
+        table_df = pd.DataFrame(data=table_data, columns=column_names)
 
-    table_df = pd.DataFrame(data=table_data, columns=column_names)
+        logging.info(f"{table_name} table successfully extracted as dataframe!")
 
-    logging.info(f"{table_name} table successfully extracted as dataframe!")
-
-    return table_df
+        return table_df, query
+    except InterfaceError:
+        logging.error(f"InterfaceError: the query: \n {query} \n cannot be executed.")
+        raise InterfaceError
 
 def upload_table_s3(table_df, table_name, ingestion_bucket_name):
     logging.info(
