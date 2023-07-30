@@ -33,7 +33,7 @@ def get_secret(secret_name):
         logging.error(e)
 
 
-def get_table(connection, table_name):
+def get_table_db(connection, table_name):
     if not isinstance(table_name, str):
         raise TypeError(f"table name is {type(table_name)}, expected {str}")
     if not isinstance(connection, type(Connection)):

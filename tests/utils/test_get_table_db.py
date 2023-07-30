@@ -1,4 +1,4 @@
-from src.utils.utils import get_table
+from src.utils.utils import get_table_db
 import pytest
 import pandas as pd
 from unittest.mock import patch
@@ -22,7 +22,7 @@ def test_should_return_correct_dataframe_and_string(test_connection):
 
     test_df = pd.DataFrame(data=test_connection.run(), columns=["col1", "col2", "col3"])
 
-    test_result_df, test_query = get_table(test_connection, test_table_name)
+    test_result_df, test_query = get_table_db(test_connection, test_table_name)
 
     assert isinstance(test_result_df, pd.DataFrame)
     assert isinstance(test_query, str)
@@ -33,7 +33,7 @@ def test_should_return_correct_dataframe_and_string(test_connection):
 @patch("src.utils.utils.Connection")
 def test_should_protect_against_sql_injection(test_connection):
     test_table_name = "design; DROP *;"
-    test_table_df, test_query = get_table(test_connection, test_table_name)
+    test_table_df, test_query = get_table_db(test_connection, test_table_name)
 
     assert test_query == 'SELECT * FROM "design; DROP *;";'
 

@@ -1,7 +1,7 @@
 import json
 import logging
 from botocore.exceptions import ClientError
-from src.utils.utils import get_secret, connect_db, get_table, upload_table_s3
+from src.utils.utils import get_secret, connect_db, get_table_db, upload_table_s3
 
 """
 Defines lambda function responsible for extracting the data
@@ -28,7 +28,7 @@ def extraction_lambda_handler(event, context):
         connection = connect_db(db_credentials, db_name="totesys")
 
         for table_name in table_names:
-            table_df, query = get_table(connection, table_name)
+            table_df, query = get_table_db(connection, table_name)
 
             upload_table_s3(table_df, table_name, INGESTION_BUCKET_NAME)
 
