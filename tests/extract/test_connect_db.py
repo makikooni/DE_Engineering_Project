@@ -1,7 +1,7 @@
 from src.extract.extract import connect_db
 from pg8000.native import InterfaceError
 import pytest
-from unittest.mock import patch
+
 
 def test_should_raise_exception_if_incorrect_credentials():
     test_db_credentials = {
