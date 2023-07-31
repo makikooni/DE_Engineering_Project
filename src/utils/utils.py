@@ -19,7 +19,7 @@ def write_df_to_parquet(df, file, target_bucket):
     try:
        return df.to_parquet(f's3://{target_bucket}/{file}.parquet')
     except Exception as e:
-        logger.info('write_to_parquet', e)
+        logger.info('write_df_to_parquet', e)
         raise e
         
 
@@ -38,6 +38,7 @@ def timestamp_to_date_and_time(dataframe):
         logger.info('timestamp_to_date_and_time', e)
         raise e
 
+
 def add_to_dates_set(set, cols_to_add):
     try:
         for col in cols_to_add:
@@ -46,4 +47,3 @@ def add_to_dates_set(set, cols_to_add):
     except Exception as e:
         logger.info('add_to_dates_set', e)
         raise e
-

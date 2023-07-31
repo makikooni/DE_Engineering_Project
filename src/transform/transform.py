@@ -6,6 +6,7 @@ from src.transform.table_transformations import transform_counterparty, transfor
 logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
 
+
 ingestion_bucket_name = 'test-va-ingestion-atif'
 processing_bucket_name = 'processed-va-052023'
 
@@ -32,8 +33,8 @@ def transformation_lambda_handler():
         transform_payment('payment', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
         create_date(dates_for_dim_date, processing_bucket_name)
     except Exception as e:
-        print(e)
-        pass
+        logger.info('transform_lambda_handler ', e)
+        raise e
 
 transformation_lambda_handler()
 

@@ -17,6 +17,7 @@ def transform_design(file, source_bucket, target_bucket):
         logger.info('transform_design', e)
         raise e
 
+
 def transform_payment_type(file, source_bucket, target_bucket):
     try:
 
@@ -37,6 +38,7 @@ def transform_location(file, source_bucket, target_bucket):
     except Exception as e:
         logger.info('transform_location', e)
         raise e
+
 
 def transform_transaction(file, source_bucket, target_bucket):
     try:
@@ -86,6 +88,7 @@ def transform_counterparty(file1, file2, source_bucket, target_bucket):
     except Exception as e:
         logger.info('transform_counterparty', e)
         raise e
+
 
 def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date):
     try:
