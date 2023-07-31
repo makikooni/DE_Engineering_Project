@@ -15,6 +15,7 @@ processing_bucket_name = 'processed-va-052023'
 
 
 def transformation_lambda_handler():
+    # run in terminal to view pq table --> parquet-tools show s3://{target_bucket}/{file}.parquet
     # pd.set_option('display.max_columns', None)
     try:
         dates_for_dim_date = set()
@@ -26,11 +27,11 @@ def transformation_lambda_handler():
             raise Exception('the bucket may not exist, or, you may not have the correct permissions')
         transform_design('design', ingestion_bucket_name, processing_bucket_name)
         transform_payment_type('payment_type', ingestion_bucket_name, processing_bucket_name)
-        transform_location()
-        transform_transaction()
-        transform_staff()
-        transform_currency()
-        transform_counterparty()
+        transform_location('address', ingestion_bucket_name, processing_bucket_name)
+        transform_transaction('transaction', ingestion_bucket_name, processing_bucket_name)
+        transform_staff('staff', 'department', ingestion_bucket_name, processing_bucket_name)
+        transform_currency('currency', ingestion_bucket_name, processing_bucket_name)
+        transform_counterparty('counterparty', 'address', ingestion_bucket_name, processing_bucket_name)
         transform_sales_order(dates_for_dim_date)
         transform_purchase_order(dates_for_dim_date)
         transform_payment(dates_for_dim_date)
@@ -40,69 +41,58 @@ def transformation_lambda_handler():
         print(e)
         pass
 
-def read_csv_to_pandas(filename, source_bucket):
-    return pd.read_csv(f's3://{source_bucket}/{filename}.csv')
+def read_csv_to_pandas(file, source_bucket):
+    return pd.read_csv(f's3://{source_bucket}/{file}.csv')
 
-def write_df_to_parquet(df, filename, target_bucket):
-    return df.to_parquet(f's3://{target_bucket}/{filename}.parquet')
+def write_df_to_parquet(df, file, target_bucket):
+    return df.to_parquet(f's3://{target_bucket}/{file}.parquet')
 
-def transform_design(filename, source_bucket, target_bucket):
-    design_table = read_csv_to_pandas(filename, source_bucket)
+def transform_design(file, source_bucket, target_bucket):
+    design_table = read_csv_to_pandas(file, source_bucket)
     dim_design_table = design_table[['design_id', 'design_name', 'file_location', 'file_name']]
     write_df_to_parquet(dim_design_table, 'dim_design', target_bucket)
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_design.parquet
 
-def transform_payment_type(filename, source_bucket, target_bucket):
-    payment_type_table = read_csv_to_pandas(filename, source_bucket)
+def transform_payment_type(file, source_bucket, target_bucket):
+    payment_type_table = read_csv_to_pandas(file, source_bucket)
     dim_payment_type_table = payment_type_table[['payment_type_id', 'payment_type_name']]
     write_df_to_parquet(dim_payment_type_table, 'dim_payment_type', target_bucket)
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_payment_type.parquet
 
-def transform_location():
-    # dim_location table
-    address_table = pd.read_csv(f's3://{ingestion_bucket_name}/address.csv')
+def transform_location(file, source_bucket, target_bucket):
+    address_table = read_csv_to_pandas(file, source_bucket)
     dim_address_table = address_table[['address_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']]
     dim_address_table.rename(columns={'address_id': 'location_id'}, inplace=True)
-    dim_address_table.to_parquet(f's3://{processing_bucket_name}/dim_location.parquet')
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_location.parquet
+    write_df_to_parquet(dim_address_table, 'dim_location', target_bucket)
 
-def transform_transaction():
-    # dim_transaction table
-    transaction_table = pd.read_csv(f's3://{ingestion_bucket_name}/transaction.csv')
+def transform_transaction(file, source_bucket, target_bucket):
+    transaction_table = read_csv_to_pandas(file, source_bucket)
     dim_transaction_table = transaction_table[['transaction_id', 'transaction_type', 'sales_order_id', 'purchase_order_id']]
-    dim_transaction_table.to_parquet(f's3://{processing_bucket_name}/dim_transaction.parquet')
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_transaction.parquet
+    write_df_to_parquet(dim_transaction_table, 'dim_transaction', target_bucket)
 
-def transform_staff():
-    # dim_staff table
-    staff_table = pd.read_csv(f's3://{ingestion_bucket_name}/staff.csv')
-    department_table = pd.read_csv(f's3://{ingestion_bucket_name}/department.csv')
+def transform_staff(file1, file2, source_bucket, target_bucket):
+    staff_table = read_csv_to_pandas(file1, source_bucket)
+    department_table = read_csv_to_pandas(file2, source_bucket)
     joined_staff_department_table = staff_table.join(department_table.set_index('department_id'), on='department_id', lsuffix="staff", rsuffix='department')
     dim_staff_table = joined_staff_department_table[['staff_id', 'first_name', 'last_name', 'department_name', 'location', 'email_address']]
     dim_staff_table.to_parquet(f's3://{processing_bucket_name}/dim_staff.parquet')
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_staff.parquet
+    write_df_to_parquet(dim_staff_table, 'dim_staff', target_bucket)
 
-def transform_currency():
-    # dim_currency table
-    currency_table = pd.read_csv(f's3://{ingestion_bucket_name}/currency.csv')
+def transform_currency(file, source_bucket, target_bucket):
+    currency_table = read_csv_to_pandas(file, source_bucket)
     dim_currency_table = currency_table[['currency_id', 'currency_code']]
     conditions = [(dim_currency_table['currency_code'] == 'EUR'), (dim_currency_table['currency_code'] == 'GBP'), (dim_currency_table['currency_code'] == 'USD')]
     values = ['Euro', 'British Pound', 'US Dollar']
     dim_currency_table['currency_name'] = np.select(conditions, values)
-    dim_currency_table.to_parquet(f's3://{processing_bucket_name}/dim_currency.parquet')
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_currency.parquet
+    write_df_to_parquet(dim_currency_table, 'dim_currency', target_bucket)
 
-def transform_counterparty():
-    # dim_counterparty table
-    counterparty_table = pd.read_csv(f's3://{ingestion_bucket_name}/counterparty.csv')
-    address_table_for_counterparty = pd.read_csv(f's3://{ingestion_bucket_name}/address.csv')
+def transform_counterparty(file1, file2, source_bucket, target_bucket):
+    counterparty_table = read_csv_to_pandas(file1, source_bucket)
+    address_table_for_counterparty = read_csv_to_pandas(file2, source_bucket)
     joined_counterparty_address_table = counterparty_table.join(address_table_for_counterparty.set_index('address_id'), on='legal_address_id', lsuffix='counterparty', rsuffix='address')
     dim_counterparty = joined_counterparty_address_table[['counterparty_id', 'counterparty_legal_name', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']]
     columns_to_rename = ['address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country']
     dim_counterparty.rename(columns={col: 'counterparty_legal_'+col for col in dim_counterparty.columns if col in columns_to_rename}, inplace=True)
     dim_counterparty.rename(columns={'phone': 'counterparty_legal_phone_number'}, inplace=True)
-    dim_counterparty.to_parquet(f's3://{processing_bucket_name}/dim_counterparty.parquet')
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_counterparty.parquet
+    write_df_to_parquet(dim_counterparty, 'dim_counterparty', target_bucket)
 
 def transform_sales_order(dates_for_dim_date):
     # fact_sales_order table
