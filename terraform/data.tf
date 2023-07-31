@@ -4,9 +4,10 @@ data "aws_region" "current" {}
 
 data "archive_file" "extraction_lambda_zip" {
   type        = "zip"
-  source_file = [
-    "${path.module}/../src/extract.py",
-    "${path.module}/../src/utils"
-    ]
+  exclude = [
+    "${path.module}/../src/load.py",
+    "${path.module}/../src/transform.py"
+  ]
+  source_dir = "${path.module}/../src"
   output_path = "${path.module}/../extraction_function.zip"
 }
