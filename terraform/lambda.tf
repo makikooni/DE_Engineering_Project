@@ -4,5 +4,5 @@ resource "aws_lambda_function" "extract_data_to_ingestion_s3" {
   role = aws_iam_role.lambda_role.arn
   handler = "extract.extraction_lambda_handler"
   runtime = "python3.9"
-  layer = [aws_lambda_layer_version.lambda_layer.arn]
+  layers = [aws_lambda_layer_version.lambda_layer.arn]
 }
