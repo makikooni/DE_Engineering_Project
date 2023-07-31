@@ -4,7 +4,7 @@ data "aws_region" "current" {}
 
 data "archive_file" "extraction_lambda_zip" {
   type        = "zip"
-  exclude = [
+  excludes = [
     "${path.module}/../src/load.py",
     "${path.module}/../src/transform.py"
   ]
