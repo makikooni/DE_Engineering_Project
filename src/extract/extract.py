@@ -37,8 +37,12 @@ def extraction_lambda_handler(event, context):
         "arn:aws:events:eu-west-2:454963742860:rule/extraction_schedule"
     )
 
+    req_event_keys = ["id", "detail-type", "source", "account", "time", "region", "resources", "detail" ]
+
     if event["resources"] != CLOUDWATCH_TRIGGER_ARN:
         raise ValueError("Event schedule is incorrect")
+    if req_event_keys not in list(event.keys()):
+        raise KeyError("This event is not a valid cloudwatch event")
 
     logger.info(
         f'The lambda has been triggered at {event["time"]} by a {event["detail-type"]} '
