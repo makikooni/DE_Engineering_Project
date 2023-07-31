@@ -11,7 +11,7 @@ ingestion_bucket_name = 'test-va-ingestion-atif'
 processing_bucket_name = 'processed-va-052023'
 
 
-def transformation_lambda_handler():
+def transformation_lambda_handler(event, context):
     # run in terminal to view pq table --> parquet-tools show s3://{target_bucket}/{file}.parquet
     # pd.set_option('display.max_columns', None)
     try:
@@ -36,7 +36,7 @@ def transformation_lambda_handler():
         logger.info('transform_lambda_handler ', e)
         raise e
 
-transformation_lambda_handler()
+transformation_lambda_handler(1, 1)
 
 
 '''
