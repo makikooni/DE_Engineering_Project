@@ -28,7 +28,11 @@ def extraction_lambda_handler(event, context):
         RuntimeError: An unexpected error occurred in execution. Other errors
         result in an informative log message.
     """
-
+    
+    s3_bucket_name, s3_object_name = get_object_path(event['Records'])
+    logger.info(f'Bucket is {s3_bucket_name}')
+    logger.info(f'Object key is {s3_object_name}')
+    
     AWS_SECRET_TABLES_NAMES = "ingestion/db/table-names"
     AWS_SECRET_DB_CREDENTIALS_NAME = "ingestion/db/credentials"
 
