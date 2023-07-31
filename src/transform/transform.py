@@ -32,7 +32,6 @@ def transformation_lambda_handler():
         transform_payment('payment', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
         create_date(dates_for_dim_date, processing_bucket_name)
     except Exception as e:
-        print('except')
         print(e)
         pass
 
