@@ -16,7 +16,6 @@ def transformation_lambda_handler():
     try:
         dates_for_dim_date = set()
         s3_client = boto3.client('s3')
-        s3_resource = boto3.resource('s3')
         response = s3_client.head_bucket(Bucket=ingestion_bucket_name)
         status_code = response['ResponseMetadata']['HTTPStatusCode']
         if status_code != 200:
