@@ -1,6 +1,6 @@
 import logging
 import boto3
-from src.utils.utils import read_csv_to_pandas, write_df_to_parquet
+from src.utils.utils import read_csv_to_pandas, write_df_to_parquet, timestamp_to_date_and_time
 import pandas as pd
 import numpy as np
 
@@ -89,15 +89,7 @@ def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date
     sales_order_table = read_csv_to_pandas(file, source_bucket)
     sales_order_table.columns.values[0] = "sales_record_id"
     
-    new_created_sales = sales_order_table['created_at'].str.split(" ", n = 1, expand = True)
-    sales_order_table['created_date']= new_created_sales[0]
-    sales_order_table['created_time']= new_created_sales[1]
-    sales_order_table.drop(columns =['created_at'], inplace = True)
-
-    new_updated_sales = sales_order_table['last_updated'].str.split(" ", n = 1, expand = True)
-    sales_order_table['last_updated_date']= new_updated_sales[0]
-    sales_order_table['last_updated_time']= new_updated_sales[1]
-    sales_order_table.drop(columns =['last_updated'], inplace = True)
+    sales_order_table = timestamp_to_date_and_time(sales_order_table)
 
     sales_order_table.rename(columns={'staff_id': 'sales_staff_id'}, inplace=True)
     fact_sales_order = sales_order_table[['sales_record_id', 'sales_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'sales_staff_id', 'counterparty_id', 'units_sold', 'unit_price', 'currency_id', 'design_id', 'agreed_payment_date', 'agreed_delivery_date', 'agreed_delivery_location_id']]
@@ -112,15 +104,7 @@ def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_d
     purchase_order_table = read_csv_to_pandas(file, source_bucket)
     purchase_order_table.columns.values[0] = "purchase_record_id"
 
-    new_created_purchase = purchase_order_table['created_at'].str.split(" ", n = 1, expand = True)
-    purchase_order_table['created_date']= new_created_purchase[0]
-    purchase_order_table['created_time']= new_created_purchase[1]
-    purchase_order_table.drop(columns =['created_at'], inplace = True)
-
-    new_updated_purchase = purchase_order_table['last_updated'].str.split(" ", n = 1, expand = True)
-    purchase_order_table['last_updated_date']= new_updated_purchase[0]
-    purchase_order_table['last_updated_time']= new_updated_purchase[1]
-    purchase_order_table.drop(columns =['last_updated'], inplace = True)
+    purchase_order_table = timestamp_to_date_and_time(purchase_order_table)
 
     fact_purchase_order = purchase_order_table[['purchase_record_id', 'purchase_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'staff_id', 'counterparty_id', 'item_code', 'item_quantity', 'item_unit_price', 'currency_id', 'agreed_delivery_date', 'agreed_payment_date', 'agreed_delivery_location_id']]
     fact_purchase_order.to_parquet(f's3://{processing_bucket_name}/fact_purchase_order.parquet')
@@ -135,15 +119,7 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
     payment_table = read_csv_to_pandas(file, source_bucket)
     payment_table.columns.values[0] = 'payment_record_id'
 
-    new_created_payment = payment_table['created_at'].str.split(" ", n = 1, expand = True)
-    payment_table['created_date']= new_created_payment[0]
-    payment_table['created_time']= new_created_payment[1]
-    payment_table.drop(columns =['created_at'], inplace = True)
-
-    new_updated_payment = payment_table['last_updated'].str.split(" ", n = 1, expand = True)
-    payment_table['last_updated_date']= new_updated_payment[0]
-    payment_table['last_updated_time']= new_updated_payment[1]
-    payment_table.drop(columns =['last_updated'], inplace = True)
+    payment_table = timestamp_to_date_and_time(payment_table)
 
     # figma states last_updated, assuming this is a typo: find last_updated_time
     fact_payment_table = payment_table[['payment_record_id', 'payment_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'transaction_id', 'counterparty_id', 'payment_amount', 'currency_id', 'payment_type_id', 'paid', 'payment_date']]
