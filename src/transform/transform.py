@@ -1,6 +1,6 @@
 import logging
 import boto3
-from src.utils.utils import read_csv_to_pandas, write_df_to_parquet, timestamp_to_date_and_time
+from src.utils.utils import read_csv_to_pandas, write_df_to_parquet, timestamp_to_date_and_time, add_to_dates_set
 import pandas as pd
 import numpy as np
 
@@ -96,9 +96,7 @@ def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date
     write_df_to_parquet(fact_sales_order, 'fact_sales_order', target_bucket)
 
     date_cols_to_add = [fact_sales_order['created_date'], fact_sales_order['last_updated_date'],fact_sales_order['agreed_payment_date'], fact_sales_order['agreed_delivery_date']]
-    for col in date_cols_to_add:
-        for row in col:
-            dates_for_dim_date.add(row)
+    add_to_dates_set(dates_for_dim_date, date_cols_to_add)
 
 def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_date):
     purchase_order_table = read_csv_to_pandas(file, source_bucket)
@@ -111,9 +109,7 @@ def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_d
     write_df_to_parquet(fact_purchase_order, 'fact_purchase_order', target_bucket)
 
     date_cols_to_add = [fact_purchase_order['created_date'], fact_purchase_order['last_updated_date'], fact_purchase_order['agreed_delivery_date'], fact_purchase_order['agreed_payment_date']]
-    for col in date_cols_to_add:
-        for row in col:
-            dates_for_dim_date.add(row)
+    add_to_dates_set(dates_for_dim_date, date_cols_to_add)
 
 def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
     payment_table = read_csv_to_pandas(file, source_bucket)
@@ -127,9 +123,7 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
     write_df_to_parquet(fact_payment_table, 'fact_payment', target_bucket)
 
     date_cols_to_add = [fact_payment_table['created_date'], fact_payment_table['last_updated_date'], fact_payment_table['payment_date']]
-    for col in date_cols_to_add:
-        for row in col:
-            dates_for_dim_date.add(row)
+    add_to_dates_set(dates_for_dim_date, date_cols_to_add)
 
 def create_date(dates_for_dim_date):
     dates = {'date_id': sorted(list(dates_for_dim_date))}
