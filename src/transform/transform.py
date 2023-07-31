@@ -1,9 +1,6 @@
-
-import os
 import logging
 import boto3
-from pprint import pprint
-import csv
+from src.utils.utils import read_csv_to_pandas, write_df_to_parquet
 import pandas as pd
 import numpy as np
 
@@ -40,12 +37,6 @@ def transformation_lambda_handler():
         print('except')
         print(e)
         pass
-
-def read_csv_to_pandas(file, source_bucket):
-    return pd.read_csv(f's3://{source_bucket}/{file}.csv')
-
-def write_df_to_parquet(df, file, target_bucket):
-    return df.to_parquet(f's3://{target_bucket}/{file}.parquet')
 
 def transform_design(file, source_bucket, target_bucket):
     design_table = read_csv_to_pandas(file, source_bucket)
