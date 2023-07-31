@@ -24,8 +24,8 @@ def transformation_lambda_handler():
         status_code = response['ResponseMetadata']['HTTPStatusCode']
         if status_code != 200:
             raise Exception('the bucket may not exist, or, you may not have the correct permissions')
-        transform_design()
-        transform_payment_type()
+        transform_design('design', ingestion_bucket_name, processing_bucket_name)
+        transform_payment_type('payment_type', ingestion_bucket_name, processing_bucket_name)
         transform_location()
         transform_transaction()
         transform_staff()
@@ -40,19 +40,22 @@ def transformation_lambda_handler():
         print(e)
         pass
 
+def read_csv_to_pandas(filename, source_bucket):
+    return pd.read_csv(f's3://{source_bucket}/{filename}.csv')
 
-def transform_design():
-    # dim_design table
-    design_table = pd.read_csv(f's3://{ingestion_bucket_name}/design.csv')
+def write_df_to_parquet(df, filename, target_bucket):
+    return df.to_parquet(f's3://{target_bucket}/{filename}.parquet')
+
+def transform_design(filename, source_bucket, target_bucket):
+    design_table = read_csv_to_pandas(filename, source_bucket)
     dim_design_table = design_table[['design_id', 'design_name', 'file_location', 'file_name']]
-    dim_design_table.to_parquet(f's3://{processing_bucket_name}/dim_design.parquet')
+    write_df_to_parquet(dim_design_table, 'dim_design', target_bucket)
     # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_design.parquet
 
-def transform_payment_type():
-    # dim_payment_type table
-    payment_type_table = pd.read_csv(f's3://{ingestion_bucket_name}/payment_type.csv')
+def transform_payment_type(filename, source_bucket, target_bucket):
+    payment_type_table = read_csv_to_pandas(filename, source_bucket)
     dim_payment_type_table = payment_type_table[['payment_type_id', 'payment_type_name']]
-    dim_payment_type_table.to_parquet(f's3://{processing_bucket_name}/dim_payment_type.parquet')
+    write_df_to_parquet(dim_payment_type_table, 'dim_payment_type', target_bucket)
     # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_payment_type.parquet
 
 def transform_location():
