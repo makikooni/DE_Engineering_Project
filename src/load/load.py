@@ -36,20 +36,29 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
             password=password
         )
         # get the table from the s3 and put it in a pandas dataframe
-        table = pd.read_parquet(f's3://{process_bucket}/{s3_table_name}')
-        columns = ', '.join(table.columns)
-        placeholder = ',' .join(['%s'] * len(table.columns))
-        insert_table_sql = f"INSERT INTO {wh_table_name}" \
-            f"({columns}) VALUES ({placeholder})"
+        table = get_table_data(s3_table_name)
+        insert_table_sql = build_load_sql(wh_table_name, table)
         # Convert DataFrame to list tuples for executemany
-        data_to_insert = [tuple(row) for row in table.itertuples(index=False)]
+        data_to_insert = datafarme_to_list(table)
         # Execute the query using executemany to insert all rows at once
-        cursor = connection.cursor()
-        cursor.executemany(insert_table_sql, data_to_insert)
-        connection.commit()
-        cursor.close()
+        insert_table_data(connection,insert_table_sql, data_to_insert)
     except Exception as error:
         raise error
+def get_table_data(s3_table_name):
+    return pd.read_parquet(f's3://processed-va-052023/{s3_table_name}')
 
+def datafarme_to_list(table):
+    return [tuple(row) for row in table.itertuples(index=False)]
+
+def build_load_sql(wh_table_name, table):
+    columns = ', '.join(table.columns)
+    placeholder = ',' .join(['%s'] * len(table.columns))
+    return f"INSERT INTO {wh_table_name} ({columns}) VALUES ({placeholder})"
+
+def insert_table_data(connection,insert_table_sql, data_to_insert):
+    cursor = connection.cursor()
+    cursor.executemany(insert_table_sql, data_to_insert)
+    connection.commit()
+    cursor.close()
 
 #add_new_rows('test_dim_design.parquet', 'dim_design')
