@@ -37,8 +37,8 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name = 'warehouse'):
         # get the table from the s3 and put it in a pandas dataframe
         table = pd.read_parquet(f's3://{process_bucket}/{s3_table_name}')
         columns = ', '.join(table.columns)
-        new_row = ',' .join(['%s'] * len(table.columns))
-        insert_table_sql = f"INSERT INTO {wh_table_name} ({columns}) VALUES ({new_row})"
+        placeholder = ',' .join(['%s'] * len(table.columns))
+        insert_table_sql = f"INSERT INTO {wh_table_name} ({columns}) VALUES ({placeholder})"
         # Convert DataFrame to list tuples for executemany
         data_to_insert = [tuple(row) for row in table.itertuples(index=False)]
         # Execute the query using executemany to insert all rows at once
