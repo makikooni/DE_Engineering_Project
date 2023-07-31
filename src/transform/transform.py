@@ -29,9 +29,9 @@ def transformation_lambda_handler():
         transform_staff('staff', 'department', ingestion_bucket_name, processing_bucket_name)
         transform_currency('currency', ingestion_bucket_name, processing_bucket_name)
         transform_counterparty('counterparty', 'address', ingestion_bucket_name, processing_bucket_name)
-        transform_sales_order(dates_for_dim_date)
-        transform_purchase_order(dates_for_dim_date)
-        transform_payment(dates_for_dim_date)
+        transform_sales_order('sales_order', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
+        transform_purchase_order('purchase_order', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
+        transform_payment('payment', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
         create_date(dates_for_dim_date)
     except Exception as e:
         print('except')
@@ -85,9 +85,8 @@ def transform_counterparty(file1, file2, source_bucket, target_bucket):
     dim_counterparty.rename(columns={'phone': 'counterparty_legal_phone_number'}, inplace=True)
     write_df_to_parquet(dim_counterparty, 'dim_counterparty', target_bucket)
 
-def transform_sales_order(dates_for_dim_date):
-    # fact_sales_order table
-    sales_order_table = pd.read_csv(f's3://{ingestion_bucket_name}/sales_order.csv')
+def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date):
+    sales_order_table = read_csv_to_pandas(file, source_bucket)
     sales_order_table.columns.values[0] = "sales_record_id"
     
     new_created_sales = sales_order_table['created_at'].str.split(" ", n = 1, expand = True)
@@ -102,17 +101,15 @@ def transform_sales_order(dates_for_dim_date):
 
     sales_order_table.rename(columns={'staff_id': 'sales_staff_id'}, inplace=True)
     fact_sales_order = sales_order_table[['sales_record_id', 'sales_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'sales_staff_id', 'counterparty_id', 'units_sold', 'unit_price', 'currency_id', 'design_id', 'agreed_payment_date', 'agreed_delivery_date', 'agreed_delivery_location_id']]
-    fact_sales_order.to_parquet(f's3://{processing_bucket_name}/fact_sales_order.parquet')
+    write_df_to_parquet(fact_sales_order, 'fact_sales_order', target_bucket)
 
     date_cols_to_add = [fact_sales_order['created_date'], fact_sales_order['last_updated_date'],fact_sales_order['agreed_payment_date'], fact_sales_order['agreed_delivery_date']]
     for col in date_cols_to_add:
         for row in col:
             dates_for_dim_date.add(row)
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/fact_sales_order.parquet
 
-def transform_purchase_order(dates_for_dim_date):
-    # fact_purchase_order table
-    purchase_order_table = pd.read_csv(f's3://{ingestion_bucket_name}/purchase_order.csv')
+def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_date):
+    purchase_order_table = read_csv_to_pandas(file, source_bucket)
     purchase_order_table.columns.values[0] = "purchase_record_id"
 
     new_created_purchase = purchase_order_table['created_at'].str.split(" ", n = 1, expand = True)
@@ -127,16 +124,15 @@ def transform_purchase_order(dates_for_dim_date):
 
     fact_purchase_order = purchase_order_table[['purchase_record_id', 'purchase_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'staff_id', 'counterparty_id', 'item_code', 'item_quantity', 'item_unit_price', 'currency_id', 'agreed_delivery_date', 'agreed_payment_date', 'agreed_delivery_location_id']]
     fact_purchase_order.to_parquet(f's3://{processing_bucket_name}/fact_purchase_order.parquet')
+    write_df_to_parquet(fact_purchase_order, 'fact_purchase_order', target_bucket)
 
     date_cols_to_add = [fact_purchase_order['created_date'], fact_purchase_order['last_updated_date'], fact_purchase_order['agreed_delivery_date'], fact_purchase_order['agreed_payment_date']]
     for col in date_cols_to_add:
         for row in col:
             dates_for_dim_date.add(row)
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/fact_purchase_order.parquet
 
-def transform_payment(dates_for_dim_date):
-    # fact_payment table
-    payment_table = pd.read_csv(f's3://{ingestion_bucket_name}/payment.csv')
+def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
+    payment_table = read_csv_to_pandas(file, source_bucket)
     payment_table.columns.values[0] = 'payment_record_id'
 
     new_created_payment = payment_table['created_at'].str.split(" ", n = 1, expand = True)
@@ -152,12 +148,12 @@ def transform_payment(dates_for_dim_date):
     # figma states last_updated, assuming this is a typo: find last_updated_time
     fact_payment_table = payment_table[['payment_record_id', 'payment_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'transaction_id', 'counterparty_id', 'payment_amount', 'currency_id', 'payment_type_id', 'paid', 'payment_date']]
     fact_payment_table.to_parquet(f's3://{processing_bucket_name}/fact_payment.parquet')
+    write_df_to_parquet(fact_payment_table, 'fact_payment', target_bucket)
 
     date_cols_to_add = [fact_payment_table['created_date'], fact_payment_table['last_updated_date'], fact_payment_table['payment_date']]
     for col in date_cols_to_add:
         for row in col:
             dates_for_dim_date.add(row)
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/fact_payment.parquet
 
 def create_date(dates_for_dim_date):
     dates = {'date_id': sorted(list(dates_for_dim_date))}
