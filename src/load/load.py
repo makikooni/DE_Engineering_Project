@@ -3,7 +3,9 @@ import pg8000
 import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
-def add_new_rows(s3_table_name, wh_table_name, secret_name = 'warehouse'):
+
+
+def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
     # get warehouse credentails from AWS secrets
     secretsmanager = boto3.client('secretsmanager')
     try:
@@ -27,17 +29,18 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name = 'warehouse'):
         password = db_creds['password']
         # connecting to warehouse
         connection = pg8000.connect(
-                    host=host,
-                    port=port,
-                    database=database,
-                    user=user,
-                    password=password
-                )
+            host=host,
+            port=port,
+            database=database,
+            user=user,
+            password=password
+        )
         # get the table from the s3 and put it in a pandas dataframe
         table = pd.read_parquet(f's3://{process_bucket}/{s3_table_name}')
         columns = ', '.join(table.columns)
         placeholder = ',' .join(['%s'] * len(table.columns))
-        insert_table_sql = f"INSERT INTO {wh_table_name} ({columns}) VALUES ({placeholder})"
+        insert_table_sql = f"INSERT INTO {wh_table_name}" \
+            f"({columns}) VALUES ({placeholder})"
         # Convert DataFrame to list tuples for executemany
         data_to_insert = [tuple(row) for row in table.itertuples(index=False)]
         # Execute the query using executemany to insert all rows at once
@@ -47,4 +50,6 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name = 'warehouse'):
         cursor.close()
     except Exception as error:
         raise error
-add_new_rows('test_dim_design.parquet', 'dim_design')
+
+
+#add_new_rows('test_dim_design.parquet', 'dim_design')
