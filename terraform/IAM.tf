@@ -20,6 +20,28 @@ resource "aws_iam_role" "lambda_role" {
     EOF
 }
 
+resource "aws_iam_role" "lambda_role" {
+    name_prefix = "role_load_data_to_warehouse"
+    assume_role_policy = <<EOF
+    {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Effect": "Allow",
+                "Action": [
+                    "sts:AssumeRole"
+                ],
+                "Principal": {
+                    "Service": [
+                        "lambda.amazonaws.com"
+                    ]
+                }
+            }
+        ]
+    }
+    EOF
+}
+
 data "aws_iam_policy_document" "s3_document" {
   statement {
 
@@ -70,3 +92,4 @@ resource "aws_iam_role_policy_attachment" "lambda_cw_policy_attachment" {
     role = aws_iam_role.lambda_role.name
     policy_arn = aws_iam_policy.cw_policy.arn
 }
+
