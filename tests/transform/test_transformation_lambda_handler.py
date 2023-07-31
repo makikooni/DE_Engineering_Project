@@ -2,7 +2,7 @@ import pytest
 import boto3
 from moto import mock_s3
 from pprint import pprint
-from src.transform.transform import transformation_lambda_handler
+from transform import transformation_lambda_handler
 
 
 def test_testing():
