@@ -1,4 +1,5 @@
 import logging
+import json
 from pg8000.native import Connection, InterfaceError, DatabaseError, identifier, literal
 import boto3
 import pandas as pd
@@ -18,10 +19,9 @@ def get_secret(secret_name):
             )
 
         response = secretsmanager.get_secret_value(SecretId=secret_name)
-
+        secret_value = json.loads(response['SecretString'].replace("'",'"'))
         logging.info(f"{secret_name} information successfully retrieved!")
-
-        return response
+        return secret_value
 
     except ClientError as e:
         if e.response["Error"]["Code"] == "ResourceNotFoundException":
@@ -33,8 +33,6 @@ def get_secret(secret_name):
             )
         else:
             logging.error(e)
-    except Exception as e:
-        logging.error(e)
 
 
 def get_table_db(connection, table_name):

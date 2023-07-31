@@ -63,7 +63,7 @@ def test_should_return_a_dict_with_correct_keys(sm_client):
 
     assert isinstance(test_db_credentials_response, dict)
 
-    res_keys = ["ARN", "Name", "SecretString", "CreatedDate"]
+    res_keys = ["username", "password", "engine", "host", "port", "dbname"]
     for key in res_keys:
         assert key in test_db_credentials_response
 
@@ -77,8 +77,7 @@ def test_should_return_a_dict_with_correct_db_credential_data(sm_client):
         )
 
     test_db_credentials_response = get_secret(AWS_SECRET_DB_CREDENTIALS_NAME)
-    assert test_db_credentials_response["SecretString"] == str(
-        {
+    assert test_db_credentials_response == {
             "username": "test_user",
             "password": "test_password",
             "engine": "test_engine",
@@ -86,7 +85,6 @@ def test_should_return_a_dict_with_correct_db_credential_data(sm_client):
             "port": "test_port",
             "dbname": "test_dbname",
         }
-    )
 
 
 def test_should_return_a_dict_with_correct_table_name_data(sm_client):
@@ -98,15 +96,13 @@ def test_should_return_a_dict_with_correct_table_name_data(sm_client):
         )
 
     test_table_names_response = get_secret(AWS_SECRET_TABLES_NAMES)
-    assert test_table_names_response["SecretString"] == str(
-        {
+    assert test_table_names_response == {
             "table1": "table1",
             "table2": "table2",
             "table3": "table3",
             "table4": "table4",
             "table5": "table5",
         }
-    )
 
 
 @mock_secretsmanager

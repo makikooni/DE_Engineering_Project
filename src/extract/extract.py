@@ -18,11 +18,8 @@ def extraction_lambda_handler(event, context):
 
     INGESTION_BUCKET_NAME = "test-va-ingestion-atif"
 
-    db_credentials_response = get_secret(AWS_SECRET_DB_CREDENTIALS_NAME)
-    table_names_response = get_secret(AWS_SECRET_TABLES_NAMES)
-
-    db_credentials = json.loads(db_credentials_response["SecretString"])
-    table_names = json.loads(table_names_response["SecretString"]).keys()
+    db_credentials = get_secret(AWS_SECRET_DB_CREDENTIALS_NAME)
+    table_names = get_secret(AWS_SECRET_TABLES_NAMES).keys()
 
     try:
         connection = connect_db(db_credentials, db_name="totesys")
