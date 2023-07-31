@@ -1,6 +1,4 @@
-import json
 import logging
-from botocore.exceptions import ClientError
 from src.utils.utils import get_secret, connect_db, get_table_db, upload_table_s3
 
 """
