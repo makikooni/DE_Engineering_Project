@@ -4,9 +4,9 @@
     "source": "aws.events",
     "account": "123456789012",
     "time": "1970-01-01T00:00:00Z",
-    "region": "us-east-1",
+    "region": "us-east-1", 
     "resources": [
-      "arn:aws:events:eu-west-2:454963742860:rule/extraction_schedule"
+      "arn:aws:events:eu-west-2:454963742860:rule/invalid_extraction_schedule"
     ],
     "detail": {}
   }
