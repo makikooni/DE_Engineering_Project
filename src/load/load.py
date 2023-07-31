@@ -1,6 +1,5 @@
 import json
 import pg8000
-import logging
 import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
