@@ -41,6 +41,7 @@ requests==2.31.0
 responses==0.22.0
 ruamel.yaml==0.17.21
 ruamel.yaml.clib==0.2.7
+s3fs
 s3transfer==0.6.1
 safety==2.3.5
 six==1.16.0

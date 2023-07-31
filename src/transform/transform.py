@@ -123,6 +123,7 @@ def transform_sales_order():
     sales_order_table.rename(columns={'staff_id': 'sales_staff_id'}, inplace=True)
     fact_sales_order = sales_order_table[['sales_record_id', 'sales_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'sales_staff_id', 'counterparty_id', 'units_sold', 'unit_price', 'currency_id', 'design_id', 'agreed_payment_date', 'agreed_delivery_date', 'agreed_delivery_location_id']]
     fact_sales_order.to_parquet(f's3://{processing_bucket_name}/test_fact_sales_order.parquet')
+
     date_cols_to_add = [fact_sales_order['created_date'], fact_sales_order['last_updated_date'],fact_sales_order['agreed_payment_date'], fact_sales_order['agreed_delivery_date']]
     for col in date_cols_to_add:
         date_col_dataframes.append(col)
@@ -145,6 +146,10 @@ def transform_purchase_order():
 
     fact_purchase_order = purchase_order_table[['purchase_record_id', 'purchase_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'staff_id', 'counterparty_id', 'item_code', 'item_quantity', 'item_unit_price', 'currency_id', 'agreed_delivery_date', 'agreed_payment_date', 'agreed_delivery_location_id']]
     fact_purchase_order.to_parquet(f's3://{processing_bucket_name}/test_fact_purchase_order.parquet')
+
+    date_cols_to_add = [fact_purchase_order['created_date'], fact_purchase_order['last_updated_date'], fact_purchase_order['agreed_delivery_date'], fact_purchase_order['agreed_payment_date']]
+    for col in date_cols_to_add:
+        date_col_dataframes.append(col)
     # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_fact_purchase_order.parquet
 
 def transform_payment():
@@ -165,6 +170,10 @@ def transform_payment():
     # figma states last_updated, assuming this is a typo: find last_updated_time
     fact_payment_table = payment_table[['payment_record_id', 'payment_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'transaction_id', 'counterparty_id', 'payment_amount', 'currency_id', 'payment_type_id', 'paid', 'payment_date']]
     fact_payment_table.to_parquet(f's3://{processing_bucket_name}/test_fact_payment.parquet')
+
+    date_cols_to_add = [fact_payment_table['created_date'], fact_payment_table['last_updated_date'], fact_payment_table['payment_date']]
+    for col in date_cols_to_add:
+        date_col_dataframes.append(col)
     # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/test_fact_payment.parquet
 
 
