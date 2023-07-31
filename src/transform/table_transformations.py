@@ -82,6 +82,7 @@ def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_d
     date_cols_to_add = [fact_purchase_order['created_date'], fact_purchase_order['last_updated_date'], fact_purchase_order['agreed_delivery_date'], fact_purchase_order['agreed_payment_date']]
     add_to_dates_set(dates_for_dim_date, date_cols_to_add)
 
+
 def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
     payment_table = read_csv_to_pandas(file, source_bucket)
     payment_table.columns.values[0] = 'payment_record_id'
@@ -94,6 +95,7 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
 
     date_cols_to_add = [fact_payment_table['created_date'], fact_payment_table['last_updated_date'], fact_payment_table['payment_date']]
     add_to_dates_set(dates_for_dim_date, date_cols_to_add)
+
 
 def create_date(dates_for_dim_date, target_bucket):
     dates = {'date_id': sorted(list(dates_for_dim_date))}
