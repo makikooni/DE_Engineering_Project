@@ -1,4 +1,4 @@
-from src.extract.extract import extraction_lambda_handler
+from src.extract import extraction_lambda_handler
 import pytest
 import json
 
