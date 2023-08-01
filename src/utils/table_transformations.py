@@ -11,7 +11,6 @@ logger.setLevel(logging.INFO)
 
 def transform_design(file, source_bucket, target_bucket):
     try:
-        pprint('heloo')
         design_table = read_csv_to_pandas(file, source_bucket)
         dim_design_table = design_table[['design_id', 'design_name', 'file_location', 'file_name']]
         write_df_to_parquet(dim_design_table, 'dim_design', target_bucket)
