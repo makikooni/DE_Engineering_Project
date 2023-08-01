@@ -58,7 +58,7 @@ def test_transform_design_transforms_tables_into_correct_parquet_shchema(mock_cl
 
     assert len(df) == 3
     assert list(df.columns) == ['design_id', 'design_name', 'file_location', 'file_name']
-
+pa
 
 # def test_transform_design_puts_parquet_file_into_processed_s3_bucket():
 
