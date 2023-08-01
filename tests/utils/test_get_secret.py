@@ -1,4 +1,4 @@
-from src.utils.utils import get_secret
+from utils.utils import get_secret
 import pytest
 import boto3
 from unittest.mock import patch
@@ -54,7 +54,7 @@ def sm_client(create_sm_client):
 def test_should_return_a_dict_with_correct_keys(sm_client):
     AWS_SECRET_DB_CREDENTIALS_NAME = "test_db_credentials"
 
-    with patch("src.utils.utils.boto3.client") as mock_client:
+    with patch("utils.utils.boto3.client") as mock_client:
         mock_client.get_secret_value.return_value = sm_client.get_secret_value(
             SecretId=AWS_SECRET_DB_CREDENTIALS_NAME
         )
@@ -71,7 +71,7 @@ def test_should_return_a_dict_with_correct_keys(sm_client):
 def test_should_return_a_dict_with_correct_db_credential_data(sm_client):
     AWS_SECRET_DB_CREDENTIALS_NAME = "test_db_credentials"
 
-    with patch("src.utils.utils.boto3.client") as mock_client:
+    with patch("utils.utils.boto3.client") as mock_client:
         mock_client.get_secret_value.return_value = sm_client.get_secret_value(
             SecretId=AWS_SECRET_DB_CREDENTIALS_NAME
         )
@@ -90,7 +90,7 @@ def test_should_return_a_dict_with_correct_db_credential_data(sm_client):
 def test_should_return_a_dict_with_correct_table_name_data(sm_client):
     AWS_SECRET_TABLES_NAMES = "test_table_name"
 
-    with patch("src.utils.utils.boto3.client") as mock_client:
+    with patch("utils.utils.boto3.client") as mock_client:
         mock_client.get_secret_value.return_value = sm_client.get_secret_value(
             SecretId=AWS_SECRET_TABLES_NAMES
         )

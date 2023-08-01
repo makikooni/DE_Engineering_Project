@@ -1,7 +1,8 @@
-from src.utils.utils import connect_db
-from pg8000.native import InterfaceError
+from utils.utils import connect_db
+from pg8000.native import Connection, InterfaceError
+import boto3
+from moto import mock_rds
 import pytest
-
 
 def test_should_raise_exception_if_incorrect_credentials():
     test_db_credentials = {

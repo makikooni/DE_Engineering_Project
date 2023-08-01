@@ -1,4 +1,4 @@
-from src.utils.utils import upload_table_s3
+from utils.utils import upload_table_s3
 import pytest
 import boto3
 from unittest.mock import patch
@@ -59,7 +59,7 @@ def test_should_raise_exception_if_arguments_incorrect_type():
 
 
 def test_should_raise_exception_if_incorrect_bucket_name(mock_client):
-    with patch("src.utils.utils.boto3.client") as mocked_client:
+    with patch("utils.utils.boto3.client") as mocked_client:
         mocked_client = mock_client
 
         bucket_name = "test_bucket1"

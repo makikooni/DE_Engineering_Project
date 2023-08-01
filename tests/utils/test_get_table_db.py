@@ -1,10 +1,10 @@
-from src.utils.utils import get_table_db
+from utils.utils import get_table_db
 import pytest
 import pandas as pd
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+from pg8000.native import Connection, InterfaceError
 
-
-@patch("src.utils.utils.Connection")
+@patch("utils.utils.Connection")
 def test_should_return_correct_dataframe_and_string(test_connection):
     test_table_name = "test_table"
 
@@ -30,7 +30,7 @@ def test_should_return_correct_dataframe_and_string(test_connection):
     assert test_result_df.equals(test_df)
 
 
-@patch("src.utils.utils.Connection")
+@patch("utils.utils.Connection")
 def test_should_protect_against_sql_injection(test_connection):
     test_table_name = "design; DROP *;"
     test_table_df, test_query = get_table_db(test_connection, test_table_name)
@@ -38,6 +38,18 @@ def test_should_protect_against_sql_injection(test_connection):
     assert test_query == 'SELECT * FROM "design; DROP *;";'
 
 
-def test_should_raise_exception_if_incorrect_input_type():
+def test_should_raise_exception_if_incorrect_connection_input_type():
     with pytest.raises(TypeError):
         get_table_db([], "table_name")
+
+def test_should_raise_exception_if_incorrect_table_name_input_type():
+    with pytest.raises(TypeError):
+        get_table_db(Connection, 2)
+
+@patch("utils.utils.Connection")
+def test_should_raise_error_for_invalid_table(test_connection):
+    test_table_name = "design; DROP *;"
+    test_connection.run = MagicMock(side_effect=InterfaceError)
+    
+    with pytest.raises(InterfaceError):
+        test_table_df, test_query = get_table_db(test_connection, test_table_name)
