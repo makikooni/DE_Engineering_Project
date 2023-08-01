@@ -12,7 +12,6 @@ def read_csv_to_pandas(file, source_bucket):
         return pd.read_csv(f's3://{source_bucket}/{file}.csv')
     except Exception as e:
         logger.info('read_csv_to_pandas')
-        # logging.error('read_csv_to_pandas')
         raise e
 
 
