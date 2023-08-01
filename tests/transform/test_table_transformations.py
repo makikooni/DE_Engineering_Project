@@ -57,6 +57,16 @@ def test_transform_design_transforms_tables_into_correct_parquet_shchema(mock_cl
     assert list(df.columns) == ['design_id', 'design_name', 'file_location', 'file_name']
 
 
-# def test_transform_design_raises_exception_when_agruments_invalid():
+def test_transform_design_raises_exception_when_agruments_invalid(mock_client):
+
+    ingestion_bucket_name = 'mock-test-ingestion-va-052023'
+    processed_bucket_name = 'mock-test-processed-va-052023'
+
+    with pytest.raises(Exception):
+        transform_design('wrong', ingestion_bucket_name, processed_bucket_name)
     
-#     pass
+    with pytest.raises(Exception):
+        transform_design('test', 'wrong', processed_bucket_name)
+
+    with pytest.raises(Exception):
+        transform_design('test', ingestion_bucket_name, 'wrong')
