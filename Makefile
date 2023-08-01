@@ -72,7 +72,7 @@ autopep:
 	$(call execute_in_env, $(PIP) install autopep8)
 
 ## Set up dev requirements (bandit, safety, flake8, coverage, autopep and pytest)
-dev-setup: bandit safety flake coverage pytest moto autopep
+dev-setup: bandit safety flake coverage pytest autopep
 
 # Build / Run
 security-test:
