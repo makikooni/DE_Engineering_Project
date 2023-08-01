@@ -101,5 +101,3 @@ check-coverage:
 
 ## Run all checks
 run-checks: security-test run-flake unit-tests check-coverage
-
-# this comment is simply to test that github actions is working when a pull request is merged to the main branch
