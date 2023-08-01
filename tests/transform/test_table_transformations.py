@@ -47,25 +47,17 @@ def test_transform_design_retrieves_csv_file_from_ingestion_s3_bucket_and_puts_p
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
     assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_design.parquet'
-    
 
 
-#     pprint(mock_client.list_buckets())
-#     pprint('$-break1------------------------------------------------------------------------------$')
-#     pprint(mock_client.list_objects_v2(Bucket=ingestion_bucket_name))
-#     pprint('$-break2------------------------------------------------------------------------------$')
-#     pprint(mock_client.list_objects_v2(Bucket=processed_bucket_name))
+def test_transform_design_transforms_tables_into_correct_parquet_shchema(mock_client):
 
+    ingestion_bucket_name = 'mock-test-ingestion-va-052023'
+    processed_bucket_name = 'mock-test-processed-va-052023'
+    transform_design('test', ingestion_bucket_name, processed_bucket_name)
+    df = pd.read_parquet(f's3://{processed_bucket_name}/dim_design.parquet')
 
-#     pprint('$-break3------------------------------------------------------------------------------$')
-#     pprint(mock_client.list_objects_v2(Bucket=processed_bucket_name))
-
-#     assert False
-
-
-# def test_transform_design_transforms_tables_into_correct_parquet_shchema():
-
-#     pass
+    assert len(df) == 3
+    assert list(df.columns) == ['design_id', 'design_name', 'file_location', 'file_name']
 
 
 # def test_transform_design_puts_parquet_file_into_processed_s3_bucket():
