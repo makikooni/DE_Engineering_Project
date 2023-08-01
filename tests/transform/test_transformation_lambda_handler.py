@@ -2,13 +2,13 @@ import pytest
 import boto3
 from moto import mock_s3
 from pprint import pprint
-from transform import transformation_lambda_handler
+from src.transform import transformation_lambda_handler
 
 
 def test_testing():
     '''
     '''
-    transformation_lambda_handler()
+    transformation_lambda_handler(1,1)
     assert True
 
 
