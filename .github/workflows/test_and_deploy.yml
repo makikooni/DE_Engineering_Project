@@ -38,6 +38,9 @@ jobs:
       - name: create environment
         run: make create-environment
 
+      - name: setup dev requirements
+        run: make dev-setup
+
       - name: setup requirements
         run: make requirements
 
