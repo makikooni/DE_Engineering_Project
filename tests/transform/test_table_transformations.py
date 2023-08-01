@@ -39,10 +39,14 @@ def test_test(mock_client):
     assert True
 
 
-# def test_transform_design_retrieves_csv_file_from_ingestion_s3_bucket_and_puts_parquet_file_in_processed_s3_bucket(mock_client):
+def test_transform_design_retrieves_csv_file_from_ingestion_s3_bucket_and_puts_parquet_file_in_processed_s3_bucket(mock_client):
 
-#     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
-#     processed_bucket_name = 'mock-test-processed-va-052023'
+    ingestion_bucket_name = 'mock-test-ingestion-va-052023'
+    processed_bucket_name = 'mock-test-processed-va-052023'
+    transform_design('test', ingestion_bucket_name, processed_bucket_name)
+
+    assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_design.parquet'
     
 
 
@@ -52,7 +56,6 @@ def test_test(mock_client):
 #     pprint('$-break2------------------------------------------------------------------------------$')
 #     pprint(mock_client.list_objects_v2(Bucket=processed_bucket_name))
 
-#     transform_design('test', ingestion_bucket_name, processed_bucket_name)
 
 #     pprint('$-break3------------------------------------------------------------------------------$')
 #     pprint(mock_client.list_objects_v2(Bucket=processed_bucket_name))
