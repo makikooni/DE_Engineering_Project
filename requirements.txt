@@ -5,4 +5,3 @@ pandas==2.0.3
 pg8000==1.29.8
 pytest==7.4.0
 awswrangler==3.2.1
-s3fs
