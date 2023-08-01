@@ -34,6 +34,9 @@ define execute_in_env
 	$(ACTIVATE_ENV) && $1
 endef
 
+run:
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} python ${filename})
+
 ## install all python packages and dependencies
 requirements:
 	$(call execute_in_env, $(PIP) install -r ./requirements.txt)
@@ -74,7 +77,7 @@ security-test:
 
 ## Run the flake8 code check
 run-flake:
-	$(call execute_in_env, flake8  ./src/*/*.py)
+	$(call execute_in_env, flake8  ./src/*.py)
 
 ## NEED TO INCLUDE THIS ONCE TESTS HAVE BEEN WRITTEN
 # $(call execute_in_env, flake8  ./src/*/*.py ./tests/*/*.py)
