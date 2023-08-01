@@ -50,8 +50,10 @@ def extraction_lambda_handler(event, context):
 
     if event["resources"] != CLOUDWATCH_TRIGGER_ARN:
         raise ValueError("Event schedule is incorrect")
-    if req_event_keys not in list(event.keys()):
-        raise KeyError("This event is not a valid cloudwatch event")
+    for key in req_event_keys:
+        if key not in list(event.keys()):
+            raise KeyError(f"This event is not a valid cloudwatch event.\
+                           event object does not contain the key {key}")
 
     logger.info(
         f'Lambda triggered on {event["time"]} by a {event["detail-type"]} '
