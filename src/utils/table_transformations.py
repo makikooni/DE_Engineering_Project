@@ -21,7 +21,6 @@ def transform_design(file, source_bucket, target_bucket):
 
 def transform_payment_type(file, source_bucket, target_bucket):
     try:
-
         payment_type_table = read_csv_to_pandas(file, source_bucket)
         dim_payment_type_table = payment_type_table[['payment_type_id', 'payment_type_name']]
         write_df_to_parquet(dim_payment_type_table, 'dim_payment_type', target_bucket)

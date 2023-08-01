@@ -6,13 +6,13 @@ import pandas as pd
 from pprint import pprint
 from src.transform import transformation_lambda_handler
 from src.utils.utils import read_csv_to_pandas
-from src.utils.table_transformations import transform_counterparty, transform_currency, transform_design, transform_location, transform_payment, transform_payment_type, transform_purchase_order, transform_sales_order, transform_staff, transform_transaction, create_date
-
+from src.utils.table_transformations import transform_design
 
 @pytest.fixture
 def create_s3_client():
     with mock_s3():
         yield boto3.client('s3', region_name='eu-west-2')
+
 
 @pytest.fixture
 def mock_client(create_s3_client):
@@ -31,7 +31,7 @@ def mock_client(create_s3_client):
              Bucket=processed_bucket_name, 
              CreateBucketConfiguration={'LocationConstraint': 'eu-west-2'},
              )
-        with open('/Users/angushirst/Northcoders/week-11-project/mango_repo/test.csv', 'rb') as data:
+        with open('tests/transform/test_data_csv_files/test_design.csv', 'rb') as data:
             mock_client.upload_fileobj(data, ingestion_bucket_name, 'test.csv')
         yield mock_client
 
