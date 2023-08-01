@@ -74,7 +74,7 @@ security-test:
 
 ## Run the flake8 code check
 run-flake:
-	$(call execute_in_env, flake8  ./src/*/*.py)
+	$(call execute_in_env, flake8  ./src/*.py)
 
 ## NEED TO INCLUDE THIS ONCE TESTS HAVE BEEN WRITTEN
 # $(call execute_in_env, flake8  ./src/*/*.py ./tests/*/*.py)
