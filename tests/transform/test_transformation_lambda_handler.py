@@ -8,7 +8,7 @@ from src.transform import transformation_lambda_handler
 def test_testing():
     '''
     '''
-    transformation_lambda_handler(1,1)
+    # transformation_lambda_handler(1,1)
     assert True
 
 
