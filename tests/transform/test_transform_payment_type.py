@@ -3,9 +3,6 @@ import pytest
 import boto3
 from moto import mock_s3
 import pandas as pd
-from pprint import pprint
-from src.transform import transformation_lambda_handler
-from src.utils.utils import read_csv_to_pandas
 from src.utils.table_transformations import transform_payment_type
 
 
@@ -42,8 +39,6 @@ def test_transform_payment_type_retrieves_csv_file_from_ingestion_s3_bucket_and_
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
     transform_payment_type('test', ingestion_bucket_name, processed_bucket_name)
-
-    pprint(mock_client.list_objects_v2(Bucket=processed_bucket_name))
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
     assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_payment_type.parquet'
