@@ -5,28 +5,30 @@ Defines lambda function responsible for extracting the data
 from the database and depositing it in the ingestion bucket
 """
 
-logger = logging.getLogger("MyLogger")
+logger = logging.getLogger("ExtractionLogger")
 logger.setLevel(logging.INFO)
 
 
 def extraction_lambda_handler(event, context):
-    """Handles scheduled invocation event and transfers data from database to s3.
+    """Handles scheduled event and transfers data from database to s3.
 
-      One receipt of a Cloudwatch scheduled invocation event, connects to totesys database and
-      extracts each table and uploads as a csv to ingestion zone (S3 bucket).
+      On receipt of a Cloudwatch scheduled event:
+        - connects to totesys database
+        - extracts each table
+        - uploads each table as a csv to ingestion zone
 
     Args:
         event:
-            a valid Cloudwatch scheudle event -
-            see https://docs.aws.amazon.com/AmazonS3/latest/userguide/notification-content-structure.html
+            a valid Cloudwatch scheudle event
         context:
-            a valid AWS lambda Python context object - see
-            https://docs.aws.amazon.com/lambda/latest/dg/python-context.html
+            a valid AWS lambda Python context object
 
     Raises:
-        ValueError: Event resources arn does not match the expected arn.
-        RuntimeError: An unexpected error occurred in execution. Other errors
-        result in an informative log message.
+        ValueError:
+            Event resources arn does not match the expected arn.
+        RuntimeError:
+            An unexpected error occurred in execution. Other errors
+            result in an informative log message.
     """
     AWS_SECRET_TABLES_NAMES = "ingestion/db/table-names"
     AWS_SECRET_DB_CREDENTIALS_NAME = "ingestion/db/credentials"
@@ -36,7 +38,15 @@ def extraction_lambda_handler(event, context):
         "arn:aws:events:eu-west-2:454963742860:rule/extraction_schedule"
     )
 
-    req_event_keys = ["id", "detail-type", "source", "account", "time", "region", "resources", "detail" ]
+    req_event_keys = [
+        "id",
+        "detail-type",
+        "source",
+        "account",
+        "time",
+        "region",
+        "resources",
+        "detail"]
 
     if event["resources"] != CLOUDWATCH_TRIGGER_ARN:
         raise ValueError("Event schedule is incorrect")
@@ -44,7 +54,7 @@ def extraction_lambda_handler(event, context):
         raise KeyError("This event is not a valid cloudwatch event")
 
     logger.info(
-        f'The lambda has been triggered at {event["time"]} by a {event["detail-type"]} '
+        f'Lambda triggered on {event["time"]} by a {event["detail-type"]} '
     )
     logger.info(f'event["detail"] is: \n {event["detail"]} ')
 
