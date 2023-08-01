@@ -63,12 +63,16 @@ coverage:
 pytest:
 	$(call execute_in_env, $(PIP) install pytest)
 
+## Install pytest
+moto:
+	$(call execute_in_env, $(PIP) install moto)
+
 ## Install autopep8
 autopep:
 	$(call execute_in_env, $(PIP) install autopep8)
 
 ## Set up dev requirements (bandit, safety, flake8, coverage, autopep and pytest)
-dev-setup: bandit safety flake coverage pytest autopep
+dev-setup: bandit safety flake coverage pytest moto autopep
 
 # Build / Run
 security-test:
