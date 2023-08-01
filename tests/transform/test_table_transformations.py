@@ -35,9 +35,6 @@ def mock_client(create_s3_client):
             mock_client.upload_fileobj(data, ingestion_bucket_name, 'test.csv')
         yield mock_client
 
-def test_test(mock_client):
-    assert True
-
 
 def test_transform_design_retrieves_csv_file_from_ingestion_s3_bucket_and_puts_parquet_file_in_processed_s3_bucket(mock_client):
 
@@ -58,11 +55,6 @@ def test_transform_design_transforms_tables_into_correct_parquet_shchema(mock_cl
 
     assert len(df) == 3
     assert list(df.columns) == ['design_id', 'design_name', 'file_location', 'file_name']
-pa
-
-# def test_transform_design_puts_parquet_file_into_processed_s3_bucket():
-
-#     pass
 
 
 # def test_transform_design_raises_exception_when_agruments_invalid():
