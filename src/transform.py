@@ -36,7 +36,6 @@ def transformation_lambda_handler(event, context):
         logger.info('transform_lambda_handler ', e)
         raise e
 
-transformation_lambda_handler(1, 1)
 
 
 '''
