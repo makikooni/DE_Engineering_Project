@@ -1,20 +1,32 @@
-import logging
-import boto3
-from src.utils.table_transformations import transform_counterparty, transform_currency, transform_design, transform_location, transform_payment, transform_payment_type, transform_purchase_order, transform_sales_order, transform_staff, transform_transaction, create_date
 from moto import mock_s3
-from pprint import pprint
-from src.transform import transformation_lambda_handler
+from moto.core import patch_client
+import logging
+import os
 import pytest
-from src.utils.utils import read_csv_to_pandas
+import boto3
+from pprint import pprint
 import pandas as pd
-
+from src.transform import transformation_lambda_handler
+from src.utils.utils import read_csv_to_pandas
+from src.utils.table_transformations import transform_counterparty, transform_currency, transform_design, transform_location, transform_payment, transform_payment_type, transform_purchase_order, transform_sales_order, transform_staff, transform_transaction, create_date
 
 @pytest.fixture
-def create_s3_client():
-    with mock_s3():
-        yield boto3.client('s3')
+def aws_credentials():
 
-@pytest.fixture()
+    """Mocked AWS Credentials for moto."""
+
+    os.environ['AWS_ACCESS_KEY_ID'] = 'test'
+    os.environ['AWS_SECRET_ACCESS_KEY'] = 'test'
+    os.environ['AWS_SECURITY_TOKEN'] = 'test'
+    os.environ['AWS_SESSION_TOKEN'] = 'test'
+    os.environ['AWS_DEFAULT_REGION'] = 'eu-west-2'
+
+@pytest.fixture
+def create_s3_client(aws_credentials):
+    with mock_s3():
+        yield boto3.client('s3', region_name='eu-west-2')
+
+@pytest.fixture
 def mock_client(create_s3_client):
         '''
         fixture creates 'test-ingestion-va-052023' bucket in 
@@ -39,6 +51,7 @@ def mock_client(create_s3_client):
         ]
         pprint(mock_client.list_buckets())
         test_table_df = pd.DataFrame(data=test_data, columns=["col1", "col2", "col3"])
+        pprint(test_table_df)
         test_table_df.to_csv(f"s3://{ingestion_bucket_name}/{table_name}.csv")
         pprint(mock_client.list_objects_v2(Bucket=ingestion_bucket_name))
         # with open('/Users/angushirst/Northcoders/week-11-project/teststuff/test.txt', 'rb') as data:
@@ -46,7 +59,6 @@ def mock_client(create_s3_client):
         yield mock_client
 
 def test_test(mock_client):
-    # pprint(mock_client.list_buckets())
     assert True
 
 
