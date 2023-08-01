@@ -2,7 +2,7 @@
 locals {
   layer_zip_path    = "layer.zip"
   layer_name        = "lambda_requirements_layer"
-  requirements_path = "${path.root}/../requirements.txt"
+  requirements_path = "${path.root}/../deploy_requirements.txt"
 }
 
 # create zip file from requirements.txt. Triggers only when the file is updated
