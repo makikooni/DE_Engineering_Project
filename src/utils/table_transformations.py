@@ -95,7 +95,7 @@ def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date
         sales_order_table = read_csv_to_pandas(file, source_bucket)
         
         sales_order_table = timestamp_to_date_and_time(sales_order_table)
-        
+
         sales_order_table.rename(columns={'staff_id': 'sales_staff_id'}, inplace=True)
         # pprint(sales_order_table)
         fact_sales_order = sales_order_table.loc[:, ['sales_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'sales_staff_id', 'counterparty_id', 'units_sold', 'unit_price', 'currency_id', 'design_id', 'agreed_payment_date', 'agreed_delivery_date', 'agreed_delivery_location_id']]
@@ -114,7 +114,7 @@ def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_d
 
         purchase_order_table = timestamp_to_date_and_time(purchase_order_table)
 
-        fact_purchase_order = purchase_order_table[['purchase_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'staff_id', 'counterparty_id', 'item_code', 'item_quantity', 'item_unit_price', 'currency_id', 'agreed_delivery_date', 'agreed_payment_date', 'agreed_delivery_location_id']]
+        fact_purchase_order = purchase_order_table.loc[:, ['purchase_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'staff_id', 'counterparty_id', 'item_code', 'item_quantity', 'item_unit_price', 'currency_id', 'agreed_delivery_date', 'agreed_payment_date', 'agreed_delivery_location_id']]
         write_df_to_parquet(fact_purchase_order, 'fact_purchase_order', target_bucket)
 
         date_cols_to_add = [fact_purchase_order['created_date'], fact_purchase_order['last_updated_date'], fact_purchase_order['agreed_delivery_date'], fact_purchase_order['agreed_payment_date']]
@@ -124,21 +124,20 @@ def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_d
         raise e
 
 
-# def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
-#     try:
-#         payment_table = read_csv_to_pandas(file, source_bucket)
-#         payment_table.columns.values[0] = 'payment_record_id'
+def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
+    try:
+        payment_table = read_csv_to_pandas(file, source_bucket)
 
-#         payment_table = timestamp_to_date_and_time(payment_table)
+        payment_table = timestamp_to_date_and_time(payment_table)
 
-#         fact_payment_table = payment_table[['payment_record_id', 'payment_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'transaction_id', 'counterparty_id', 'payment_amount', 'currency_id', 'payment_type_id', 'paid', 'payment_date']]
-#         write_df_to_parquet(fact_payment_table, 'fact_payment', target_bucket)
+        fact_payment_table = payment_table.loc[:, ['payment_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'transaction_id', 'counterparty_id', 'payment_amount', 'currency_id', 'payment_type_id', 'paid', 'payment_date']]
+        write_df_to_parquet(fact_payment_table, 'fact_payment', target_bucket)
 
-#         date_cols_to_add = [fact_payment_table['created_date'], fact_payment_table['last_updated_date'], fact_payment_table['payment_date']]
-#         add_to_dates_set(dates_for_dim_date, date_cols_to_add)
-#     except Exception as e:
-#         logger.info('transform_payment', e)
-#         raise e
+        date_cols_to_add = [fact_payment_table['created_date'], fact_payment_table['last_updated_date'], fact_payment_table['payment_date']]
+        add_to_dates_set(dates_for_dim_date, date_cols_to_add)
+    except Exception as e:
+        logger.info('transform_payment', e)
+        raise e
 
 
 # def create_date(dates_for_dim_date, target_bucket):
