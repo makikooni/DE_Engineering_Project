@@ -44,7 +44,7 @@ def test_transform_sales_order_retrieves_csv_file_from_ingestion_s3_bucket_and_p
     transform_sales_order('test', ingestion_bucket_name, processed_bucket_name, test_set)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_sales_order.parquet'
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'fact_sales_order.parquet'
 
 
 def test_transform_sales_order_transforms_tables_into_correct_parquet_shchema(mock_client):
@@ -54,9 +54,9 @@ def test_transform_sales_order_transforms_tables_into_correct_parquet_shchema(mo
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
     transform_sales_order('test', ingestion_bucket_name, processed_bucket_name, test_set)
-    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_sales_order.parquet')
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/fact_sales_order.parquet')
     assert len(df) == 3
-    assert list(df.columns) == ['sales_record_id', 'sales_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'sales_staff_id', 'counterparty_id', 'units_sold', 'unit_price', 'currency_id', 'design_id', 'agreed_payment_date', 'agreed_delivery_date', 'agreed_delivery_location_id']
+    assert list(df.columns) == ['sales_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'sales_staff_id', 'counterparty_id', 'units_sold', 'unit_price', 'currency_id', 'design_id', 'agreed_payment_date', 'agreed_delivery_date', 'agreed_delivery_location_id']
 
 
 def test_transform_sales_order_raises_exception_when_agruments_invalid(mock_client):
