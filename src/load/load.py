@@ -18,8 +18,6 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
         else:
             raise error
     try:
-        # conecting to the process bucket
-        process_bucket = 'processed-va-052023'
         # credentails for the warehouse
         db_creds = json.loads(db_credentials['SecretString'])
         host = db_creds['host']
@@ -37,17 +35,19 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
         )
         # get the table from the s3 and put it in a pandas dataframe
         table = get_table_data(s3_table_name)
+        print(table)
         insert_table_sql = build_load_sql(wh_table_name, table)
         # Convert DataFrame to list tuples for executemany
-        data_to_insert = datafarme_to_list(table)
+        data_to_insert = dataframe_to_list(table)
         # Execute the query using executemany to insert all rows at once
         insert_table_data(connection,insert_table_sql, data_to_insert)
     except Exception as error:
         raise error
-def get_table_data(s3_table_name):
-    return pd.read_parquet(f's3://processed-va-052023/{s3_table_name}')
 
-def datafarme_to_list(table):
+def get_table_data(s3_table_name):
+    return pd.read_parquet(f's3://test-processed-va-052023/{s3_table_name}')
+
+def dataframe_to_list(table):
     return [tuple(row) for row in table.itertuples(index=False)]
 
 def build_load_sql(wh_table_name, table):
@@ -61,4 +61,17 @@ def insert_table_data(connection,insert_table_sql, data_to_insert):
     connection.commit()
     cursor.close()
 
-#add_new_rows('test_dim_design.parquet', 'dim_design')
+def load_lambda_hander():
+    add_new_rows('dim_counterparty.parquet', 'dim_counterparty')
+    add_new_rows('dim_currency.parquet', 'dim_currency')
+    add_new_rows('dim_date.parquet', 'dim_date')
+    add_new_rows('dim_design.parquet', 'dim_design')
+    add_new_rows('dim_location.parquet', 'dim_location')
+    add_new_rows('dim_payment_type.parquet', 'dim_payment_type')
+    add_new_rows('dim_staff.parquet', 'dim_staff')
+    add_new_rows('fact_payment.parquet', 'fact_payment')
+    add_new_rows('fact_purchase_order.parquet', 'fact_purchase_order')
+    add_new_rows('fact_sales_order.parquet', 'fact_sales_order')
+
+# add_new_rows('dim_date.parquet', 'dim_date')
+# add_new_rows('fact_sales_order.parquet', 'fact_sales_order')
