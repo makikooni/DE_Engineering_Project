@@ -38,6 +38,7 @@ def test_function_returns_dateframe_of_csv_file_content_from_bucket(mock_client)
 
     assert_frame_equal(test_df, df)
 
+
 def test_function_raises_exception_when_agruments_invalid(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
@@ -47,5 +48,3 @@ def test_function_raises_exception_when_agruments_invalid(mock_client):
     
     with pytest.raises(Exception):
         read_csv_to_pandas('test', 'wrong')
-
-
