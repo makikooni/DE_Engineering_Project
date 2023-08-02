@@ -28,7 +28,7 @@ def mock_client(create_s3_client):
              Bucket=processed_bucket_name, 
              CreateBucketConfiguration={'LocationConstraint': 'eu-west-2'},
              )
-        with open('tests/transform/test_data_csv_files/test_location.csv', 'rb') as data:
+        with open('tests/transform/test_data_csv_files/test_address.csv', 'rb') as data:
             mock_client.upload_fileobj(data, ingestion_bucket_name, 'test.csv')
         yield mock_client
 

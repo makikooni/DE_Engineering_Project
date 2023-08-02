@@ -75,19 +75,19 @@ def transform_currency(file, source_bucket, target_bucket):
         raise e
 
 
-# def transform_counterparty(file1, file2, source_bucket, target_bucket):
-#     try:
-#         counterparty_table = read_csv_to_pandas(file1, source_bucket)
-#         address_table_for_counterparty = read_csv_to_pandas(file2, source_bucket)
-#         joined_counterparty_address_table = counterparty_table.join(address_table_for_counterparty.set_index('address_id'), on='legal_address_id', lsuffix='counterparty', rsuffix='address')
-#         dim_counterparty = joined_counterparty_address_table[['counterparty_id', 'counterparty_legal_name', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']]
-#         columns_to_rename = ['address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country']
-#         dim_counterparty.rename(columns={col: 'counterparty_legal_'+col for col in dim_counterparty.columns if col in columns_to_rename}, inplace=True)
-#         dim_counterparty.rename(columns={'phone': 'counterparty_legal_phone_number'}, inplace=True)
-#         write_df_to_parquet(dim_counterparty, 'dim_counterparty', target_bucket)
-#     except Exception as e:
-#         logger.info('transform_counterparty', e)
-#         raise e
+def transform_counterparty(file1, file2, source_bucket, target_bucket):
+    try:
+        counterparty_table = read_csv_to_pandas(file1, source_bucket)
+        address_table_for_counterparty = read_csv_to_pandas(file2, source_bucket)
+        joined_counterparty_address_table = counterparty_table.join(address_table_for_counterparty.set_index('address_id'), on='legal_address_id', lsuffix='counterparty', rsuffix='address')
+        dim_counterparty = joined_counterparty_address_table.loc[:, ['counterparty_id', 'counterparty_legal_name', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']]
+        columns_to_rename = ['address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country']
+        dim_counterparty.rename(columns={col: 'counterparty_legal_'+col for col in dim_counterparty.columns if col in columns_to_rename}, inplace=True)
+        dim_counterparty.rename(columns={'phone': 'counterparty_legal_phone_number'}, inplace=True)
+        write_df_to_parquet(dim_counterparty, 'dim_counterparty', target_bucket)
+    except Exception as e:
+        logger.info('transform_counterparty', e)
+        raise e
 
 
 # def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date):

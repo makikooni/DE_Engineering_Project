@@ -3,7 +3,7 @@ from moto import mock_s3
 import boto3
 import pytest
 import awswrangler as wr
-from src.utils.table_transformations import transform_staff
+from src.utils.table_transformations import transform_counterparty
 
 @pytest.fixture
 def create_s3_client():
@@ -28,46 +28,46 @@ def mock_client(create_s3_client):
              Bucket=processed_bucket_name, 
              CreateBucketConfiguration={'LocationConstraint': 'eu-west-2'},
              )
-        with open('tests/transform/test_data_csv_files/test_staff.csv', 'rb') as data:
+        with open('tests/transform/test_data_csv_files/test_counterparty.csv', 'rb') as data:
             mock_client.upload_fileobj(data, ingestion_bucket_name, 'test_1.csv')
-        with open('tests/transform/test_data_csv_files/test_department.csv', 'rb') as data:
+        with open('tests/transform/test_data_csv_files/test_address.csv', 'rb') as data:
             mock_client.upload_fileobj(data, ingestion_bucket_name, 'test_2.csv')
         yield mock_client
 
 
-def test_transform_staff_retrieves_csv_file_from_ingestion_s3_bucket_and_puts_parquet_file_in_processed_s3_bucket(mock_client):
+def test_transform_counterparty_retrieves_csv_file_from_ingestion_s3_bucket_and_puts_parquet_file_in_processed_s3_bucket(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_staff('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name)
+    transform_counterparty('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_staff.parquet'
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_counterparty.parquet'
 
 
-def test_transform_staff_transforms_tables_into_correct_parquet_shchema(mock_client):
+def test_transform_counterparty_transforms_tables_into_correct_parquet_shchema(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_staff('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name)
-    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_staff.parquet')
+    transform_counterparty('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name)
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_counterparty.parquet')
     assert len(df) == 3
-    assert list(df.columns) == ['staff_id', 'first_name', 'last_name', 'department_name', 'location', 'email_address']
+    assert list(df.columns) == ['counterparty_id', 'counterparty_legal_name', 'counterparty_legal_address_line_1', 'counterparty_legal_address_line_2', 'counterparty_legal_district', 'counterparty_legal_city', 'counterparty_legal_postal_code', 'counterparty_legal_country', 'counterparty_legal_phone_number']
 
 
-def test_transform_staff_raises_exception_when_agruments_invalid(mock_client):
+def test_transform_counterparty_raises_exception_when_agruments_invalid(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
 
     with pytest.raises(Exception):
-        transform_staff('wrong', 'test_2', ingestion_bucket_name, processed_bucket_name)
+        transform_counterparty('wrong', 'test_2', ingestion_bucket_name, processed_bucket_name)
 
     with pytest.raises(Exception):
-        transform_staff('test_1', 'wrong', ingestion_bucket_name, processed_bucket_name)
+        transform_counterparty('test_1', 'wrong', ingestion_bucket_name, processed_bucket_name)
 
     with pytest.raises(Exception):
-        transform_staff('test_1', 'test_2', 'wrong', processed_bucket_name)
+        transform_counterparty('test_1', 'test_2', 'wrong', processed_bucket_name)
 
     with pytest.raises(Exception):
-        transform_staff('test_1', 'test_2', ingestion_bucket_name, 'wrong')
+        transform_counterparty('test_1', 'test_2', ingestion_bucket_name, 'wrong')
