@@ -1,5 +1,6 @@
 import logging
 from utils.utils import get_secret, connect_db, get_table_db, upload_table_s3
+
 """
 Defines lambda function responsible for extracting the data
 from the database and depositing it in the ingestion bucket
@@ -46,21 +47,24 @@ def extraction_lambda_handler(event, context):
         "time",
         "region",
         "resources",
-        "detail"]
+        "detail",
+    ]
 
     if event["resources"][0] != CLOUDWATCH_TRIGGER_ARN:
-        logging.error(f"cloudwatch trigger arn is {event['resources'][0]}, \n \
-                       expected {CLOUDWATCH_TRIGGER_ARN} ")
+        logging.error(
+            f"cloudwatch trigger arn is {event['resources'][0]}, \n \
+                       expected {CLOUDWATCH_TRIGGER_ARN} "
+        )
         raise ValueError("Event schedule is incorrect")
     for key in req_event_keys:
         if key not in list(event.keys()):
-            raise KeyError(f"This event is not a valid cloudwatch event.\
-                           event object does not contain the key {key}")
+            raise KeyError(
+                f"This event is not a valid cloudwatch event.\
+                           event object does not contain the key {key}"
+            )
 
-    logger.info(
-        f'Lambda triggered on {event["time"]} by a {event["detail-type"]} '
-    )
-    
+    logger.info(f'Lambda triggered on {event["time"]}')
+
     db_credentials = get_secret(AWS_SECRET_DB_CREDENTIALS_NAME)
     table_names = get_secret(AWS_SECRET_TABLES_NAMES).keys()
 
