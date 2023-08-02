@@ -62,17 +62,17 @@ def transform_transaction(file, source_bucket, target_bucket):
 #         raise e
 
 
-# def transform_currency(file, source_bucket, target_bucket):
-#     try:
-#         currency_table = read_csv_to_pandas(file, source_bucket)
-#         dim_currency_table = currency_table[['currency_id', 'currency_code']]
-#         conditions = [(dim_currency_table['currency_code'] == 'EUR'), (dim_currency_table['currency_code'] == 'GBP'), (dim_currency_table['currency_code'] == 'USD')]
-#         values = ['Euro', 'British Pound', 'US Dollar']
-#         dim_currency_table['currency_name'] = np.select(conditions, values)
-#         write_df_to_parquet(dim_currency_table, 'dim_currency', target_bucket)
-#     except Exception as e:
-#         logger.info('transform_currency', e)
-#         raise e
+def transform_currency(file, source_bucket, target_bucket):
+    try:
+        currency_table = read_csv_to_pandas(file, source_bucket)
+        dim_currency_table = currency_table.loc[:, ['currency_id', 'currency_code']]
+        conditions = [(dim_currency_table['currency_code'] == 'EUR'), (dim_currency_table['currency_code'] == 'GBP'), (dim_currency_table['currency_code'] == 'USD')]
+        values = ['Euro', 'British Pound', 'US Dollar']
+        dim_currency_table['currency_name'] = np.select(conditions, values)
+        write_df_to_parquet(dim_currency_table, 'dim_currency', target_bucket)
+    except Exception as e:
+        logger.info('transform_currency', e)
+        raise e
 
 
 # def transform_counterparty(file1, file2, source_bucket, target_bucket):
