@@ -140,19 +140,20 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
         raise e
 
 
-# def create_date(dates_for_dim_date, target_bucket):
-#     try:
-#         dates = {'date_id': sorted(list(dates_for_dim_date))}
-#         dim_date = pd.DataFrame(data=dates)
-#         dim_date['year'] = pd.DatetimeIndex(dim_date['date_id']).year
-#         dim_date['month'] = pd.DatetimeIndex(dim_date['date_id']).month
-#         dim_date['day'] = pd.DatetimeIndex(dim_date['date_id']).day
-#         dim_date['day_of_week'] = pd.DatetimeIndex(dim_date['date_id']).dayofweek
-#         dim_date['day_name'] = pd.DatetimeIndex(dim_date['date_id']).day_name()
-#         dim_date['month_name'] = pd.DatetimeIndex(dim_date['date_id']).month_name()
-#         dim_date['quarter'] = pd.DatetimeIndex(dim_date['date_id']).quarter
-#         write_df_to_parquet(dim_date, 'dim_date', target_bucket)
-#     except Exception as e:
-#         logger.info('create_date', e)
-#         raise e
+def create_date(dates_for_dim_date, target_bucket):
+    try:
+        dates = {'date_id': sorted(list(dates_for_dim_date))}
+        dim_date = pd.DataFrame(data=dates)
+        dim_date['year'] = pd.DatetimeIndex(dim_date['date_id']).year
+        dim_date['month'] = pd.DatetimeIndex(dim_date['date_id']).month
+        dim_date['day'] = pd.DatetimeIndex(dim_date['date_id']).day
+        dim_date['day_of_week'] = pd.DatetimeIndex(dim_date['date_id']).dayofweek
+        dim_date['day_name'] = pd.DatetimeIndex(dim_date['date_id']).day_name()
+        dim_date['month_name'] = pd.DatetimeIndex(dim_date['date_id']).month_name()
+        dim_date['quarter'] = pd.DatetimeIndex(dim_date['date_id']).quarter
+        write_df_to_parquet(dim_date, 'dim_date', target_bucket)
+    except Exception as e:
+        logger.info('create_date', e)
+        raise e
+    
     # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_date.parquet
