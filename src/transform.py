@@ -6,15 +6,15 @@ logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
 
 
-ingestion_bucket_name = 'test-va-ingestion-atif'
-processing_bucket_name = 'test-processed-va-052023'
 
 
 def transformation_lambda_handler(event, context):
     # run in terminal to view pq table --> parquet-tools show s3://{target_bucket}/{file}.parquet
     # pd.set_option('display.max_columns', None)
+    ingestion_bucket_name = 'test-va-ingestion-atif'
+    processing_bucket_name = 'test-processed-va-052023'
+    dates_for_dim_date = set()
     try:
-        dates_for_dim_date = set()
         s3_client = boto3.client('s3')
         response = s3_client.head_bucket(Bucket=ingestion_bucket_name)
         status_code = response['ResponseMetadata']['HTTPStatusCode']
