@@ -48,8 +48,9 @@ def extraction_lambda_handler(event, context):
         "resources",
         "detail"]
 
-    if event["resources"] != CLOUDWATCH_TRIGGER_ARN:
-        logging.error(f"event['resources'] is {event['resources']} but should be {CLOUDWATCH_TRIGGER_ARN} ")
+    if event["resources"][0] != CLOUDWATCH_TRIGGER_ARN:
+        logging.error(f"cloudwatch trigger arn is {event['resources'][0]}, \n \
+                       expected {CLOUDWATCH_TRIGGER_ARN} ")
         raise ValueError("Event schedule is incorrect")
     for key in req_event_keys:
         if key not in list(event.keys()):
