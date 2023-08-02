@@ -50,16 +50,16 @@ def transform_transaction(file, source_bucket, target_bucket):
         raise e
 
 
-# def transform_staff(file1, file2, source_bucket, target_bucket):
-#     try:
-#         staff_table = read_csv_to_pandas(file1, source_bucket)
-#         department_table = read_csv_to_pandas(file2, source_bucket)
-#         joined_staff_department_table = staff_table.join(department_table.set_index('department_id'), on='department_id', lsuffix="staff", rsuffix='department')
-#         dim_staff_table = joined_staff_department_table[['staff_id', 'first_name', 'last_name', 'department_name', 'location', 'email_address']]
-#         write_df_to_parquet(dim_staff_table, 'dim_staff', target_bucket)
-#     except Exception as e:
-#         logger.info('transform_staff', e)
-#         raise e
+def transform_staff(file1, file2, source_bucket, target_bucket):
+    try:
+        staff_table = read_csv_to_pandas(file1, source_bucket)
+        department_table = read_csv_to_pandas(file2, source_bucket)
+        joined_staff_department_table = staff_table.join(department_table.set_index('department_id'), on='department_id', lsuffix="staff", rsuffix='department')
+        dim_staff_table = joined_staff_department_table.loc[:, ['staff_id', 'first_name', 'last_name', 'department_name', 'location', 'email_address']]
+        write_df_to_parquet(dim_staff_table, 'dim_staff', target_bucket)
+    except Exception as e:
+        logger.info('transform_staff', e)
+        raise e
 
 
 def transform_currency(file, source_bucket, target_bucket):

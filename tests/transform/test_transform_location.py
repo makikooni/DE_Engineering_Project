@@ -50,7 +50,6 @@ def test_transform_location_transforms_tables_into_correct_parquet_shchema(mock_
     processed_bucket_name = 'mock-test-processed-va-052023'
     transform_location('test', ingestion_bucket_name, processed_bucket_name)
     df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_location.parquet')
-
     assert len(df) == 3
     assert list(df.columns) == ['location_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']
 
