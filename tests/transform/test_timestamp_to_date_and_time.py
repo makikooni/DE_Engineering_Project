@@ -14,3 +14,8 @@ def test_function_correctly_splits_columns_and_data():
     
     assert_frame_equal(result_df, expected_df)
 
+
+def test_function_raises_exception_when_agruments_invalid():
+
+    with pytest.raises(Exception):
+        timestamp_to_date_and_time('wrong')
