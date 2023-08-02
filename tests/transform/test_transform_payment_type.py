@@ -1,8 +1,8 @@
-import moto.core 
-import pytest
-import boto3
+# import moto.core 
 from moto import mock_s3
-import pandas as pd
+import boto3
+import pytest
+import awswrangler as wr
 from src.utils.table_transformations import transform_payment_type
 
 
@@ -49,8 +49,7 @@ def test_transform_payment_type_transforms_tables_into_correct_parquet_shchema(m
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
     transform_payment_type('test', ingestion_bucket_name, processed_bucket_name)
-    df = pd.read_parquet(f's3://{processed_bucket_name}/dim_payment_type.parquet')
-    pprint(df)
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_payment_type.parquet')
     assert len(df) == 3
     assert list(df.columns) == ['payment_type_id', 'payment_type_name']
 

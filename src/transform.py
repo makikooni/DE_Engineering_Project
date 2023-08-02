@@ -1,14 +1,14 @@
 import logging
 import boto3
-from src.utils.table_transformations import transform_counterparty, transform_currency, transform_design, transform_location, transform_payment, transform_payment_type, transform_purchase_order, transform_sales_order, transform_staff, transform_transaction, create_date
-
+# from src.utils.table_transformations import transform_counterparty, transform_currency, transform_design, transform_location, transform_payment, transform_payment_type, transform_purchase_order, transform_sales_order, transform_staff, transform_transaction, create_date
+from src.utils.table_transformations import transform_design, transform_payment_type
 
 logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
 
 
 ingestion_bucket_name = 'test-va-ingestion-atif'
-processing_bucket_name = 'processed-va-052023'
+processing_bucket_name = 'test-processed-va-052023'
 
 
 def transformation_lambda_handler(event, context):
@@ -23,20 +23,20 @@ def transformation_lambda_handler(event, context):
             raise Exception('the bucket may not exist, or, you may not have the correct permissions')
         transform_design('design', ingestion_bucket_name, processing_bucket_name)
         transform_payment_type('payment_type', ingestion_bucket_name, processing_bucket_name)
-        transform_location('address', ingestion_bucket_name, processing_bucket_name)
-        transform_transaction('transaction', ingestion_bucket_name, processing_bucket_name)
-        transform_staff('staff', 'department', ingestion_bucket_name, processing_bucket_name)
-        transform_currency('currency', ingestion_bucket_name, processing_bucket_name)
-        transform_counterparty('counterparty', 'address', ingestion_bucket_name, processing_bucket_name)
-        transform_sales_order('sales_order', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
-        transform_purchase_order('purchase_order', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
-        transform_payment('payment', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
-        create_date(dates_for_dim_date, processing_bucket_name)
+        # transform_location('address', ingestion_bucket_name, processing_bucket_name)
+        # transform_transaction('transaction', ingestion_bucket_name, processing_bucket_name)
+        # transform_staff('staff', 'department', ingestion_bucket_name, processing_bucket_name)
+        # transform_currency('currency', ingestion_bucket_name, processing_bucket_name)
+        # transform_counterparty('counterparty', 'address', ingestion_bucket_name, processing_bucket_name)
+        # transform_sales_order('sales_order', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
+        # transform_purchase_order('purchase_order', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
+        # transform_payment('payment', ingestion_bucket_name, processing_bucket_name, dates_for_dim_date)
+        # create_date(dates_for_dim_date, processing_bucket_name)
     except Exception as e:
         logger.info('transform_lambda_handler ', e)
         raise e
 
-
+transformation_lambda_handler(1, 1)
 
 '''
 

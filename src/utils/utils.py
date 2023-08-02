@@ -1,6 +1,5 @@
-import pandas as pd
+import awswrangler as wr
 import logging
-from pprint import pprint
 
 
 logger = logging.getLogger('MyLogger')
@@ -9,15 +8,15 @@ logger.setLevel(logging.INFO)
 
 def read_csv_to_pandas(file, source_bucket):
     try:
-        return pd.read_csv(f's3://{source_bucket}/{file}.csv')
+        return wr.s3.read_csv(path=f's3://{source_bucket}/{file}.csv')
     except Exception as e:
-        logger.info('read_csv_to_pandas')
+        logger.info('read_csv_to_pandas', e)
         raise e
 
 
 def write_df_to_parquet(df, file, target_bucket):
     try:
-       return df.to_parquet(f's3://{target_bucket}/{file}.parquet')
+       return wr.s3.to_parquet(df=df, path=f's3://{target_bucket}/{file}.parquet')
     except Exception as e:
         logger.info('write_df_to_parquet', e)
         raise e
