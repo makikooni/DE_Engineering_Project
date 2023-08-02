@@ -1,3 +1,4 @@
+# IAM Role for Lambda Functions
 resource "aws_iam_role" "lambda_role" {
     name_prefix = "role_extract_data_to_ingestion_s3"
     assume_role_policy = <<EOF
@@ -20,6 +21,31 @@ resource "aws_iam_role" "lambda_role" {
     EOF
 }
 
+# SecretsManager Policy and Permissions
+data "aws_iam_policy_document" "sm_document" {
+  statement {
+
+    actions = ["secretsmanager:GetSecretValue"]
+
+    resources = [
+      "arn:aws:secretsmanager:eu-west-2:454963742860:secret:ingestion/db/credentials-y9n2MW",
+      "arn:aws:secretsmanager:eu-west-2:454963742860:secret:ingestion/db/table-names-0OOOHO"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "sm_policy" {
+    name_prefix = "sm_policy_lambda"
+    policy = data.aws_iam_policy_document.sm_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_sm_policy_attachment" {
+    role = aws_iam_role.lambda_role.name
+    policy_arn = aws_iam_policy.sm_policy.arn
+}
+
+# Ingestion S3 Policy and Permissions
+
 data "aws_iam_policy_document" "s3_document" {
   statement {
 
@@ -30,6 +56,19 @@ data "aws_iam_policy_document" "s3_document" {
     ]
   }
 }
+
+resource "aws_iam_policy" "s3_policy" {
+    name_prefix = "ingestion_s3_policy_extract_lambda"
+    policy = data.aws_iam_policy_document.s3_document.json
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_s3_policy_attachment" {
+    role = aws_iam_role.lambda_role.name
+    policy_arn = aws_iam_policy.s3_policy.arn
+}
+
+
+# Cloudwatch Policy and Permissions
 
 data "aws_iam_policy_document" "cw_document" {
   statement {
@@ -51,19 +90,9 @@ data "aws_iam_policy_document" "cw_document" {
   }
 }
 
-resource "aws_iam_policy" "s3_policy" {
-    name_prefix = "ingestion_s3_policy_extract_lambda"
-    policy = data.aws_iam_policy_document.s3_document.json
-}
-
 resource "aws_iam_policy" "cw_policy" {
     name_prefix = "cw_policy_extract_lambda"
     policy = data.aws_iam_policy_document.cw_document.json
-}
-
-resource "aws_iam_role_policy_attachment" "lambda_s3_policy_attachment" {
-    role = aws_iam_role.lambda_role.name
-    policy_arn = aws_iam_policy.s3_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_cw_policy_attachment" {
