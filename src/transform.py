@@ -1,7 +1,7 @@
 import logging
 import boto3
-# from src.utils.table_transformations import transform_counterparty, transform_currency, transform_design, transform_location, transform_payment, transform_payment_type, transform_purchase_order, transform_sales_order, transform_staff, transform_transaction, create_date
-from src.utils.table_transformations import transform_design, transform_payment_type, transform_location
+# from src.utils.table_transformations import transform_counterparty, transform_currency, transform_payment, transform_purchase_order, transform_sales_order, transform_staff, create_date
+from src.utils.table_transformations import transform_design, transform_payment_type, transform_location, transform_transaction
 
 logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
@@ -24,7 +24,7 @@ def transformation_lambda_handler(event, context):
         transform_design('design', ingestion_bucket_name, processing_bucket_name)
         transform_payment_type('payment_type', ingestion_bucket_name, processing_bucket_name)
         transform_location('address', ingestion_bucket_name, processing_bucket_name)
-        # transform_transaction('transaction', ingestion_bucket_name, processing_bucket_name)
+        transform_transaction('transaction', ingestion_bucket_name, processing_bucket_name)
         # transform_staff('staff', 'department', ingestion_bucket_name, processing_bucket_name)
         # transform_currency('currency', ingestion_bucket_name, processing_bucket_name)
         # transform_counterparty('counterparty', 'address', ingestion_bucket_name, processing_bucket_name)

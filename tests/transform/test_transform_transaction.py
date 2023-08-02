@@ -1,11 +1,8 @@
-import moto.core 
-import pytest
-import boto3
+# import moto.core
 from moto import mock_s3
-import pandas as pd
-from pprint import pprint
-from src.transform import transformation_lambda_handler
-from src.utils.utils import read_csv_to_pandas
+import boto3
+import pytest
+import awswrangler as wr
 from src.utils.table_transformations import transform_transaction
 
 @pytest.fixture
@@ -51,7 +48,7 @@ def test_transform_transaction_transforms_tables_into_correct_parquet_shchema(mo
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
     transform_transaction('test', ingestion_bucket_name, processed_bucket_name)
-    df = pd.read_parquet(f's3://{processed_bucket_name}/dim_transaction.parquet')
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_transaction.parquet')
 
     assert len(df) == 3
     assert list(df.columns) == ['transaction_id', 'transaction_type', 'sales_order_id', 'purchase_order_id']

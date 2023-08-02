@@ -40,14 +40,14 @@ def transform_location(file, source_bucket, target_bucket):
         raise e
 
 
-# def transform_transaction(file, source_bucket, target_bucket):
-#     try:
-#         transaction_table = read_csv_to_pandas(file, source_bucket)
-#         dim_transaction_table = transaction_table[['transaction_id', 'transaction_type', 'sales_order_id', 'purchase_order_id']]
-#         write_df_to_parquet(dim_transaction_table, 'dim_transaction', target_bucket)
-#     except Exception as e:
-#         logger.info('transform_transaction', e)
-#         raise e
+def transform_transaction(file, source_bucket, target_bucket):
+    try:
+        transaction_table = read_csv_to_pandas(file, source_bucket)
+        dim_transaction_table = transaction_table.loc[:, ['transaction_id', 'transaction_type', 'sales_order_id', 'purchase_order_id']]
+        write_df_to_parquet(dim_transaction_table, 'dim_transaction', target_bucket)
+    except Exception as e:
+        logger.info('transform_transaction', e)
+        raise e
 
 
 # def transform_staff(file1, file2, source_bucket, target_bucket):
