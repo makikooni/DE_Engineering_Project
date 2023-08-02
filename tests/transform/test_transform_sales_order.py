@@ -42,7 +42,7 @@ def test_transform_sales_order_retrieves_csv_file_from_ingestion_s3_bucket_and_p
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
     transform_sales_order('test', ingestion_bucket_name, processed_bucket_name, test_set)
-
+    pprint(test_set)
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
     assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'fact_sales_order.parquet'
 
@@ -57,6 +57,17 @@ def test_transform_sales_order_transforms_tables_into_correct_parquet_shchema(mo
     df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/fact_sales_order.parquet')
     assert len(df) == 3
     assert list(df.columns) == ['sales_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'sales_staff_id', 'counterparty_id', 'units_sold', 'unit_price', 'currency_id', 'design_id', 'agreed_payment_date', 'agreed_delivery_date', 'agreed_delivery_location_id']
+
+
+def test_transform_payment_adds_relevent_data_to_set(mock_client):
+
+    test_set = set()
+
+    ingestion_bucket_name = 'mock-test-ingestion-va-052023'
+    processed_bucket_name = 'mock-test-processed-va-052023'
+    transform_sales_order('test', ingestion_bucket_name, processed_bucket_name, test_set)
+
+    assert test_set == {'15a', '26a', 35, 34, '27a', 10, 11, '3a', 23, 22, '2a', '14a'}
 
 
 def test_transform_sales_order_raises_exception_when_agruments_invalid(mock_client):
