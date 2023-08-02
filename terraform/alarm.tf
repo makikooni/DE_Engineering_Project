@@ -58,7 +58,7 @@ resource "aws_cloudwatch_metric_alarm" "alert_info" {
 resource "aws_cloudwatch_log_metric_filter" "name_error" {
     name = "NameErrorFilter"
     pattern = "NameError"
-    log_group_name = "/aws/lambda/${aws_lambda_function.extract_data_to_ingestion_s3.function_name}"
+    log_group_name = "/aws/lambda/${aws_lambda_function.extract_lambda.function_name}"
 
     metric_transformation {
         name = "NameErrorSum"
