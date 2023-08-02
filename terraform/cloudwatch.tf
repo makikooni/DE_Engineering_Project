@@ -10,7 +10,7 @@ resource "aws_cloudwatch_event_target" "extract_schedule_extraction_lambda" {
     arn = aws_lambda_function.extract_lambda.arn
 }
 
-resource "aws_lambda_permission" "allow_cloudwatch_to_call_extract_data_to_ingestion" {
+resource "aws_lambda_permission" "allow_cloudwatch_execution_extract_lambda" {
     statement_id = "AllowExecutionFromCloudWatch"
     action = "lambda:InvokeFunction"
     function_name = aws_lambda_function.extract_lambda.function_name
