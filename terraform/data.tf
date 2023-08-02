@@ -2,6 +2,7 @@ data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
 locals {
+  temp_extract_lambda_dir= "${path.root}/../temp_extract_lambda"
   extract_function_zip_path = "${path.module}/../extraction_function.zip"
   extract_function_path = "${path.root}/../src/extract.py"
   utils_path = "${path.root}/../utils"
@@ -9,7 +10,11 @@ locals {
 
 resource "null_resource" "extraction_zip" {
   provisioner "local-exec" {
-    command = "cd ${path.root}/../src & zip -r ${local.extract_function_zip_path} ${local.extract_function_path} ${local.utils_path}"
+    command = <<EOT
+      mkdir ${local.temp_extract_lambda_dir}
+      cp -r ${local.extract_function_path} ${local.utils_path} ${local.temp_extract_lambda_path}
+      zip -r ${local.extract_function_zip_path} ${local.temp_extract_lambda_dir}
+    EOT
   }
 }
 
