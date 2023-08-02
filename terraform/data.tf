@@ -13,7 +13,8 @@ resource "null_resource" "extraction_zip" {
     command = <<EOT
       mkdir ${local.temp_extract_lambda_dir}
       cp -r ${local.extract_function_path} ${local.utils_path} ${local.temp_extract_lambda_dir}
-      cd ${local.temp_extract_lambda_dir} && zip -r ${local.extract_function_zip_path} ${local.temp_extract_lambda_dir}
+      cd ${local.temp_extract_lambda_dir} 
+      zip -r ${local.extract_function_zip_path} .
     EOT
   }
 }
