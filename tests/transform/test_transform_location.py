@@ -1,11 +1,8 @@
-import moto.core 
-import pytest
-import boto3
+# import moto.core
 from moto import mock_s3
-import pandas as pd
-from pprint import pprint
-from src.transform import transformation_lambda_handler
-from src.utils.utils import read_csv_to_pandas
+import boto3
+import pytest
+import awswrangler as wr
 from src.utils.table_transformations import transform_location
 
 @pytest.fixture
@@ -41,7 +38,6 @@ def test_transform_location_retrieves_csv_file_from_ingestion_s3_bucket_and_puts
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
 
-    pprint(mock_client.list_objects_v2(Bucket=ingestion_bucket_name))
     transform_location('test', ingestion_bucket_name, processed_bucket_name)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
@@ -53,10 +49,10 @@ def test_transform_location_transforms_tables_into_correct_parquet_shchema(mock_
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
     transform_location('test', ingestion_bucket_name, processed_bucket_name)
-    df = pd.read_parquet(f's3://{processed_bucket_name}/dim_location.parquet')
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_location.parquet')
 
     assert len(df) == 3
-    assert list(df.columns) == ['address_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']
+    assert list(df.columns) == ['location_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']
 
 
 def test_transform_location_raises_exception_when_agruments_invalid(mock_client):

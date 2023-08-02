@@ -29,15 +29,15 @@ def transform_payment_type(file, source_bucket, target_bucket):
         raise e
 
 
-# def transform_location(file, source_bucket, target_bucket):
-#     try:
-#         address_table = read_csv_to_pandas(file, source_bucket)
-#         dim_address_table = address_table[['address_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']]
-#         dim_address_table.rename(columns={'address_id': 'location_id'}, inplace=True)
-#         write_df_to_parquet(dim_address_table, 'dim_location', target_bucket)
-#     except Exception as e:
-#         logger.info('transform_location', e)
-#         raise e
+def transform_location(file, source_bucket, target_bucket):
+    try:
+        address_table = read_csv_to_pandas(file, source_bucket)
+        dim_address_table = address_table.loc[:, ['address_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']]
+        dim_address_table.rename(columns={'address_id': 'location_id'}, inplace=True)
+        write_df_to_parquet(dim_address_table, 'dim_location', target_bucket)
+    except Exception as e:
+        logger.info('transform_location', e)
+        raise e
 
 
 # def transform_transaction(file, source_bucket, target_bucket):
