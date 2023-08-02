@@ -52,7 +52,7 @@ def test_transform_currency_transforms_tables_into_correct_parquet_shchema(mock_
     processed_bucket_name = 'mock-test-processed-va-052023'
     transform_currency('test', ingestion_bucket_name, processed_bucket_name)
     df = pd.read_parquet(f's3://{processed_bucket_name}/dim_currency.parquet')
-
+    pprint(df)
     assert len(df) == 3
     assert list(df.columns) == ['currency_id', 'currency_code', 'currency_name']
 

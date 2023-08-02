@@ -36,39 +36,39 @@ def mock_client(create_s3_client):
         yield mock_client
 
 
-# def test_transform_location_retrieves_csv_file_from_ingestion_s3_bucket_and_puts_parquet_file_in_processed_s3_bucket(mock_client):
+def test_transform_location_retrieves_csv_file_from_ingestion_s3_bucket_and_puts_parquet_file_in_processed_s3_bucket(mock_client):
 
-#     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
-#     processed_bucket_name = 'mock-test-processed-va-052023'
+    ingestion_bucket_name = 'mock-test-ingestion-va-052023'
+    processed_bucket_name = 'mock-test-processed-va-052023'
 
-#     pprint(mock_client.list_objects_v2(Bucket=ingestion_bucket_name))
-#     transform_location('test', ingestion_bucket_name, processed_bucket_name)
+    pprint(mock_client.list_objects_v2(Bucket=ingestion_bucket_name))
+    transform_location('test', ingestion_bucket_name, processed_bucket_name)
 
-#     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-#     assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_location.parquet'
-
-
-# def test_transform_location_transforms_tables_into_correct_parquet_shchema(mock_client):
-
-#     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
-#     processed_bucket_name = 'mock-test-processed-va-052023'
-#     transform_location('test', ingestion_bucket_name, processed_bucket_name)
-#     df = pd.read_parquet(f's3://{processed_bucket_name}/dim_location.parquet')
-
-#     assert len(df) == 3
-#     assert list(df.columns) == ['address_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']
+    assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_location.parquet'
 
 
-# def test_transform_location_raises_exception_when_agruments_invalid(mock_client):
+def test_transform_location_transforms_tables_into_correct_parquet_shchema(mock_client):
 
-#     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
-#     processed_bucket_name = 'mock-test-processed-va-052023'
+    ingestion_bucket_name = 'mock-test-ingestion-va-052023'
+    processed_bucket_name = 'mock-test-processed-va-052023'
+    transform_location('test', ingestion_bucket_name, processed_bucket_name)
+    df = pd.read_parquet(f's3://{processed_bucket_name}/dim_location.parquet')
 
-#     with pytest.raises(Exception):
-#         transform_location('wrong', ingestion_bucket_name, processed_bucket_name)
+    assert len(df) == 3
+    assert list(df.columns) == ['address_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']
+
+
+def test_transform_location_raises_exception_when_agruments_invalid(mock_client):
+
+    ingestion_bucket_name = 'mock-test-ingestion-va-052023'
+    processed_bucket_name = 'mock-test-processed-va-052023'
+
+    with pytest.raises(Exception):
+        transform_location('wrong', ingestion_bucket_name, processed_bucket_name)
     
-#     with pytest.raises(Exception):
-#         transform_location('test', 'wrong', processed_bucket_name)
+    with pytest.raises(Exception):
+        transform_location('test', 'wrong', processed_bucket_name)
 
-#     with pytest.raises(Exception):
-#         transform_location('test', ingestion_bucket_name, 'wrong')
+    with pytest.raises(Exception):
+        transform_location('test', ingestion_bucket_name, 'wrong')

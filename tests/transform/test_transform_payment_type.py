@@ -50,7 +50,7 @@ def test_transform_payment_type_transforms_tables_into_correct_parquet_shchema(m
     processed_bucket_name = 'mock-test-processed-va-052023'
     transform_payment_type('test', ingestion_bucket_name, processed_bucket_name)
     df = pd.read_parquet(f's3://{processed_bucket_name}/dim_payment_type.parquet')
-
+    pprint(df)
     assert len(df) == 3
     assert list(df.columns) == ['payment_type_id', 'payment_type_name']
 
