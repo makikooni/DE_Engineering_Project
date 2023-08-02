@@ -51,7 +51,7 @@ def extraction_lambda_handler(event, context):
     ]
 
     if event["resources"][0] != CLOUDWATCH_TRIGGER_ARN:
-        logging.error(
+        logger.error(
             f"cloudwatch trigger arn is {event['resources'][0]}, \n \
                        expected {CLOUDWATCH_TRIGGER_ARN} "
         )

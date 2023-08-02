@@ -6,6 +6,8 @@ import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
 
+logger = logging.getLogger("UtilsLogger")
+logger.setLevel(logging.INFO)
 
 def get_secret(secret_name):
     if not isinstance(secret_name, str):
@@ -13,30 +15,28 @@ def get_secret(secret_name):
 
     secretsmanager = boto3.client("secretsmanager")
     try:
-        logging.info(f"Retrieving {secret_name} information from SecretsManager...")
-
         response = secretsmanager.get_secret_value(SecretId=secret_name)
         secret_value = json.loads(response["SecretString"].replace("'", '"'))
-        logging.info(f"{secret_name} information successfully retrieved!")
+        logger.info(f"{secret_name} information successfully retrieved!")
         return secret_value
 
     except ClientError as e:
         if e.response["Error"]["Code"] == "ResourceNotFoundException":
-            logging.error(
+            logger.error(
                 f"ResourceNotFoundException: the secret named {secret_name} cannot be found in SecretsManager"
             )
             raise KeyError(
                 f"ResourceNotFoundException: the secret named {secret_name} cannot be found in SecretsManager"
             )
         elif e.response["Error"]["Code"] == "AccessDeniedException":
-            logging.error(
+            logger.error(
                 f"AccessDeniedException: the lambda does not have an identity-based policy to access SecretsManager resource"
             )
             raise RuntimeError(
                 f"AccessDeniedException: the lambda does not have an identity-based policy to access SecretsManager resource"
             )
         else:
-            logging.error(e)
+            logger.error(e)
 
 
 def get_table_db(connection, table_name):
@@ -47,7 +47,7 @@ def get_table_db(connection, table_name):
             f"connection object is {type(connection)}, expected {Connection}"
         )
 
-    logging.info(f"Extracting {table_name} table from database...")
+    logger.info(f"Extracting {table_name} table from database...")
     try:
         query = f"SELECT * FROM {identifier(table_name)};"
 
@@ -56,11 +56,11 @@ def get_table_db(connection, table_name):
 
         table_df = pd.DataFrame(data=table_data, columns=column_names)
 
-        logging.info(f"{table_name} table successfully extracted as dataframe!")
+        logger.info(f"{table_name} table successfully extracted as dataframe!")
 
         return table_df, query
     except InterfaceError:
-        logging.error(f"InterfaceError: the query: \n {query} \n cannot be executed.")
+        logger.error(f"InterfaceError: the query: \n {query} \n cannot be executed.")
         raise InterfaceError
 
 
@@ -73,17 +73,17 @@ def upload_table_s3(table_df, table_name, bucket_name):
         raise TypeError(f"ingestion bucket name is {type(bucket_name)}, expected {str}")
 
     try:
-        logging.info(f"uploading {table_name} table to {bucket_name} S3 bucket...")
+        logger.info(f"uploading {table_name} table to {bucket_name} S3 bucket...")
 
         wr.s3.to_csv(table_df, f"s3://{bucket_name}/{table_name}.csv", index=False)
 
-        logging.info(
+        logger.info(
             f"{table_name} table successfully uploaded to {bucket_name} S3 bucket!"
         )
     except Exception as e:
         error = e.response["Error"]
         if e.response["Error"]["Code"] == "NoSuchBucket":
-            logging.error(f"NoSuchBucket: {error['BucketName']} does not exist")
+            logger.error(f"NoSuchBucket: {error['BucketName']} does not exist")
 
             raise KeyError(f"{error['BucketName']} does not exist")
         else:
@@ -91,7 +91,7 @@ def upload_table_s3(table_df, table_name, bucket_name):
 
 
 def connect_db(db_credentials, db_name=""):
-    logging.info(f"Performing checks before connecting to database...")
+    logger.info(f"Performing checks before connecting to database...")
     if not isinstance(db_credentials, dict):
         raise TypeError(f"db_credentials is {type(db_credentials)}, {dict} is required")
     elif not isinstance(db_name, str):
@@ -111,7 +111,7 @@ def connect_db(db_credentials, db_name=""):
             )
 
     try:
-        logging.info(f"Starting connection to {db_name} database...")
+        logger.info(f"Starting connection to {db_name} database...")
         connection = Connection(
             host=db_credentials["host"],
             port=db_credentials["port"],
@@ -119,12 +119,12 @@ def connect_db(db_credentials, db_name=""):
             user=db_credentials["username"],
             password=db_credentials["password"],
         )
-        logging.info(f"Successfully connected to {db_name} database!")
+        logger.info(f"Successfully connected to {db_name} database!")
         return connection
     except InterfaceError:
-        logging.error(f"InterfaceError: please check your database credentials")
+        logger.error(f"InterfaceError: please check your database credentials")
         raise InterfaceError
 
     except DatabaseError:
-        logging.error(f"DatabaseError: please contact your database administrator")
+        logger.error(f"DatabaseError: please contact your database administrator")
         raise DatabaseError
