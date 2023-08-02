@@ -59,6 +59,17 @@ def test_transform_purchase_order_transforms_tables_into_correct_parquet_shchema
     assert list(df.columns) == ['purchase_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'staff_id', 'counterparty_id', 'item_code', 'item_quantity', 'item_unit_price', 'currency_id', 'agreed_delivery_date', 'agreed_payment_date', 'agreed_delivery_location_id']
 
 
+def test_transform_payment_adds_relevent_data_to_set(mock_client):
+
+    test_set = set()
+
+    ingestion_bucket_name = 'mock-test-ingestion-va-052023'
+    processed_bucket_name = 'mock-test-processed-va-052023'
+    transform_purchase_order('test', ingestion_bucket_name, processed_bucket_name, test_set)
+
+    assert test_set == {34, 35, '14a', '3a', 10, '15a', '2a', 11, 22, 23, '26a', '27a'}
+
+
 def test_transform_purchase_order_raises_exception_when_agruments_invalid(mock_client):
 
     test_set = set()
