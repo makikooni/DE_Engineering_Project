@@ -17,7 +17,7 @@ def get_secret(secret_name):
     try:
         response = secretsmanager.get_secret_value(SecretId=secret_name)
         secret_value = json.loads(response["SecretString"].replace("'", '"'))
-        logger.info(f"{secret_name} information successfully retrieved!")
+        logger.info(f"secret: {secret_name} information successfully retrieved!")
         return secret_value
 
     except ClientError as e:
@@ -47,7 +47,6 @@ def get_table_db(connection, table_name):
             f"connection object is {type(connection)}, expected {Connection}"
         )
 
-    logger.info(f"Extracting {table_name} table from database...")
     try:
         query = f"SELECT * FROM {identifier(table_name)};"
 
@@ -73,8 +72,6 @@ def upload_table_s3(table_df, table_name, bucket_name):
         raise TypeError(f"ingestion bucket name is {type(bucket_name)}, expected {str}")
 
     try:
-        logger.info(f"uploading {table_name} table to {bucket_name} S3 bucket...")
-
         wr.s3.to_csv(table_df, f"s3://{bucket_name}/{table_name}.csv", index=False)
 
         logger.info(
@@ -111,7 +108,6 @@ def connect_db(db_credentials, db_name=""):
             )
 
     try:
-        logger.info(f"Starting connection to {db_name} database...")
         connection = Connection(
             host=db_credentials["host"],
             port=db_credentials["port"],
