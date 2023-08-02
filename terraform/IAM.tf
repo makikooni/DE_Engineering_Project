@@ -46,7 +46,7 @@ data "aws_iam_policy_document" "cw_document" {
     actions = [ "logs:CreateLogStream", "logs:PutLogEvents" ]
 
     resources = [
-      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/extract_lambda:*"
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${aws_lambda_function.extract_lambda.function_name}:*"
     ]
   }
 }
