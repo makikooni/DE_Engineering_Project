@@ -73,8 +73,6 @@ def upload_table_s3(table_df, table_name, bucket_name):
         raise TypeError(f"ingestion bucket name is {type(bucket_name)}, expected {str}")
 
     try:
-        boto3.client("s3").head_bucket(Bucket=bucket_name)
-
         logging.info(f"uploading {table_name} table to {bucket_name} S3 bucket...")
 
         wr.s3.to_csv(table_df, f"s3://{bucket_name}/{table_name}.csv", index=False)
