@@ -33,7 +33,7 @@ def extraction_lambda_handler(event, context):
     AWS_SECRET_TABLES_NAMES = "ingestion/db/table-names"
     AWS_SECRET_DB_CREDENTIALS_NAME = "ingestion/db/credentials"
 
-    INGESTION_BUCKET_NAME = "test-va-ingestion-atif"
+    INGESTION_BUCKET_NAME = "ingestion-va-052023"
     CLOUDWATCH_TRIGGER_ARN = (
         "arn:aws:events:eu-west-2:454963742860:rule/extraction_schedule"
     )
@@ -60,13 +60,7 @@ def extraction_lambda_handler(event, context):
     logger.info(
         f'Lambda triggered on {event["time"]} by a {event["detail-type"]} '
     )
-    logger.info(f'event["detail"] is: \n {event["detail"]} ')
-
-    AWS_SECRET_TABLES_NAMES = "ingestion/db/table-names"
-    AWS_SECRET_DB_CREDENTIALS_NAME = "ingestion/db/credentials"
-
-    INGESTION_BUCKET_NAME = "test-va-ingestion-atif"
-
+    
     db_credentials = get_secret(AWS_SECRET_DB_CREDENTIALS_NAME)
     table_names = get_secret(AWS_SECRET_TABLES_NAMES).keys()
 
