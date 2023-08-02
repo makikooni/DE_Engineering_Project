@@ -97,7 +97,6 @@ def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date
         sales_order_table = timestamp_to_date_and_time(sales_order_table)
 
         sales_order_table.rename(columns={'staff_id': 'sales_staff_id'}, inplace=True)
-        # pprint(sales_order_table)
         fact_sales_order = sales_order_table.loc[:, ['sales_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'sales_staff_id', 'counterparty_id', 'units_sold', 'unit_price', 'currency_id', 'design_id', 'agreed_payment_date', 'agreed_delivery_date', 'agreed_delivery_location_id']]
         write_df_to_parquet(fact_sales_order, 'fact_sales_order', target_bucket)
 

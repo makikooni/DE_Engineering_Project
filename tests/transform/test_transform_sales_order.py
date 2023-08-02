@@ -42,7 +42,6 @@ def test_transform_sales_order_retrieves_csv_file_from_ingestion_s3_bucket_and_p
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
     transform_sales_order('test', ingestion_bucket_name, processed_bucket_name, test_set)
-    pprint(test_set)
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
     assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'fact_sales_order.parquet'
 
