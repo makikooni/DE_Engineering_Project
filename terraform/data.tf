@@ -3,7 +3,7 @@ data "aws_caller_identity" "current" {}
 data "aws_region" "current" {}
 locals {
   extract_function_zip_path = "${path.module}/../extraction_function.zip"
-  extract_function_path = "extract.py"
+  extract_function_path = "${path.root}/../src/extract.py"
   utils_path = "${path.root}/../utils"
 }
 
