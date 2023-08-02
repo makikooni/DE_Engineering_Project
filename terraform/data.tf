@@ -4,7 +4,7 @@ data "aws_region" "current" {}
 
 resource "null_resource" "extraction_zip" {
   provisioner "local-exec" {
-    command = "zip -r extraction_function.zip ./src/extract.py ./utils"
+    command = "zip -r extraction_function.zip ${path.root}/../src/extract.py ${path.root}/../utils"
   }
 }
 
