@@ -1,13 +1,17 @@
 data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
+locals {
+  extract_function_zip_path = "${path.module}/../extraction_function.zip"
+  extract_function_path = "${path.root}/../src/extract.py"
+  utils_path = "${path.root}/../utils"
+}
 
 resource "null_resource" "extraction_zip" {
   provisioner "local-exec" {
-    command = "zip -r extraction_function.zip ${path.root}/../src/extract.py ${path.root}/../utils"
+    command = "zip -r ${local.extract_function_zip_path} ${local.extract_function_path} ${local.utils_path}"
   }
 }
-
 
 
 # data "archive_file" "extraction_lambda_zip" {
