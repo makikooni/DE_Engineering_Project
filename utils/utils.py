@@ -25,12 +25,15 @@ def get_secret(secret_name):
             logging.error(
                 f"ResourceNotFoundException: the secret named {secret_name} cannot be found in SecretsManager"
             )
-        elif e.response["Error"]["Code"] == "AccessDeniedException":
-            logging.error(
-                f"AccessDeniedException: the lambda does not have an identity-based policy to access SecretsManager resource "
-            )
             raise KeyError(
                 f"ResourceNotFoundException: the secret named {secret_name} cannot be found in SecretsManager"
+            )
+        elif e.response["Error"]["Code"] == "AccessDeniedException":
+            logging.error(
+                f"AccessDeniedException: the lambda does not have an identity-based policy to access SecretsManager resource"
+            )
+            raise RuntimeError(
+                f"AccessDeniedException: the lambda does not have an identity-based policy to access SecretsManager resource"
             )
         else:
             logging.error(e)
