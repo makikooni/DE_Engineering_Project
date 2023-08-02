@@ -46,18 +46,18 @@ data "aws_iam_policy_document" "cw_document" {
     actions = [ "logs:CreateLogStream", "logs:PutLogEvents" ]
 
     resources = [
-      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/extract_data_to_ingestion_s3:*"
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/extract_lambda:*"
     ]
   }
 }
 
 resource "aws_iam_policy" "s3_policy" {
-    name_prefix = "s3_policy_extract_data_to_ingestion_s3"
+    name_prefix = "ingestion_s3_policy_extract_lambda"
     policy = data.aws_iam_policy_document.s3_document.json
 }
 
 resource "aws_iam_policy" "cw_policy" {
-    name_prefix = "cw_policy_extract_data_to_ingestion_s3"
+    name_prefix = "cw_policy_extract_lambda"
     policy = data.aws_iam_policy_document.cw_document.json
 }
 
