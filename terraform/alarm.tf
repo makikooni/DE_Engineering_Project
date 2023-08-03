@@ -1,12 +1,95 @@
-# resource "aws_sns_topic" "extract_errors" {
-#     name = "extract-errors-topic"
-# }
+#=#=#=#=#=#=#=#=#=#=#=#=# Metric Filter
 
-# resource "aws_sns_topic_subscription" "extract_errors_email_target" {
-#     topic_arn = aws_sns_topic.extract_errors.arn
-#     protocol = "email"
-#     endpoint = "david.geddes.de-202307@northcoders.net"
-# }
+# Extract
+resource "aws_cloudwatch_log_metric_filter" "extract_lambda_error_filter" {
+    name = "${local.extract_lambda_name}_error_filter"
+    log_group_name = "/aws/lambda/${local.extract_lambda_name}"
+    pattern = "ERROR"
+
+    metric_transformation {
+        name = "ExtractLambdaErrorCount"
+        namespace = local.metric_namespace
+        value = "1"
+    }
+}
+
+# Transform
+resource "aws_cloudwatch_log_metric_filter" "transform_lambda_error_filter" {
+    name = "${local.transform_lambda_name}_error_filter"
+    log_group_name = "/aws/lambda/${local.transform_lambda_name}"
+    pattern = "ERROR"
+
+    metric_transformation {
+        name = "TransformLambdaErrorCount"
+        namespace = loca.metric_namespace
+        value = "1"
+    }
+}
+
+# Load
+resource "aws_cloudwatch_log_metric_filter" "load_lambda_error_filter" {
+    name = "${local.load_lambda_name}_error_filter"
+    log_group_name = "/aws/lambda/${local.load_lambda_name}"
+    pattern = "ERROR"
+
+    metric_transformation {
+        name = "LoadLambdaErrorCount"
+        namespace = local.metric_namespace
+        value = "1"
+    }
+}
+
+
+#=#=#=#=#=#=#=#=#=#=#=#=# Alarm
+
+# Extract
+
+resource "aws_cloudwatch_metric_alarm" "extract_lambda_error_alarm" {
+  alarm_name          = "${local.extract_lambda_name}_alarm"
+  alarm_description   = "This alarm monitors the ${local.extract_lambda_name}"
+  metric_name         = aws_cloudwatch_log_metric_filter.extract_lambda_error_filter.name
+  threshold           = "0"
+  statistic           = "Sum"
+  comparison_operator = "GreaterThanThreshold"
+  datapoints_to_alarm = "1"
+  evaluation_periods  = "1"
+  period              = "50"
+  namespace           = local.metric_namespace
+  alarm_actions       = [aws_sns_topic.extract_notification.arn]
+}
+
+# Transform
+
+resource "aws_cloudwatch_metric_alarm" "transform_lambda_error_alarm" {
+  alarm_name          = "${local.transform_lambda_name}_alarm"
+  alarm_description   = "This alarm monitors the ${local.transform_lambda_name}"
+  metric_name         = aws_cloudwatch_log_metric_filter.transform_lambda_error_filter.name
+  threshold           = "0"
+  statistic           = "Sum"
+  comparison_operator = "GreaterThanThreshold"
+  datapoints_to_alarm = "1"
+  evaluation_periods  = "1"
+  period              = "50"
+  namespace           = local.metric_namespace
+  alarm_actions       = [aws_sns_topic.transform_notification.arn]
+}
+
+# Load
+
+resource "aws_cloudwatch_metric_alarm" "load_lambda_error_alarm" {
+  alarm_name          = "${local.load_lambda_name}_alarm"
+  alarm_description   = "This alarm monitors the ${local.load_lambda_name}"
+  metric_name         = aws_cloudwatch_log_metric_filter.load_lambda_error_filter.name
+  threshold           = "0"
+  statistic           = "Sum"
+  comparison_operator = "GreaterThanThreshold"
+  datapoints_to_alarm = "1"
+  evaluation_periods  = "1"
+  period              = "50"
+  namespace           = local.metric_namespace
+  alarm_actions       = [aws_sns_topic.load_notification.arn]
+}
+
 
 # resource "aws_cloudwatch_event_rule" "scheduler" {
 #     name_prefix = "extraction-scheduler-"
@@ -24,59 +107,4 @@
 # resource "aws_cloudwatch_event_target" "lambda_target" {
 #   rule      = aws_cloudwatch_event_rule.scheduler.name
 #   arn       = aws_lambda_function.extract_lambda.arn
-# }
-
-
-
-# resource "aws_cloudwatch_log_metric_filter" "info_trigger" {
-#     name = "Info"
-#     pattern = "INFO"
-#     log_group_name = "/aws/lambda/${aws_lambda_function.extract_lambda.function_name}"
-
-#     metric_transformation {
-#         name = "InfoSum"
-#         namespace = "InfoLambdaMetrics"
-#         value = "1"
-#     }
-# }
-
-# resource "aws_cloudwatch_metric_alarm" "alert_info" {
-#     alarm_name = "test-info"
-#     metric_name = "InfoSum"
-#     namespace = "InfoLambdaMetrics"
-#     alarm_description = "Info has been logged in the log group"
-#     comparison_operator = "GreaterThanOrEqualToThreshold"
-#     statistic = "Sum"
-#     evaluation_periods = 1
-#     period = 60
-#     threshold = 2
-#     alarm_actions = [aws_sns_topic.extract_errors.arn]
-#     ok_actions = [aws_sns_topic.extract_errors.arn]
-# }
-
-
-
-# resource "aws_cloudwatch_log_metric_filter" "name_error" {
-#     name = "NameErrorFilter"
-#     pattern = "NameError"
-#     log_group_name = "/aws/lambda/${aws_lambda_function.extract_lambda.function_name}"
-
-#     metric_transformation {
-#         name = "NameErrorSum"
-#         namespace = "NameErrorLambdaMetrics"
-#         value = "1"
-#     }
-# }
-# resource "aws_cloudwatch_metric_alarm" "alert_name_error" {
-#     alarm_name = "test-name-error"
-#     metric_name = "NameErrorSum"
-#     namespace = "NameErrorLambdaMetrics"
-#     alarm_description = "A NameError has occurred."
-#     comparison_operator = "GreaterThanOrEqualToThreshold"
-#     statistic = "Sum"
-#     evaluation_periods = 1
-#     period = 60
-#     threshold = 2
-#     alarm_actions = [aws_sns_topic.extract_errors.arn]
-#     ok_actions = [aws_sns_topic.extract_errors.arn]
 # }
