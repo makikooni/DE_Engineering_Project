@@ -28,8 +28,8 @@ data "aws_iam_policy_document" "sm_document" {
     actions = ["secretsmanager:GetSecretValue"]
 
     resources = [
-      "arn:aws:secretsmanager:eu-west-2:454963742860:secret:ingestion/db/credentials-y9n2MW",
-      "arn:aws:secretsmanager:eu-west-2:454963742860:secret:ingestion/db/table-names-0OOOHO"
+      "${var.db_secrets_arn}",
+      "${var.table_names_secrets_arn}"
     ]
   }
 }
