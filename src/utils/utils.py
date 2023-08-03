@@ -1,5 +1,6 @@
 import awswrangler as wr
 import logging
+from pprint import pprint
 
 
 logger = logging.getLogger('MyLogger')

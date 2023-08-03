@@ -2,16 +2,27 @@ from moto import mock_s3
 from pandas.testing import assert_frame_equal
 import pandas as pd
 import pytest
-from pprint import pprint
 from src.utils.utils import add_to_dates_set
 
 
-def test_function_correctly_appends_unique_dates_to_set():
+def test_function_correctly_adds_unique_dates_to_set():
      
     test_set = set()
-    df = pd.read_csv('tests/transform/test_data_csv_files/test_add_dates_to_set.csv')
-    add_to_dates_set(test_set, df)
-    pprint(test_set)
-    
-    assert False
+    df1 = pd.DataFrame({'created_date': ['1', '2', '3']})
+    df2 = pd.DataFrame({'created_at': ['2', '3', '4', '5']})
 
+    col_list = [df1['created_date'], df2['created_at']]
+    add_to_dates_set(test_set, col_list)
+
+    assert test_set == {'1', '2', '3', '4', '5'}
+
+
+def test_function_raises_exception_when_given_invalid_arguments():
+    
+    col_list = []
+
+    with pytest.raises(Exception):
+        add_to_dates_set(a, col_list)
+
+    with pytest.raises(Exception):
+        add_to_dates_set({1, 2, 3}, False)
