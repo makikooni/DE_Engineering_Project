@@ -2,7 +2,8 @@ from moto import mock_s3
 from moto.core import patch_client
 import pytest
 import boto3
-from unittest.mock import patch, Mock
+import unittest
+from unittest.mock import patch, Mock, MagicMock
 from pprint import pprint
 from src.transform import transformation_lambda_handler
 from src.utils.table_transformations import transform_design
@@ -34,17 +35,24 @@ def mock_client(create_s3_client):
             mock_client.upload_fileobj(data, ingestion_bucket_name, 'test.csv')
         yield mock_client
 
-def test_function_connects_to_ingestion_s3_bucket(mock_client):
-    with patch('src.transform.transformation_lambda_handler') as mock_lambda:
-        with patch('src.utils.table_transformations.transform_design') as mock_transform_design:
-            mock_lambda()
+# def test_function_connects_to_ingestion_s3_bucket(mock_client):
+#     with patch('src.transform.transformation_lambda_handler') as mock_lambda:
+#         with patch('src.utils.table_transformations.transform_design') as mock_transform_design:
+#             mock_lambda()
 
-# def test_function_calls_all_table_transformation_functions(mock_client): 
-#     with patch('src.utils.table_transformations.transform_design') as transform_design_mock:
-#         transformation_lambda_handler()
-#         assert transform_design_mock.call_count == 1
+# class test_transformation_lambda_handler(unittest.TestCase):
+#      def test_ensures_internal_methods_are_each_called_once(mock_client):
+#           with patch('src.transform.transform_design') as mock_transformation_design, \
+#             patch('src.transform.transform_design.read_csv_to_pandas'):
+#                transformation_lambda_handler()
+#                assert mock_transformation_design.call_count == 1
 
-
+# @mock_client
+class test_transformation_lambda_handler(unittest.TestCase):
+     def test_ensures_internal_methods_are_each_called_once(self):
+          with patch('src.transform.transform_design') as mock_transform_design:
+               transformation_lambda_handler()
+               assert mock_transform_design.call_count == 1
 
          
 
