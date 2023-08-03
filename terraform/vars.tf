@@ -6,4 +6,5 @@ locals {
   db_secrets_arn          =   "arn:aws:secretsmanager:eu-west-2:454963742860:secret:ingestion/db/credentials-y9n2MW"
   table_names_secrets_arn =   "arn:aws:secretsmanager:eu-west-2:454963742860:secret:ingestion/db/table-names-0OOOHO"
   group_name              =   "variousartists"
+  metric_namespace        =   "VariousArtistsMetrics"
 }
