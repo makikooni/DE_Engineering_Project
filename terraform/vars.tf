@@ -27,3 +27,8 @@ variable "table_names_secrets_arn" {
   type    = string
   default = "arn:aws:secretsmanager:eu-west-2:454963742860:secret:ingestion/db/table-names-0OOOHO"
 }
+
+variable "group_name" {
+  type    = string
+  default = "variousartists"
+}
