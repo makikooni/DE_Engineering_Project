@@ -1,6 +1,6 @@
 #=#=#=#=#=#=#=#=#=#=#=#=# IAM Role - Extract
 resource "aws_iam_role" "extract_lambda_role" {
-    name = "${local.extract_lambda_name}_lambda_role"
+    name = "${local.extract_lambda_name}_role"
     description = "this role is for the extract lambda"
     assume_role_policy = <<EOF
     {
@@ -23,7 +23,7 @@ resource "aws_iam_role" "extract_lambda_role" {
 }
 
 resource "aws_iam_role" "transform_lambda_role" {
-    name = "${local.transform_lambda_name}_lambda_role"
+    name = "${local.transform_lambda_name}_role"
     description = "this role is for the transform lambda"
     assume_role_policy = <<EOF
     {
@@ -46,7 +46,7 @@ resource "aws_iam_role" "transform_lambda_role" {
 }
 
 resource "aws_iam_role" "load_lambda_role" {
-    name = "${local.load_lambda_name}_lambda_role"
+    name = "${local.load_lambda_name}_role"
     description = "this role is for the load lambda"
     assume_role_policy = <<EOF
     {
