@@ -2,6 +2,7 @@ from moto import mock_s3
 from moto.core import patch_client
 import pytest
 import boto3
+import aws
 import unittest
 from unittest.mock import patch, Mock, MagicMock
 from pprint import pprint
@@ -80,7 +81,7 @@ def test_raises_excpetion_when_bucket_does_not_exist(mock_client):
     '''
     demonstrates the function raises an exception when passed an invalid bucket name
     '''
-    with patch('S3.Client.head_bucket', return_value = 404):
+    with patch('aws.s3.meta.client.head_bucket', return_value = 404):
         with patch('src.transform.transformation_lambda_handler') as mock_lambda_handler:
             with pytest.raises(Exception):
                 mock_lambda_handler()
