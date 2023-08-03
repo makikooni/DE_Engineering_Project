@@ -21,7 +21,7 @@ resource "aws_cloudwatch_log_metric_filter" "transform_lambda_error_filter" {
 
     metric_transformation {
         name = "TransformLambdaErrorCount"
-        namespace = loca.metric_namespace
+        namespace = local.metric_namespace
         value = "1"
     }
 }
@@ -53,7 +53,7 @@ resource "aws_cloudwatch_metric_alarm" "extract_lambda_error_alarm" {
   comparison_operator = "GreaterThanThreshold"
   datapoints_to_alarm = "1"
   evaluation_periods  = "1"
-  period              = "50"
+  period              = "30"
   namespace           = local.metric_namespace
   alarm_actions       = [aws_sns_topic.extract_notification.arn]
 }
@@ -69,7 +69,7 @@ resource "aws_cloudwatch_metric_alarm" "transform_lambda_error_alarm" {
   comparison_operator = "GreaterThanThreshold"
   datapoints_to_alarm = "1"
   evaluation_periods  = "1"
-  period              = "50"
+  period              = "30"
   namespace           = local.metric_namespace
   alarm_actions       = [aws_sns_topic.transform_notification.arn]
 }
@@ -85,7 +85,7 @@ resource "aws_cloudwatch_metric_alarm" "load_lambda_error_alarm" {
   comparison_operator = "GreaterThanThreshold"
   datapoints_to_alarm = "1"
   evaluation_periods  = "1"
-  period              = "50"
+  period              = "30"
   namespace           = local.metric_namespace
   alarm_actions       = [aws_sns_topic.load_notification.arn]
 }
