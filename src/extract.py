@@ -36,7 +36,7 @@ def extraction_lambda_handler(event, context):
 
     INGESTION_BUCKET_NAME = "ingestion-va-052023"
     CLOUDWATCH_TRIGGER_ARN = (
-        "arn:aws:events:eu-west-2:454963742860:rule/extraction_schedul"
+        "arn:aws:events:eu-west-2:454963742860:rule/extraction_schedule"
     )
 
     req_event_keys = [
