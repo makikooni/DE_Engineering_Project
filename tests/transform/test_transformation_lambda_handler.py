@@ -40,23 +40,34 @@ def mock_client(create_s3_client):
 #         with patch('src.utils.table_transformations.transform_design') as mock_transform_design:
 #             mock_lambda()
 
-# class test_transformation_lambda_handler(unittest.TestCase):
-#      def test_ensures_internal_methods_are_each_called_once(mock_client):
-#           with patch('src.transform.transform_design') as mock_transformation_design, \
-#             patch('src.transform.transform_design.read_csv_to_pandas'):
-#                transformation_lambda_handler()
-#                assert mock_transformation_design.call_count == 1
 
-# @mock_client
+
 class test_transformation_lambda_handler(unittest.TestCase):
-     def test_ensures_internal_methods_are_each_called_once(self):
-          with patch('src.transform.transform_design') as mock_transform_design:
-               transformation_lambda_handler()
-               assert mock_transform_design.call_count == 1
-
+    def test_ensures_internal_methods_are_each_called_once(self):
+        with patch('src.transform.transform_design') as mock_transform_design,\
+            patch('src.transform.transform_payment_type') as mock_transform_payment_type,\
+            patch('src.transform.transform_location') as mock_transform_location,\
+            patch('src.transform.transform_transaction') as mock_transform_transaction,\
+            patch('src.transform.transform_staff') as mock_transform_staff,\
+            patch('src.transform.transform_currency') as mock_transform_currency,\
+            patch('src.transform.transform_counterparty') as mock_transform_counterparty,\
+            patch('src.transform.transform_sales_order') as mock_transform_sales_order,\
+            patch('src.transform.transform_purchase_order') as mock_transform_purchase_order,\
+            patch('src.transform.transform_payment') as mock_transform_payment,\
+            patch('src.transform.create_date') as mock_create_date:
+            transformation_lambda_handler()
+            assert mock_transform_design.call_count == 1
+            assert mock_transform_payment_type.call_count == 1
+            assert mock_transform_location.call_count == 1
+            assert mock_transform_transaction.call_count == 1
+            assert mock_transform_staff.call_count == 1
+            assert mock_transform_currency.call_count == 1
+            assert mock_transform_counterparty.call_count == 1
+            assert mock_transform_sales_order.call_count == 1
+            assert mock_transform_purchase_order.call_count == 1
+            assert mock_transform_payment.call_count == 1
+            assert mock_create_date.call_count == 1
          
-
-# @mock_s3
 # def test_function_identifies_file_changes_within_ingestion_s3_bucket():
 #     '''
 #     this test should demonstrate the transformation_lambda_handler function 
@@ -65,7 +76,11 @@ class test_transformation_lambda_handler(unittest.TestCase):
 #     pass
 
 
-# def test_raises_excpetion_when_bucket_does_not_exist(mock_client):
-#   '''
-#   demonstrates the function raises an exception when passed an invalid bucket name
-#   '''
+def test_raises_excpetion_when_bucket_does_not_exist(mock_client):
+    '''
+    demonstrates the function raises an exception when passed an invalid bucket name
+    '''
+    with patch('S3.Client.head_bucket', return_value = 404):
+        with patch('src.transform.transformation_lambda_handler') as mock_lambda_handler:
+            with pytest.raises(Exception):
+                mock_lambda_handler()
