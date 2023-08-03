@@ -36,7 +36,7 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
         )
         # get the table from the s3 and put it in a pandas dataframe
         table = get_table_data(s3_table_name)
-        print(table)
+        
         insert_table_sql = build_load_sql(wh_table_name, table)
         # Convert DataFrame to list tuples for executemany
         data_to_insert = dataframe_to_list(table)
@@ -61,6 +61,12 @@ def insert_table_data(connection,insert_table_sql, data_to_insert):
     cursor.executemany(insert_table_sql, data_to_insert)
     connection.commit()
     cursor.close()
+def check_update_or_rows():
+    '''
+    1. look in the s3 bucket
+    2. check if folder with data is new
+    3. check  
+    '''
 
 def load_lambda_hander():
     add_new_rows('dim_counterparty.parquet', 'dim_counterparty')
@@ -74,10 +80,4 @@ def load_lambda_hander():
     add_new_rows('fact_purchase_order.parquet', 'fact_purchase_order')
     add_new_rows('fact_sales_order.parquet', 'fact_sales_order')
 
-
-# add_new_rows('dim_currency.parquet', 'dim_currency')
-
-# add_new_rows('dim_location.parquet', 'dim_location')
-# add_new_rows('dim_payment_type.parquet', 'dim_payment_type')
-
-# add_new_rows('fact_sales_order.parquet', 'fact_sales_order')
+add_new_rows('fact_sales_order.parquet', 'fact_sales_order')

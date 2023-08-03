@@ -1,11 +1,12 @@
 import pytest
 from moto import mock_s3
 import boto3
+import pg8000
 import awswrangler as wr
 import pandas as pd
 from pandas.testing import assert_frame_equal
 from src.load.load import add_new_rows, get_table_data, dataframe_to_list, build_load_sql, insert_table_data
-from pprint import pprint
+from tests.MockDB.MockDB import MockDB
 
 @pytest.fixture
 def create_s3_client():
@@ -36,7 +37,6 @@ def mock_client(create_s3_client, create_s3_resource):
         'file_name': 'wooden-20220717-npgz.json'
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    print(df_data, "= data in bucket")
     wr.s3.to_parquet(df=df_data, path=f's3://{processed_bucket_name}/{file_name}.parquet')
     yield mock_client
 
@@ -52,9 +52,7 @@ def test_get_table_data(mock_client):
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     # expect = wr.s3.to_parquet(df=df_data)
-    print(df_data,  "= comparison data")
     output = get_table_data('test_dim_design.parquet')
-    print(output, "= data extracted from bucket")
     assert assert_frame_equal(output, df_data, check_dtype = False) == None
 
 def test_dataframe_to_list_returns_a_list():
@@ -152,5 +150,25 @@ def test_build_load_sql_with_different_amount_of_columns():
     expect = "INSERT INTO dim_design (design_id, design_name, file_location) VALUES (%s,%s,%s)"
     assert  output == expect
 
-# def test_insert_table_data():
-#     assert 0
+def test_insert_table_data():
+    test_db = MockDB
+    test_db.set_up_database()
+    test_db.set_up_tables()
+    data_to_insert = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json')]
+    insert_table_sql = "INSERT INTO dim_design_t1 (design_id, design_name, file_location, file_name) VALUES (%s,%s,%s,%s)"
+    connection = pg8000.connect(
+            host='localhost',
+            user='lucy',
+            port=5432,
+            database='test_db_load',
+            password='QASW"1qa'
+        )
+    insert_table_data(connection,insert_table_sql, data_to_insert)
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM dim_design_t1")
+    output = cursor.fetchall()
+    expect = [8, 'Wooden', '/usr', 'wooden-20220717-npgz.json']
+    assert output[0] == expect
+
+def test_check_update_or_rows():
+    check_update_or_rows()
