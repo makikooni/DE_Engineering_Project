@@ -52,7 +52,7 @@ resource "aws_cloudwatch_metric_alarm" "extract_lambda_error_alarm" {
   statistic           = "Sum"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods  = "1"
-  period              = "60"
+  period              = "30"
   namespace           = "AWS/Lambda"
   alarm_actions       = [aws_sns_topic.extract_notification.arn]
   dimensions = {
