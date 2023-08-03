@@ -23,7 +23,7 @@ resource "null_resource" "lambda_layer_zip" {
 }
 
 resource "aws_s3_bucket" "lambda_layer_bucket" {
-  bucket = "lambda-layer-bucket-${var.suffix}"
+  bucket = "lambda-layer-bucket-${local.suffix}"
 }
 
 # upload zip file to s3
