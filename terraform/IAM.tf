@@ -131,7 +131,7 @@ data "aws_iam_policy_document" "s3_ingestion_document" {
 }
 
 resource "aws_iam_policy" "s3_ingestion_policy_resource" {
-    name = "s3_policy"
+    name = "s3_ingestion_policy"
     policy = data.aws_iam_policy_document.s3_ingestion_document.json
 }
 
@@ -148,7 +148,7 @@ data "aws_iam_policy_document" "s3_processed_document" {
 }
 
 resource "aws_iam_policy" "s3_processed_policy_resource" {
-    name = "s3_policy"
+    name = "s3_processed_policy"
     policy = data.aws_iam_policy_document.s3_processed_document.json
 }
 
