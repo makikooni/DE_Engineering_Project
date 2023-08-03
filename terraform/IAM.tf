@@ -105,7 +105,7 @@ resource "aws_iam_role_policy_attachment" "extract_lambda_sm_policy_attachment" 
 # Transform
 
 resource "aws_iam_role_policy_attachment" "transform_lambda_sm_policy_attachment" {
-    role = aws_iam_role.transform_lambda_name.name
+    role = aws_iam_role.transform_lambda_role.name
     policy_arn = aws_iam_policy.sm_policy_resource.arn
 }
 
@@ -113,7 +113,7 @@ resource "aws_iam_role_policy_attachment" "transform_lambda_sm_policy_attachment
 
 resource "aws_iam_role_policy_attachment" "load_lambda_sm_policy_attachment" {
     role = aws_iam_role.extract_lambda_role.name
-    policy_arn = aws_iam_policy.load_lambda_name.arn
+    policy_arn = aws_iam_policy.sm_policy_resource.arn
 }
 
 #=#=#=#=#=#=#=#=#=#=#=#=# S3 Policy
@@ -205,7 +205,7 @@ data "aws_iam_policy_document" "extract_lambda_cw_document" {
 
 resource "aws_iam_policy" "extract_lambda_cw_policy_resource" {
     name = "${local.extract_lambda_name}_cw_policy"
-    policy = data.aws_iam_policy_document.cw_document.json
+    policy = data.aws_iam_policy_document.extract_lambda_cw_document.json
 }
 
 resource "aws_iam_role_policy_attachment" "extract_lambda_cw_policy_attachment" {
