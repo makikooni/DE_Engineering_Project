@@ -1,6 +1,6 @@
 # IAM Role for all Lambda Functions
 resource "aws_iam_role" "lambda_role" {
-    name = "${var.group_name}_lambda_role"
+    name = "${local.group_name}_lambda_role"
     description = "this role is for the extract, transform and load lambda functions"
     assume_role_policy = <<EOF
     {
@@ -38,8 +38,8 @@ data "aws_iam_policy_document" "sm_document" {
     actions = ["secretsmanager:GetSecretValue"]
 
     resources = [
-      "${var.db_secrets_arn}",
-      "${var.table_names_secrets_arn}"
+      "${local.db_secrets_arn}",
+      "${local.table_names_secrets_arn}"
     ]
   }
 }
@@ -98,7 +98,7 @@ data "aws_iam_policy_document" "cw_document" {
     actions = [ "logs:CreateLogStream", "logs:PutLogEvents" ]
 
     resources = [
-      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.extract_lambda_name}:*"
+      "arn:aws:logs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${local.extract_lambda_name}:*"
     ]
   }
 }

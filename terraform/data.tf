@@ -2,7 +2,7 @@ data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
 locals {
-  temp_extract_lambda_dir= "${path.root}/../temp_${var.extract_lambda_name}"
+  temp_extract_lambda_dir= "${path.root}/../temp_${local.extract_lambda_name}"
   extract_function_zip_path = "${path.module}/../extraction_function.zip"
   extract_function_path = "${path.root}/../src/extract.py"
   utils_path = "${path.root}/../utils"
