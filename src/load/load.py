@@ -1,6 +1,7 @@
 import json
 import pg8000
 import boto3
+import awswrangler as wr
 import pandas as pd
 from botocore.exceptions import ClientError
 
@@ -45,7 +46,7 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
         raise error
 
 def get_table_data(s3_table_name):
-    return pd.read_parquet(f's3://test-processed-va-052023/{s3_table_name}')
+    return wr.s3.read_parquet(f's3://test-processed-va-052023/{s3_table_name}')
 
 def dataframe_to_list(table):
     return [tuple(row) for row in table.itertuples(index=False)]
@@ -73,5 +74,10 @@ def load_lambda_hander():
     add_new_rows('fact_purchase_order.parquet', 'fact_purchase_order')
     add_new_rows('fact_sales_order.parquet', 'fact_sales_order')
 
-# add_new_rows('dim_date.parquet', 'dim_date')
+
+# add_new_rows('dim_currency.parquet', 'dim_currency')
+
+# add_new_rows('dim_location.parquet', 'dim_location')
+# add_new_rows('dim_payment_type.parquet', 'dim_payment_type')
+
 # add_new_rows('fact_sales_order.parquet', 'fact_sales_order')
