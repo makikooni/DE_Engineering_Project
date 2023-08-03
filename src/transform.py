@@ -1,14 +1,13 @@
 import logging
 import boto3
 from src.utils.table_transformations import transform_design, transform_payment_type, transform_location, transform_transaction, transform_currency, transform_staff, transform_payment, transform_purchase_order, transform_counterparty, transform_sales_order, create_date
+from pprint import pprint
 
 logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
 
 
-
-
-def transformation_lambda_handler(event, context):
+def transformation_lambda_handler(event=1, context=1):
     # run in terminal to view pq table --> parquet-tools show s3://{target_bucket}/{file}.parquet
     # pd.set_option('display.max_columns', None)
     ingestion_bucket_name = 'test-va-ingestion-atif'
@@ -35,7 +34,7 @@ def transformation_lambda_handler(event, context):
         logger.info('transform_lambda_handler ', e)
         raise e
 
-transformation_lambda_handler(1, 1)
+transformation_lambda_handler()
 
 '''
 

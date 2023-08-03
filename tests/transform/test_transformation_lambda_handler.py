@@ -1,9 +1,11 @@
+from moto import mock_s3
+from moto.core import patch_client
 import pytest
 import boto3
-from moto import mock_s3
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 from pprint import pprint
 from src.transform import transformation_lambda_handler
+from src.utils.table_transformations import transform_design
 
 # @pytest.fixture
 # def create_s3_client():
@@ -24,13 +26,13 @@ from src.transform import transformation_lambda_handler
 #              Bucket=ingestion_bucket_name, 
 #              CreateBucketConfiguration={'LocationConstraint': 'eu-west-2'},
 #              )
-#         # mock_client.create_bucket(
-#         #      Bucket=processed_bucket_name, 
-#         #      CreateBucketConfiguration={'LocationConstraint': 'eu-west-2'},
-#         #      )
-#         # with open('tests/transform/test_data_csv_files/test_sales_order.csv', 'rb') as data:
-#         #     mock_client.upload_fileobj(data, ingestion_bucket_name, 'test.csv')
-#         yield mock_client
+        # mock_client.create_bucket(
+        #      Bucket=processed_bucket_name, 
+        #      CreateBucketConfiguration={'LocationConstraint': 'eu-west-2'},
+        #      )
+        # with open('tests/transform/test_data_csv_files/test_sales_order.csv', 'rb') as data:
+        #     mock_client.upload_fileobj(data, ingestion_bucket_name, 'test.csv')
+        # yield mock_client
 
 # @patch('src.utils.table_transformations.transform_design')
 # def test_function_connects_to_ingestion_s3_bucket(mock_client):
@@ -45,11 +47,11 @@ from src.transform import transformation_lambda_handler
 #     status_code = response['ResponseMetadata']['HTTPStatusCode']
 #     assert status_code == 200
 
-# @patch('src.transform.transformation_lambda_handler')
-# def test_function_calls_all_table_transformation_functions(mock_client):
+# def test_function_calls_all_table_transformation_functions(mock_client): 
 #     with patch('src.utils.table_transformations.transform_design') as transform_design_mock:
-#         transformation_lambda_handler(1, 1)
+#         transformation_lambda_handler()
 #         assert transform_design_mock.call_count == 1
+
 
          
 
@@ -62,9 +64,7 @@ from src.transform import transformation_lambda_handler
 #     pass
 
 
-# def test_raises_excpetion_when_bucket_does_not_exist():
-#     '''
-#     demonstrates the function raises an exception 
-#     when passed an invalid bucket name
-#     '''
-#     pass
+# def test_raises_excpetion_when_bucket_does_not_exist(mock_client):
+#   '''
+#   demonstrates the function raises an exception when passed an invalid bucket name
+#   '''
