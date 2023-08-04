@@ -31,6 +31,7 @@ def extraction_lambda_handler(event, context):
             An unexpected error occurred in execution. Other errors
             result in an informative log message.
     """
+    DBNAME = "totesys"
     AWS_SECRET_TABLES_NAMES = "ingestion/db/table-names"
     AWS_SECRET_DB_CREDENTIALS_NAME = "ingestion/db/credentials"
 
@@ -69,13 +70,18 @@ def extraction_lambda_handler(event, context):
     table_names = get_secret(AWS_SECRET_TABLES_NAMES).keys()
 
     try:
-        connection = connect_db(db_credentials, db_name="totesys")
+        connection = connect_db(db_credentials)
+        logger.info(f"Successfully connected to {DBNAME} database!")
 
         for table_name in table_names:
+
             table_df, query = get_table_db(connection, table_name)
 
             upload_table_s3(table_df, table_name, INGESTION_BUCKET_NAME)
 
+            logger.info(
+                f"{table_name} table successfully extracted and uploaded!"
+            )
     except Exception as e:
         logger.error(e)
         raise RuntimeError

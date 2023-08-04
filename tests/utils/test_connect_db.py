@@ -14,20 +14,10 @@ def test_should_raise_exception_if_incorrect_credentials():
         "dbname": "test_dbname",
     }
     with pytest.raises(InterfaceError):
-        connection = connect_db(test_db_credentials, db_name="totesys")
+        connection = connect_db(test_db_credentials)
 
 
 def test_should_raise_exception_if_incorrect_input_type():
-    test_db_credentials = {
-        "username": "test_user",
-        "password": "test_password",
-        "engine": "test_engine",
-        "host": "http://test.com",
-        "port": "9090",
-        "dbname": "test_dbname",
-    }
-    with pytest.raises(TypeError):
-        connection = connect_db(test_db_credentials, db_name=2)
 
     with pytest.raises(TypeError):
         connection = connect_db(["test"])
