@@ -34,6 +34,9 @@ define execute_in_env
 	$(ACTIVATE_ENV) && $1
 endef
 
+run:
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} python ${filename})
+
 ## install all python packages and dependencies
 requirements:
 	$(call execute_in_env, $(PIP) install -r ./requirements.txt)
@@ -59,6 +62,10 @@ coverage:
 ## Install pytest
 pytest:
 	$(call execute_in_env, $(PIP) install pytest)
+
+## Install pytest
+moto:
+	$(call execute_in_env, $(PIP) install moto)
 
 ## Install autopep8
 autopep:
@@ -99,4 +106,4 @@ check-coverage:
 ## Run all checks
 run-checks: security-test run-flake unit-tests check-coverage
 
-# this comment is simply to test that github actions is working when a pull request is merged to the main branch
+#change to run cicd
