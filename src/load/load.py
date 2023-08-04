@@ -1,3 +1,4 @@
+import logging
 import json
 import pg8000
 import boto3
@@ -5,6 +6,8 @@ import awswrangler as wr
 import pandas as pd
 from botocore.exceptions import ClientError
 
+logger = logging.getLogger('MyLogger')
+logger.setLevel(logging.INFO)
 
 def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
     # get warehouse credentails from AWS secrets
@@ -36,33 +39,48 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
         )
         # get the table from the s3 and put it in a pandas dataframe
         table = get_table_data(s3_table_name)
-        
         insert_table_sql = build_insert_sql(wh_table_name, table)
         # Convert DataFrame to list tuples for executemany
         data_to_insert = dataframe_to_list(table)
         # Execute the query using executemany to insert all rows at once
         insert_table_data(connection,insert_table_sql, data_to_insert)
     except Exception as error:
+        logger.info["main function error", error]
         raise error
 
 def get_table_data(s3_table_name):
-    return wr.s3.read_parquet(f's3://test-processed-va-052023/{s3_table_name}')
-
+    try:
+        return wr.s3.read_parquet(f's3://test-processed-va-052023/{s3_table_name}')
+    except Exception as error:
+        logger.info["get_table_data", error]
+        raise error
 def dataframe_to_list(table):
-    return [tuple(row) for row in table.itertuples(index=False)]
+    try:
+        return [tuple(row) for row in table.itertuples(index=False)]
+    except Exception as error:
+        logger.info["dataframe_to_list", error]
+        raise error
 
 def build_insert_sql(wh_table_name, table):
-    columns = ', '.join(table.columns)
-    placeholder = ',' .join(['%s'] * len(table.columns))
-    return f"INSERT INTO {wh_table_name} ({columns}) VALUES ({placeholder})"
+    try:
+        columns = ', '.join(table.columns)
+        placeholder = ',' .join(['%s'] * len(table.columns))
+        return f"INSERT INTO {wh_table_name} ({columns}) VALUES ({placeholder})"
+    except Exception as error:
+        logger.info["build_insert_sql", error]
+        raise error
 
 def insert_table_data(connection,insert_table_sql, data_to_insert):
-    cursor = connection.cursor()
-    cursor.executemany(insert_table_sql, data_to_insert)
-    connection.commit()
-    cursor.close()
+    try:
+        cursor = connection.cursor()
+        cursor.executemany(insert_table_sql, data_to_insert)
+        connection.commit()
+        cursor.close()
+    except Exception as error:
+        logger.info["insert_table_data", error]
+        raise error
 
-def check_update_or_rows():
+# def check_update_or_rows():
     '''
     1. look in the s3 bucket
     2. check if folder with data is new
@@ -70,39 +88,47 @@ def check_update_or_rows():
     '''
 
 def build_update_sql(wh_table_name, table):
-    ph_SET = ''
-    ph_WHERE = ''
-    index = 0
-    columns = table.columns
-    for column in columns:
-        if index < (len(table.columns) - 1) and index != 0:
-            ph_SET += column + ' = %s, '
-            index += 1
-        elif index == (len(table.columns) - 1):
-            ph_SET += column + ' = %s'
-            index += 1
-        elif index == 0:
-            ph_WHERE += column + ' = %s'
-            index += 1
-    return f"UPDATE {wh_table_name} SET {ph_SET} WHERE {ph_WHERE}"
-
-def update_data_format(table):
-    data = []
-    rows = table.values.tolist()
-    columns = table.columns
-    for row in rows:
-        update_row = row
+    try:
+        ph_SET = ''
+        ph_WHERE = ''
         index = 0
-        for value in update_row:
-            if index < len(row) and index != 0:
-                data.append(columns[index])
-                data.append(value)
+        columns = table.columns
+        for column in columns:
+            if index < (len(table.columns) - 1) and index != 0:
+                ph_SET += column + ' = %s, '
+                index += 1
+            elif index == (len(table.columns) - 1):
+                ph_SET += column + ' = %s'
                 index += 1
             elif index == 0:
+                ph_WHERE += column + ' = %s'
                 index += 1
-        data.append(columns[0])
-        data.append(row[0])
-    return data
+        return f"UPDATE {wh_table_name} SET {ph_SET} WHERE {ph_WHERE}"
+    except Exception as error:
+        logger.info["build_update_sql", error]
+        raise error
+
+def update_data_format(table):
+    try:
+        data = []
+        rows = table.values.tolist()
+        columns = table.columns
+        for row in rows:
+            update_row = row
+            index = 0
+            for value in update_row:
+                if index < len(row) and index != 0:
+                    data.append(columns[index])
+                    data.append(value)
+                    index += 1
+                elif index == 0:
+                    index += 1
+            data.append(columns[0])
+            data.append(row[0])
+        return data
+    except Exception as error:
+        logger.info["update_data_format", error]
+        raise error
 
 def load_lambda_hander():
     add_new_rows('dim_counterparty.parquet', 'dim_counterparty')

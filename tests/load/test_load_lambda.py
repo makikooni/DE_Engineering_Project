@@ -12,6 +12,7 @@ from tests.MockDB.MockDB import MockDB
 def create_s3_client():
     with mock_s3():
         yield boto3.client('s3', region_name='eu-west-2')
+
 @pytest.fixture
 def create_s3_resource():
     with mock_s3():
@@ -54,7 +55,7 @@ def test_get_table_data(mock_client):
     # expect = wr.s3.to_parquet(df=df_data)
     output = get_table_data('test_dim_design.parquet')
     assert assert_frame_equal(output, df_data, check_dtype = False) == None
-
+    
 def test_dataframe_to_list_returns_a_list():
     test_data = [[
         'design_id', 'design_name', 'file_location', 'file_name'
@@ -150,7 +151,7 @@ def test_build_insert_sql_with_different_amount_of_columns():
     expect = "INSERT INTO dim_design (design_id, design_name, file_location) VALUES (%s,%s,%s)"
     assert  output == expect
 
-def skip_test_insert_table_data_works_with_insert_sql():
+def test_insert_table_data_works_with_insert_sql():
     test_db = MockDB
     test_db.set_up_database()
     test_db.set_up_tables()
@@ -216,9 +217,6 @@ def test_insert_table_data_works_with_update_sql_with_multiple_data():
     output = cursor.fetchall()
     expect = ([8, 'Wooden', '/usr', 'wooden-20220717-npgz.json'], [7, 'Wooden', '/usr', 'wooden-20220717-npgz.json'])
     assert output == expect
-
-def skip_test_check_update_or_rows():
-    check_update_or_rows()
 
 def test_build_update_sql_return_string():
     test_data = [[
