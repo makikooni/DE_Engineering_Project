@@ -1,8 +1,7 @@
-from src.utils.utils import read_csv_to_pandas, write_df_to_parquet, timestamp_to_date_and_time, add_to_dates_set
+from utils.utils import read_csv_to_pandas, write_df_to_parquet, timestamp_to_date_and_time, add_to_dates_set
 import pandas as pd
 import numpy as np
 import logging
-from pprint import pprint
 
 
 logger = logging.getLogger('MyLogger')

@@ -2,7 +2,7 @@ from moto import mock_s3
 from pandas.testing import assert_frame_equal
 import pandas as pd
 import pytest
-from src.utils.utils import add_to_dates_set
+from utils.utils import add_to_dates_set
 
 
 def test_function_correctly_adds_unique_dates_to_set():

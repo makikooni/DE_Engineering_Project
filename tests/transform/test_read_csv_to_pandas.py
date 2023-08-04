@@ -4,7 +4,7 @@ import boto3
 import pytest
 from pandas.testing import assert_frame_equal
 import pandas as pd
-from src.utils.utils import read_csv_to_pandas
+from utils.utils import read_csv_to_pandas
 
 
 @pytest.fixture

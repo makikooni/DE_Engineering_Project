@@ -3,7 +3,7 @@ from moto import mock_s3
 import boto3
 import pytest
 import awswrangler as wr
-from src.utils.table_transformations import transform_payment_type
+from utils.table_transformations import transform_payment_type
 
 
 @pytest.fixture

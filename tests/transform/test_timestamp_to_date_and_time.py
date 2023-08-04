@@ -3,7 +3,7 @@ from pandas.testing import assert_frame_equal
 import pandas as pd
 import pytest
 from pprint import pprint
-from src.utils.utils import timestamp_to_date_and_time
+from utils.utils import timestamp_to_date_and_time
 
 
 def test_function_correctly_splits_columns_and_data():

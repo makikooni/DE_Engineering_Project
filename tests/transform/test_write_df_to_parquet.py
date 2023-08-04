@@ -6,7 +6,7 @@ from pandas.testing import assert_frame_equal
 import awswrangler as wr
 import pandas as pd
 from pprint import pprint
-from src.utils.utils import write_df_to_parquet
+from utils.utils import write_df_to_parquet
 
 
 @pytest.fixture
