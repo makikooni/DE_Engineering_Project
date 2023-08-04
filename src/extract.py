@@ -1,5 +1,11 @@
 import logging
-from utils.utils import get_secret, connect_db, get_table_db, upload_table_s3
+from utils.utils import (
+    get_secret,
+    connect_db,
+    get_table_db,
+    upload_table_s3,
+    extract_history_s3
+)
 
 """
 Defines lambda function responsible for extracting the data
@@ -82,6 +88,14 @@ def extraction_lambda_handler(event, context):
             logger.info(
                 f"{table_name} table successfully extracted and uploaded!"
             )
+
+        logger.info('#=#=#=#=#= Extract Lambda Job Complete! =#=#=#=#=#')
+
+        extract_history_s3(
+            bucket_name=INGESTION_BUCKET_NAME,
+            prefix="ExtractHistory"
+        )
+
     except Exception as e:
         logger.error(e)
         raise RuntimeError

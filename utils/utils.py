@@ -1,4 +1,5 @@
 import awswrangler as wr
+from datetime import datetime
 import logging
 import json
 from pg8000.native import Connection, InterfaceError, DatabaseError, identifier, literal
@@ -115,3 +116,41 @@ def connect_db(db_credentials):
     except DatabaseError:
         logger.error(f"DatabaseError: please contact your database administrator")
         raise DatabaseError
+
+def extract_history_s3(bucket_name, prefix):
+    if not isinstance(bucket_name, str):
+        raise TypeError(f"bucket name {type(bucket_name)}, expected {str}")
+    if not isinstance(prefix, str):
+        raise TypeError(f"prefix {type(prefix)}, expected {str}")
+
+    try:
+        log_string = "SUCCESS"
+        file_name = f"{datetime.now().strftime('%d%m%Y%H%M')}" #ddmmyyhhmmss
+        s3 = boto3.client('s3')
+        
+        s3.head_bucket(Bucket=bucket_name)
+
+        s3.put_object(
+            Body=log_string, 
+            Bucket=bucket_name, 
+            Key=f'{prefix}/{file_name}.txt'
+        )
+    except ClientError as e:
+        print(e)
+        if e.response["Error"]["Code"] == "ResourceNotFoundException":
+            logger.error(
+                f"ResourceNotFoundException: the bucket {bucket_name} cannot be found in S3"
+            )
+            raise KeyError(
+                f"ResourceNotFoundException: the bucket {bucket_name} cannot be found in S3"
+            )
+        elif e.response["Error"]["Code"] == "AccessDeniedException":
+            logger.error(
+                f"AccessDeniedException: the lambda does not have an identity-based policy to access S3 resource"
+            )
+            raise RuntimeError(
+                f"AccessDeniedException: the lambda does not have an identity-based policy to access S3 resource"
+            )
+        else:
+            logger.error(e)
+            raise e
