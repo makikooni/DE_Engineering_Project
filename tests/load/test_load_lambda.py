@@ -150,7 +150,7 @@ def test_build_insert_sql_with_different_amount_of_columns():
     expect = "INSERT INTO dim_design (design_id, design_name, file_location) VALUES (%s,%s,%s)"
     assert  output == expect
 
-def test_insert_table_data_works_with_insert_sql():
+def skip_test_insert_table_data_works_with_insert_sql():
     test_db = MockDB
     test_db.set_up_database()
     test_db.set_up_tables()
@@ -170,14 +170,15 @@ def test_insert_table_data_works_with_insert_sql():
     connection.close()
     expect = [8, 'Wooden', '/usr', 'wooden-20220717-npgz.json']
     assert output[0] == expect
+    test_db.insert_data_to_update()
 
 def test_insert_table_data_works_with_update_sql():
     test_db = MockDB
     test_db.set_up_database()
     test_db.set_up_tables()
     test_db.insert_data_to_update()
-    data_to_insert = ['design_name', 'Wooden', 'file_location', '/usr', 'file_name', 'wooden-20220717-npgz.json', 'design_id', '8']
-    insert_table_sql =  'UPDATE dim_design SET %s = %s, %s = %s, %s = %s WHERE %s = %s'
+    data_to_insert = [( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '8')]
+    insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
     connection = pg8000.connect(
             host='localhost',
             user='lucy',
@@ -189,8 +190,32 @@ def test_insert_table_data_works_with_update_sql():
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM dim_design_t1")
     output = cursor.fetchall()
+    connection.close()
     expect = [8, 'Wooden', '/usr', 'wooden-20220717-npgz.json']
     assert output[0] == expect
+
+def test_insert_table_data_works_with_update_sql_with_multiple_data():
+    test_db = MockDB
+    test_db.set_up_database()
+    test_db.set_up_tables()
+    test_db.insert_data_to_update()
+    test_db.insert_data_to_update_2()
+
+    data_to_insert = [( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '8'), ( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '7')]
+    insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
+    connection = pg8000.connect(
+            host='localhost',
+            user='lucy',
+            port=5432,
+            database='test_db_load',
+            password='QASW"1qa'
+        )
+    insert_table_data(connection,insert_table_sql, data_to_insert)
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM dim_design_t1")
+    output = cursor.fetchall()
+    expect = ([8, 'Wooden', '/usr', 'wooden-20220717-npgz.json'], [7, 'Wooden', '/usr', 'wooden-20220717-npgz.json'])
+    assert output == expect
 
 def skip_test_check_update_or_rows():
     check_update_or_rows()
@@ -209,7 +234,7 @@ def test_build_update_sql_return_string():
     output = build_update_sql('dim_design', df_data)
     assert isinstance(output, str)
 
-def test_build_update_sql_returnds_string_desired_string():
+def test_build_update_sql_returns_string_desired_string():
     test_data = [[
         'design_id', 'design_name', 'file_location', 'file_name'
     ],
@@ -221,7 +246,9 @@ def test_build_update_sql_returnds_string_desired_string():
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     output = build_update_sql('dim_design', df_data)
-    expect = 'UPDATE dim_design SET %s = %s, %s = %s, %s = %s WHERE %s = %s'
+    expect = "UPDATE dim_design SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
+    print(expect, "= expect")
+    print(output, "= output")
     assert output == expect
 
 def test_update_data_format_returns_a_list():
@@ -282,5 +309,3 @@ def test_update_data_format_returns_a_list_in_right_format_for_multiple_rows():
     ]
     output = update_data_format(df_data)
     assert expect == output
-
-

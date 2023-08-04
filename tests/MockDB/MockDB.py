@@ -60,7 +60,6 @@ class MockDB(TestCase):
             cursor.execute("DROP TABLE if exists dim_design_t1")
         except Exception as err:
             print("test_table tried to be deteted error ={}".format(err))
-            cursor = connection.cursor()
     # create table
         query = "CREATE TABLE dim_design_t1 (design_id int PRIMARY KEY, design_name VARCHAR(30), file_location VARCHAR(30), file_name VARCHAR(30))"
         try:
@@ -92,6 +91,28 @@ class MockDB(TestCase):
             connection.close()
         except Exception as err:
             print("Error with inserting test data of update on id 8", err)
+        
+    @classmethod
+    def insert_data_to_update_2(self):
+        # connection to database
+        connection = pg8000.connect(
+            host='localhost',
+            user='lucy',
+            port=5432,
+            database='test_db_load',
+            password='QASW"1qa'
+        )
+        # (design_id, design_name, file_location, file_name)
+        cursor = connection.cursor()
+        connection.autocommit = True
+        query = "INSERT INTO dim_design_t1 (design_id, design_name, file_location, file_name) VALUES ('7', 'hi' , 'yo' , 'sup')"
+        try:
+            cursor.execute(query)
+            connection.commit()
+            print("test data of update on id 7")
+            connection.close()
+        except Exception as err:
+            print("Error with inserting test data of update on id 7", err)
 
 New_database = MockDB()
 New_database.set_up_database()

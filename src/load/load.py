@@ -71,16 +71,20 @@ def check_update_or_rows():
 
 def build_update_sql(wh_table_name, table):
     ph_SET = ''
+    ph_WHERE = ''
     index = 0
-    for columns in table.columns:
-        if index < (len(table.columns) - 2  ):
-            ph_SET += '%s = %s, '
+    columns = table.columns
+    for column in columns:
+        if index < (len(table.columns) - 1) and index != 0:
+            ph_SET += column + ' = %s, '
             index += 1
-        elif index == (len(table.columns) - 2):
-            ph_SET += '%s = %s'
+        elif index == (len(table.columns) - 1):
+            ph_SET += column + ' = %s'
             index += 1
-    
-    return f"UPDATE {wh_table_name} SET {ph_SET} WHERE %s = %s"
+        elif index == 0:
+            ph_WHERE += column + ' = %s'
+            index += 1
+    return f"UPDATE {wh_table_name} SET {ph_SET} WHERE {ph_WHERE}"
 
 def update_data_format(table):
     data = []
