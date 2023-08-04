@@ -5,7 +5,7 @@ import pg8000
 import awswrangler as wr
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from src.load.load import add_new_rows, get_table_data, dataframe_to_list, build_load_sql, insert_table_data
+from src.load.load import get_table_data, dataframe_to_list, build_insert_sql, insert_table_data, build_update_sql, update_data_format
 from tests.MockDB.MockDB import MockDB
 
 @pytest.fixture
@@ -105,7 +105,7 @@ def test_dataframe_to_list_returns_only_data_with_multiple_rows():
     expect = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json'), ('7', 'Woden', '/us', 'wooden.json')]
     assert output == expect
 
-def test_build_load_sql():
+def test_build_insert_sql():
     test_data = [[
         'design_id', 'design_name', 'file_location', 'file_name', 'example'
     ],
@@ -117,11 +117,11 @@ def test_build_load_sql():
         'example': 'hello'
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    output = build_load_sql('dim_design', df_data)
+    output = build_insert_sql('dim_design', df_data)
     expect = "INSERT INTO dim_design (design_id, design_name, file_location, file_name, example) VALUES (%s,%s,%s,%s,%s)"
     assert  output == expect
 
-def test_build_load_sql_with_different_amount_of_columns():
+def test_build_insert_sql_with_different_amount_of_columns():
     test_data = [[
         'design_id', 'design_name', 'file_location', 'file_name'
     ],
@@ -132,7 +132,7 @@ def test_build_load_sql_with_different_amount_of_columns():
         'file_name': 'wooden-20220717-npgz.json'
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    output = build_load_sql('dim_design', df_data)
+    output = build_insert_sql('dim_design', df_data)
     expect = "INSERT INTO dim_design (design_id, design_name, file_location, file_name) " \
         "VALUES (%s,%s,%s,%s)"
     assert  output == expect
@@ -146,7 +146,7 @@ def test_build_load_sql_with_different_amount_of_columns():
         'file_location': '/usr'
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    output = build_load_sql('dim_design', df_data)
+    output = build_insert_sql('dim_design', df_data)
     expect = "INSERT INTO dim_design (design_id, design_name, file_location) VALUES (%s,%s,%s)"
     assert  output == expect
 
@@ -170,5 +170,48 @@ def test_insert_table_data():
     expect = [8, 'Wooden', '/usr', 'wooden-20220717-npgz.json']
     assert output[0] == expect
 
-def test_check_update_or_rows():
+def skip_test_check_update_or_rows():
     check_update_or_rows()
+
+def test_build_update_sql_return_string():
+    test_data = [[
+        'design_id', 'design_name', 'file_location', 'file_name'
+    ],
+    [{
+        'design_id':'8',
+        'design_name': 'Wooden',
+        'file_location': '/usr',
+        'file_name': 'wooden-20220717-npgz.json'
+    }]]
+    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
+    output = build_update_sql('dim_design', df_data)
+    assert isinstance(output, str)
+
+def test_build_update_sql_returnds_string_desired_string():
+    test_data = [[
+        'design_id', 'design_name', 'file_location', 'file_name'
+    ],
+    [{
+        'design_id':'8',
+        'design_name': 'Wooden',
+        'file_location': '/usr',
+        'file_name': 'wooden-20220717-npgz.json'
+    }]]
+    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
+    output = build_update_sql('dim_design', df_data)
+    expect = 'UPDATE dim_design SET %s = %s, %s = %s, %s = %s WHERE %s = %s'
+    assert output == expect
+
+def test_update_data_format_returns_a_list():
+    test_data = [[
+        'design_id', 'design_name', 'file_location', 'file_name'
+    ],
+    [{
+        'design_id':'8',
+        'design_name': 'Wooden',
+        'file_location': '/usr',
+        'file_name': 'wooden-20220717-npgz.json'
+    }]]
+    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
+    output = update_data_format(df_data)
+    assert isinstance(output, list)

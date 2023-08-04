@@ -51,7 +51,7 @@ def get_table_data(s3_table_name):
 def dataframe_to_list(table):
     return [tuple(row) for row in table.itertuples(index=False)]
 
-def build_load_sql(wh_table_name, table):
+def build_insert_sql(wh_table_name, table):
     columns = ', '.join(table.columns)
     placeholder = ',' .join(['%s'] * len(table.columns))
     return f"INSERT INTO {wh_table_name} ({columns}) VALUES ({placeholder})"
@@ -61,12 +61,29 @@ def insert_table_data(connection,insert_table_sql, data_to_insert):
     cursor.executemany(insert_table_sql, data_to_insert)
     connection.commit()
     cursor.close()
+
 def check_update_or_rows():
     '''
     1. look in the s3 bucket
     2. check if folder with data is new
     3. check  
     '''
+
+def build_update_sql(wh_table_name, table):
+    ph_SET = ''
+    index = 0
+    for columns in table.columns:
+        if index < (len(table.columns) - 2  ):
+            ph_SET += '%s = %s, '
+            index += 1
+        elif index == (len(table.columns) - 2):
+            ph_SET += '%s = %s'
+            index += 1
+    
+    return f"UPDATE {wh_table_name} SET {ph_SET} WHERE %s = %s"
+
+def update_data_format(table):
+    return []
 
 def load_lambda_hander():
     add_new_rows('dim_counterparty.parquet', 'dim_counterparty')
@@ -79,5 +96,3 @@ def load_lambda_hander():
     add_new_rows('fact_payment.parquet', 'fact_payment')
     add_new_rows('fact_purchase_order.parquet', 'fact_purchase_order')
     add_new_rows('fact_sales_order.parquet', 'fact_sales_order')
-
-add_new_rows('fact_sales_order.parquet', 'fact_sales_order')
