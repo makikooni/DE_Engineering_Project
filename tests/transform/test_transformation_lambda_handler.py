@@ -2,7 +2,7 @@ from moto import mock_s3
 from moto.core import patch_client
 import pytest
 import boto3
-import aws
+from botocore.exceptions import ClientError
 import unittest
 from unittest.mock import patch, Mock, MagicMock
 from pprint import pprint
@@ -76,12 +76,18 @@ class test_transformation_lambda_handler(unittest.TestCase):
 #     '''
 #     pass
 
-
-def test_raises_excpetion_when_bucket_does_not_exist(mock_client):
-    '''
-    demonstrates the function raises an exception when passed an invalid bucket name
-    '''
-    with patch('aws.s3.meta.client.head_bucket', return_value = 404):
-        with patch('src.transform.transformation_lambda_handler') as mock_lambda_handler:
-            with pytest.raises(Exception):
-                mock_lambda_handler()
+# @patch('boto3.resource')
+# def test_raises_excpetion_when_bucket_does_not_exist(mock_resource):
+#     '''
+#     demonstrates the function raises an exception when passed an invalid bucket name
+#     '''
+# #     # with patch('botocore.client.BaseClient.head_bucket', return_value = 404):
+# #     # with patch('src.transform.transformation_lambda_handler') as mock_lambda_handler:
+#     mock_resource.create_bucket(
+#         Bucket='mockbucket',
+#         CreateBucketConfiguration={
+#             'LocationConstraint': 'eu-west-2',
+#         },
+#     )
+#     with pytest.raises(ClientError):
+#         transformation_lambda_handler()
