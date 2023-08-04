@@ -40,6 +40,7 @@ class MockDB(TestCase):
     # create sql database
         try:
             cursor.execute("CREATE DATABASE Test_DB_load")
+            connection.close()
         except Exception as err:
             print("Failed creating database: {}".format(err))
     @classmethod
@@ -69,8 +70,30 @@ class MockDB(TestCase):
             connection.close()
         except Exception as err:
             print("Error with adding table", err)
-
+        
+    @classmethod
+    def insert_data_to_update(self):
+        # connection to database
+        connection = pg8000.connect(
+            host='localhost',
+            user='lucy',
+            port=5432,
+            database='test_db_load',
+            password='QASW"1qa'
+        )
+        # (design_id, design_name, file_location, file_name)
+        cursor = connection.cursor()
+        connection.autocommit = True
+        query = "INSERT INTO dim_design_t1 (design_id, design_name, file_location, file_name) VALUES ('8', 'hi' , 'yo' , 'sup')"
+        try:
+            cursor.execute(query)
+            connection.commit()
+            print("test data of update on id 8")
+            connection.close()
+        except Exception as err:
+            print("Error with inserting test data of update on id 8", err)
 
 New_database = MockDB()
-# New_database.set_up_database()
+New_database.set_up_database()
 New_database.set_up_tables()
+New_database.insert_data_to_update()

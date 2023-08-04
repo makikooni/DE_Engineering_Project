@@ -37,7 +37,7 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
         # get the table from the s3 and put it in a pandas dataframe
         table = get_table_data(s3_table_name)
         
-        insert_table_sql = build_load_sql(wh_table_name, table)
+        insert_table_sql = build_insert_sql(wh_table_name, table)
         # Convert DataFrame to list tuples for executemany
         data_to_insert = dataframe_to_list(table)
         # Execute the query using executemany to insert all rows at once
@@ -83,7 +83,22 @@ def build_update_sql(wh_table_name, table):
     return f"UPDATE {wh_table_name} SET {ph_SET} WHERE %s = %s"
 
 def update_data_format(table):
-    return []
+    data = []
+    rows = table.values.tolist()
+    columns = table.columns
+    for row in rows:
+        update_row = row
+        index = 0
+        for value in update_row:
+            if index < len(row) and index != 0:
+                data.append(columns[index])
+                data.append(value)
+                index += 1
+            elif index == 0:
+                index += 1
+        data.append(columns[0])
+        data.append(row[0])
+    return data
 
 def load_lambda_hander():
     add_new_rows('dim_counterparty.parquet', 'dim_counterparty')

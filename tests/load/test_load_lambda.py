@@ -150,12 +150,34 @@ def test_build_insert_sql_with_different_amount_of_columns():
     expect = "INSERT INTO dim_design (design_id, design_name, file_location) VALUES (%s,%s,%s)"
     assert  output == expect
 
-def test_insert_table_data():
+def test_insert_table_data_works_with_insert_sql():
     test_db = MockDB
     test_db.set_up_database()
     test_db.set_up_tables()
     data_to_insert = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json')]
     insert_table_sql = "INSERT INTO dim_design_t1 (design_id, design_name, file_location, file_name) VALUES (%s,%s,%s,%s)"
+    connection = pg8000.connect(
+            host='localhost',
+            user='lucy',
+            port=5432,
+            database='test_db_load',
+            password='QASW"1qa'
+        )
+    insert_table_data(connection,insert_table_sql, data_to_insert)
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM dim_design_t1")
+    output = cursor.fetchall()
+    connection.close()
+    expect = [8, 'Wooden', '/usr', 'wooden-20220717-npgz.json']
+    assert output[0] == expect
+
+def test_insert_table_data_works_with_update_sql():
+    test_db = MockDB
+    test_db.set_up_database()
+    test_db.set_up_tables()
+    test_db.insert_data_to_update()
+    data_to_insert = ['design_name', 'Wooden', 'file_location', '/usr', 'file_name', 'wooden-20220717-npgz.json', 'design_id', '8']
+    insert_table_sql =  'UPDATE dim_design SET %s = %s, %s = %s, %s = %s WHERE %s = %s'
     connection = pg8000.connect(
             host='localhost',
             user='lucy',
@@ -215,3 +237,50 @@ def test_update_data_format_returns_a_list():
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     output = update_data_format(df_data)
     assert isinstance(output, list)
+
+def test_update_data_format_returns_a_list_in_right_format():
+    test_data = [[
+        'design_id', 'design_name', 'file_location', 'file_name'
+    ],
+    [{
+        'design_id':'8',
+        'design_name': 'Wooden',
+        'file_location': '/usr',
+        'file_name': 'wooden-20220717-npgz.json'
+    }]]
+    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
+    expect = ['design_name', 'Wooden', 'file_location', '/usr', 'file_name', 'wooden-20220717-npgz.json', 'design_id', '8']
+    output = update_data_format(df_data)
+    assert expect == output
+
+def test_update_data_format_returns_a_list_in_right_format_for_multiple_rows():
+    test_data = [[
+        'design_id', 'design_name', 'file_location', 'file_name'
+    ],
+    [{
+        'design_id':'8',
+        'design_name': 'Wooden',
+        'file_location': '/usr',
+        'file_name': 'wooden-20220717-npgz.json'
+    },
+    {
+        'design_id':'7',
+        'design_name': 'Woden',
+        'file_location': '/us',
+        'file_name': 'wooden.json'
+    }]]
+    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
+    expect = [
+        'design_name', 'Wooden', 
+        'file_location', '/usr', 
+        'file_name', 'wooden-20220717-npgz.json', 
+        'design_id', '8',
+        'design_name', 'Woden',
+        'file_location', '/us',
+        'file_name', 'wooden.json',
+        'design_id', '7'
+    ]
+    output = update_data_format(df_data)
+    assert expect == output
+
+
