@@ -14,6 +14,7 @@ def transform_design(file, source_bucket, target_bucket):
         design_table = read_csv_to_pandas(file, source_bucket)
         dim_design_table = design_table.loc[:, ['design_id', 'design_name', 'file_location', 'file_name']]
         write_df_to_parquet(dim_design_table, 'dim_design', target_bucket)
+        logger.info(f'dim_design.parquet successfully created in {target_bucket}')
     except Exception as e:
         logger.info('transform_design', e)
         raise e
@@ -24,6 +25,7 @@ def transform_payment_type(file, source_bucket, target_bucket):
         payment_type_table = read_csv_to_pandas(file, source_bucket)
         dim_payment_type_table = payment_type_table.loc[:, ['payment_type_id', 'payment_type_name']]
         write_df_to_parquet(dim_payment_type_table, 'dim_payment_type', target_bucket)
+        logger.info(f'dim_payment_type.parquet successfully created in {target_bucket}')
     except Exception as e:
         logger.info('transform_payment_type', e)
         raise e
@@ -35,6 +37,7 @@ def transform_location(file, source_bucket, target_bucket):
         dim_address_table = address_table.loc[:, ['address_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']]
         dim_address_table.rename(columns={'address_id': 'location_id'}, inplace=True)
         write_df_to_parquet(dim_address_table, 'dim_location', target_bucket)
+        logger.info(f'dim_location.parquet successfully created in {target_bucket}')
     except Exception as e:
         logger.info('transform_location', e)
         raise e
@@ -45,6 +48,7 @@ def transform_transaction(file, source_bucket, target_bucket):
         transaction_table = read_csv_to_pandas(file, source_bucket)
         dim_transaction_table = transaction_table.loc[:, ['transaction_id', 'transaction_type', 'sales_order_id', 'purchase_order_id']]
         write_df_to_parquet(dim_transaction_table, 'dim_transaction', target_bucket)
+        logger.info(f'dim_transaction.parquet successfully created in {target_bucket}')
     except Exception as e:
         logger.info('transform_transaction', e)
         raise e
@@ -57,6 +61,7 @@ def transform_staff(file1, file2, source_bucket, target_bucket):
         joined_staff_department_table = staff_table.join(department_table.set_index('department_id'), on='department_id', lsuffix="staff", rsuffix='department')
         dim_staff_table = joined_staff_department_table.loc[:, ['staff_id', 'first_name', 'last_name', 'department_name', 'location', 'email_address']]
         write_df_to_parquet(dim_staff_table, 'dim_staff', target_bucket)
+        logger.info(f'dim_staff.parquet successfully created in {target_bucket}')
     except Exception as e:
         logger.info('transform_staff', e)
         raise e
@@ -70,6 +75,7 @@ def transform_currency(file, source_bucket, target_bucket):
         values = ['Euro', 'British Pound', 'US Dollar']
         dim_currency_table['currency_name'] = np.select(conditions, values)
         write_df_to_parquet(dim_currency_table, 'dim_currency', target_bucket)
+        logger.info(f'dim_currency.parquet successfully created in {target_bucket}')
     except Exception as e:
         logger.info('transform_currency', e)
         raise e
@@ -85,6 +91,7 @@ def transform_counterparty(file1, file2, source_bucket, target_bucket):
         dim_counterparty.rename(columns={col: 'counterparty_legal_'+col for col in dim_counterparty.columns if col in columns_to_rename}, inplace=True)
         dim_counterparty.rename(columns={'phone': 'counterparty_legal_phone_number'}, inplace=True)
         write_df_to_parquet(dim_counterparty, 'dim_counterparty', target_bucket)
+        logger.info(f'dim_counterparty.parquet successfully created in {target_bucket}')
     except Exception as e:
         logger.info('transform_counterparty', e)
         raise e
@@ -99,6 +106,7 @@ def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date
         sales_order_table.rename(columns={'staff_id': 'sales_staff_id'}, inplace=True)
         fact_sales_order = sales_order_table.loc[:, ['sales_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'sales_staff_id', 'counterparty_id', 'units_sold', 'unit_price', 'currency_id', 'design_id', 'agreed_payment_date', 'agreed_delivery_date', 'agreed_delivery_location_id']]
         write_df_to_parquet(fact_sales_order, 'fact_sales_order', target_bucket)
+        logger.info(f'fact_sales_order.parquet successfully created in {target_bucket}')
 
         date_cols_to_add = [fact_sales_order['created_date'], fact_sales_order['last_updated_date'],fact_sales_order['agreed_payment_date'], fact_sales_order['agreed_delivery_date']]
         add_to_dates_set(dates_for_dim_date, date_cols_to_add)
@@ -115,6 +123,7 @@ def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_d
 
         fact_purchase_order = purchase_order_table.loc[:, ['purchase_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'staff_id', 'counterparty_id', 'item_code', 'item_quantity', 'item_unit_price', 'currency_id', 'agreed_delivery_date', 'agreed_payment_date', 'agreed_delivery_location_id']]
         write_df_to_parquet(fact_purchase_order, 'fact_purchase_order', target_bucket)
+        logger.info(f'fact_purchase_order.parquet successfully created in {target_bucket}')
 
         date_cols_to_add = [fact_purchase_order['created_date'], fact_purchase_order['last_updated_date'], fact_purchase_order['agreed_delivery_date'], fact_purchase_order['agreed_payment_date']]
         add_to_dates_set(dates_for_dim_date, date_cols_to_add)
@@ -131,6 +140,7 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
 
         fact_payment_table = payment_table.loc[:, ['payment_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'transaction_id', 'counterparty_id', 'payment_amount', 'currency_id', 'payment_type_id', 'paid', 'payment_date']]
         write_df_to_parquet(fact_payment_table, 'fact_payment', target_bucket)
+        logger.info(f'fact_payment.parquet successfully created in {target_bucket}')
 
         date_cols_to_add = [fact_payment_table['created_date'], fact_payment_table['last_updated_date'], fact_payment_table['payment_date']]
         add_to_dates_set(dates_for_dim_date, date_cols_to_add)
@@ -151,6 +161,7 @@ def create_date(dates_for_dim_date, target_bucket):
         dim_date['month_name'] = pd.DatetimeIndex(dim_date['date_id']).month_name()
         dim_date['quarter'] = pd.DatetimeIndex(dim_date['date_id']).quarter
         write_df_to_parquet(dim_date, 'dim_date', target_bucket)
+        logger.info(f'dim_date.parquet successfully created in {target_bucket}')
     except Exception as e:
         logger.info('create_date', e)
         raise e
