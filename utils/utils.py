@@ -128,8 +128,6 @@ def extract_history_s3(bucket_name, prefix):
         file_name = f"{datetime.now().strftime('%d%m%Y%H%M')}" #ddmmyyhhmmss
         s3 = boto3.client('s3')
         
-        s3.head_bucket(Bucket=bucket_name)
-
         s3.put_object(
             Body=log_string, 
             Bucket=bucket_name, 
