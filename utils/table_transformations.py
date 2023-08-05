@@ -15,7 +15,7 @@ def transform_design(file, source_bucket, target_bucket):
         write_df_to_parquet(dim_design_table, 'dim_design', target_bucket)
         logger.info(f'dim_design.parquet successfully created in {target_bucket}')
     except Exception as e:
-        logger.info('ERROR: transform_design')
+        logger.error('ERROR: transform_design')
         raise e
 
 
@@ -26,7 +26,7 @@ def transform_payment_type(file, source_bucket, target_bucket):
         write_df_to_parquet(dim_payment_type_table, 'dim_payment_type', target_bucket)
         logger.info(f'dim_payment_type.parquet successfully created in {target_bucket}')
     except Exception as e:
-        logger.info('ERROR: transform_payment_type')
+        logger.error('ERROR: transform_payment_type')
         raise e
 
 
@@ -38,7 +38,7 @@ def transform_location(file, source_bucket, target_bucket):
         write_df_to_parquet(dim_address_table, 'dim_location', target_bucket)
         logger.info(f'dim_location.parquet successfully created in {target_bucket}')
     except Exception as e:
-        logger.info('ERROR: transform_location')
+        logger.error('ERROR: transform_location')
         raise e
 
 
@@ -49,7 +49,7 @@ def transform_transaction(file, source_bucket, target_bucket):
         write_df_to_parquet(dim_transaction_table, 'dim_transaction', target_bucket)
         logger.info(f'dim_transaction.parquet successfully created in {target_bucket}')
     except Exception as e:
-        logger.info('ERROR: transform_transaction')
+        logger.error('ERROR: transform_transaction')
         raise e
 
 
@@ -62,7 +62,7 @@ def transform_staff(file1, file2, source_bucket, target_bucket):
         write_df_to_parquet(dim_staff_table, 'dim_staff', target_bucket)
         logger.info(f'dim_staff.parquet successfully created in {target_bucket}')
     except Exception as e:
-        logger.info('ERROR: transform_staff')
+        logger.error('ERROR: transform_staff')
         raise e
 
 
@@ -76,7 +76,7 @@ def transform_currency(file, source_bucket, target_bucket):
         write_df_to_parquet(dim_currency_table, 'dim_currency', target_bucket)
         logger.info(f'dim_currency.parquet successfully created in {target_bucket}')
     except Exception as e:
-        logger.info('ERROR: transform_currency')
+        logger.error('ERROR: transform_currency')
         raise e
 
 
@@ -92,7 +92,7 @@ def transform_counterparty(file1, file2, source_bucket, target_bucket):
         write_df_to_parquet(dim_counterparty, 'dim_counterparty', target_bucket)
         logger.info(f'dim_counterparty.parquet successfully created in {target_bucket}')
     except Exception as e:
-        logger.info('ERROR: transform_counterparty')
+        logger.error('ERROR: transform_counterparty')
         raise e
 
 
@@ -110,7 +110,7 @@ def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date
         date_cols_to_add = [fact_sales_order['created_date'], fact_sales_order['last_updated_date'],fact_sales_order['agreed_payment_date'], fact_sales_order['agreed_delivery_date']]
         add_to_dates_set(dates_for_dim_date, date_cols_to_add)
     except Exception as e:
-        logger.info('ERROR: transform_sales_order')
+        logger.error('ERROR: transform_sales_order')
         raise e
 
 
@@ -127,7 +127,7 @@ def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_d
         date_cols_to_add = [fact_purchase_order['created_date'], fact_purchase_order['last_updated_date'], fact_purchase_order['agreed_delivery_date'], fact_purchase_order['agreed_payment_date']]
         add_to_dates_set(dates_for_dim_date, date_cols_to_add)
     except Exception as e:
-        logger.info('ERROR: transform_purchase_order')
+        logger.error('ERROR: transform_purchase_order')
         raise e
 
 
@@ -144,7 +144,7 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
         date_cols_to_add = [fact_payment_table['created_date'], fact_payment_table['last_updated_date'], fact_payment_table['payment_date']]
         add_to_dates_set(dates_for_dim_date, date_cols_to_add)
     except Exception as e:
-        logger.info('ERROR: transform_payment')
+        logger.error('ERROR: transform_payment')
         raise e
 
 
@@ -162,7 +162,7 @@ def create_date(dates_for_dim_date, target_bucket):
         write_df_to_parquet(dim_date, 'dim_date', target_bucket)
         logger.info(f'dim_date.parquet successfully created in {target_bucket}')
     except Exception as e:
-        logger.info('ERROR: create_date')
+        logger.error('ERROR: create_date')
         raise e
     
     # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_date.parquet

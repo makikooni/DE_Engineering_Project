@@ -159,7 +159,7 @@ def read_csv_to_pandas(file, source_bucket):
     try:
         return wr.s3.read_csv(path=f's3://{source_bucket}/{file}.csv')
     except Exception as e:
-        logger.info('ERROR: read_csv_to_pandas')
+        logger.error('ERROR: read_csv_to_pandas')
         raise e
 
 
@@ -167,7 +167,7 @@ def write_df_to_parquet(df, file, target_bucket):
     try:
        return wr.s3.to_parquet(df=df, path=f's3://{target_bucket}/{file}.parquet')
     except Exception as e:
-        logger.info('ERROR: write_df_to_parquet')
+        logger.error('ERROR: write_df_to_parquet')
         raise e
         
 
@@ -183,7 +183,7 @@ def timestamp_to_date_and_time(dataframe):
         dataframe.drop(columns =['last_updated'], inplace = True)
         return dataframe
     except Exception as e:
-        logger.info('ERROR: timestamp_to_date_and_time')
+        logger.error('ERROR: timestamp_to_date_and_time')
         raise e
 
 
@@ -193,5 +193,5 @@ def add_to_dates_set(set, cols_to_add):
             for row in col:
                 set.add(row)
     except Exception as e:
-        logger.info('ERROR: add_to_dates_set')
+        logger.error('ERROR: add_to_dates_set')
         raise e

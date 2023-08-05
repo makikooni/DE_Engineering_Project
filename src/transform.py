@@ -15,11 +15,14 @@ logger.setLevel(logging.INFO)
 def transform_lambda_handler(event, context):
     INGESTION_BUCKET_NAME = "ingestion-va-052023"
     PROCESSED_BUCKET_NAME = 'processed-va-052023'
+
     event_bucket_name = event['Records'][0]['s3']['bucket']['name']
     event_obj_name = event['Records'][0]['s3']['object']['key']
+
     if event_bucket_name != INGESTION_BUCKET_NAME:
-        raise ValueError('This is not the correct bucket')
-    if event_obj_name[-3:] not in 'txt' and \
+        raise ValueError(f'Lambda triggered by {event_bucket_name} bucket,\
+                         expected {INGESTION_BUCKET_NAME} bucket')
+    if event_obj_name[-3:] != 'txt' and \
             'ExtractHistory' not in event_obj_name:
         raise ValueError('Wrong extraction trigger file')
     try:
@@ -74,12 +77,12 @@ def transform_lambda_handler(event, context):
 
     except ClientError as e:
         if e.response['Error']['Code'] == '404':
-            logger.info('Bucket does not exist')
+            logger.error('Bucket does not exist')
             raise e
         if e.response['Error']['Code'] == '403':
-            logger.info('Invalid permissions for bucket')
+            logger.error('Invalid permissions for bucket')
         else:
-            logger.info('transform_lambda_handler ', e)
+            logger.error('transform_lambda_handler ')
             raise e
 ###############################
 # logger = logging.getLogger(__name__)
@@ -89,3 +92,8 @@ def transform_lambda_handler(event, context):
 # def transform_lambda_handler(event, context):
 #     logger.info("#=#=#=#=#=#=#=# TRANSFORM LAMBDA =#=#=#=#=#=#=#=#")
 #     logger.info("Hello from the Transform Lambda :)")
+
+# import json
+# with open("tests/transform/test_valid_event.json") as v:
+#     event = json.loads(v.read())
+# transform_lambda_handler(event, {})
