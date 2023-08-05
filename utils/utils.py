@@ -135,7 +135,6 @@ def extract_history_s3(bucket_name, prefix):
             Key=f'{prefix}/{file_name}.txt'
         )
     except ClientError as e:
-        print(e)
         if e.response["Error"]["Code"] == "ResourceNotFoundException":
             logger.error(
                 f"ResourceNotFoundException: the bucket {bucket_name} cannot be found in S3"
@@ -158,9 +157,26 @@ def extract_history_s3(bucket_name, prefix):
 def read_csv_to_pandas(file, source_bucket):
     try:
         return wr.s3.read_csv(path=f's3://{source_bucket}/{file}.csv')
-    except Exception as e:
-        logger.error('ERROR: read_csv_to_pandas')
-        raise e
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "ResourceNotFoundException":
+            logger.error(
+                f"ResourceNotFoundException: the bucket {source_bucket} cannot be found in S3"
+            )
+            raise KeyError(
+                f"ResourceNotFoundException: the bucket {source_bucket} cannot be found in S3"
+            )
+        elif e.response["Error"]["Code"] == "AccessDeniedException":
+            logger.error(
+                f"AccessDeniedException: the lambda does not have an identity-based policy \
+                    to access {source_bucket} S3 resource"
+            )
+            raise RuntimeError(
+                f"AccessDeniedException: the lambda does not have an identity-based policy \
+                    to access {source_bucket} S3 resource"
+            )
+        else:
+            logger.error("ERROR: Unknown error whilst logging extract history to S3")
+            raise e
 
 
 def write_df_to_parquet(df, file, target_bucket):
