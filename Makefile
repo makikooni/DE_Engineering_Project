@@ -34,8 +34,8 @@ define execute_in_env
 	$(ACTIVATE_ENV) && $1
 endef
 
-run:
-	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} python ${filename})
+runpy:
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} python ${file})
 
 ## install all python packages and dependencies
 requirements:
