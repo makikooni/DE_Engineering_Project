@@ -16,7 +16,7 @@ resource "aws_lambda_function" "transform_lambda" {
   handler = "transform.transform_lambda_handler"
   runtime = "python3.9"
   layers = [aws_lambda_layer_version.lambda_layer.arn, "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python39:8"]
-  timeout = 300 # 5 minutes
+  timeout = 900 # 15 minutes
   depends_on = [null_resource.transform_zip]
 }
 
