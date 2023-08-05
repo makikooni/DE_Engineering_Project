@@ -5,7 +5,7 @@ resource "aws_lambda_function" "extract_lambda" {
   handler = "extract.extraction_lambda_handler"
   runtime = "python3.9"
   layers = [aws_lambda_layer_version.lambda_layer.arn, "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python39:8"]
-  timeout = 60
+  timeout = 60  # 1 minute
   depends_on = [null_resource.extraction_zip]
 }
 
@@ -16,7 +16,7 @@ resource "aws_lambda_function" "transform_lambda" {
   handler = "transform.transform_lambda_handler"
   runtime = "python3.9"
   layers = [aws_lambda_layer_version.lambda_layer.arn, "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python39:8"]
-  timeout = 60
+  timeout = 300 # 5 minutes
   depends_on = [null_resource.transform_zip]
 }
 
@@ -27,6 +27,6 @@ resource "aws_lambda_function" "load_lambda" {
   handler = "load.load_lambda_handler"
   runtime = "python3.9"
   layers = [aws_lambda_layer_version.lambda_layer.arn, "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python39:8"]
-  timeout = 60
+  timeout = 60  # 1 minute
   depends_on = [null_resource.load_zip]
 }
