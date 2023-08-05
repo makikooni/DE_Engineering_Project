@@ -12,7 +12,7 @@ logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
 
 
-def transformation_lambda_handler(event, context):
+def transform_lambda_handler(event, context):
     INGESTION_BUCKET_NAME = "ingestion-va-052023"
     PROCESSED_BUCKET_NAME = 'processed-va-052023'
     event_bucket_name = event['Records'][0]['s3']['bucket']['name']
