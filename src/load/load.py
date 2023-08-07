@@ -41,7 +41,7 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
         table = get_table_data(s3_table_name)
         insert_table_sql = build_insert_sql(wh_table_name, table)
         # Convert DataFrame to list tuples for executemany
-        data_to_insert = dataframe_to_list(table)
+        data_to_insert = insert_data_format(table)
         # Execute the query using executemany to insert all rows at once
         insert_table_data(connection,insert_table_sql, data_to_insert)
     except Exception as error:
@@ -54,18 +54,37 @@ def get_table_data(s3_table_name):
     except Exception as error:
         logger.info["get_table_data", error]
         raise error
-def dataframe_to_list(table):
+def insert_data_format(table):
     try:
-        return [tuple(row) for row in table.itertuples(index=False)]
+        data = []
+        rows = table.values.tolist()
+        columns = table.columns
+        for row in rows:
+            insert_row = row
+            index = 0
+            for value in insert_row:
+                if index < len(row) and index != 0:
+                    data.append(value)
+                    index += 1
+                elif index == 0:
+                    index += 1
+                    data.append(row[0])
+                    data.append(row[0])           
+        return data
     except Exception as error:
-        logger.info["dataframe_to_list", error]
+        logger.info["insert_data_format", error]
         raise error
-
+        # return [tuple(row) for row in table.itertuples(index=False)]
 def build_insert_sql(wh_table_name, table):
     try:
         columns = ', '.join(table.columns)
         placeholder = ',' .join(['%s'] * len(table.columns))
-        return f"INSERT INTO {wh_table_name} ({columns}) VALUES ({placeholder})"
+        return f"BEGIN " \
+                f"IF NOT EXISTS (SELECT * FROM {wh_table_name} WHERE {table.columns[0]} = %s "\
+                "BEGIN " \
+                f"INSERT INTO {wh_table_name} ({columns}) "\
+                f"VALUES ({placeholder}) "\
+                f"END END"
     except Exception as error:
         logger.info["build_insert_sql", error]
         raise error

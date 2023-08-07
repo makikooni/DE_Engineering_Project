@@ -5,7 +5,7 @@ import pg8000
 import awswrangler as wr
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from src.load.load import get_table_data, dataframe_to_list, build_insert_sql, insert_table_data, build_update_sql, update_data_format
+from src.load.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format
 from tests.MockDB.MockDB import MockDB
 
 @pytest.fixture
@@ -67,7 +67,7 @@ def test_dataframe_to_list_returns_a_list():
         'file_name': 'wooden-20220717-npgz.json'
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    output = dataframe_to_list(df_data)
+    output = insert_data_format(df_data)
     assert isinstance(output, list)
 
 def test_dataframe_to_list_returns_only_data():
@@ -81,8 +81,8 @@ def test_dataframe_to_list_returns_only_data():
         'file_name': 'wooden-20220717-npgz.json'
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    output = dataframe_to_list(df_data)
-    expect = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json')]
+    output = insert_data_format(df_data)
+    expect = ['8','8', 'Wooden', '/usr', 'wooden-20220717-npgz.json']
     assert output == expect
 
 def test_dataframe_to_list_returns_only_data_with_multiple_rows():
@@ -102,8 +102,8 @@ def test_dataframe_to_list_returns_only_data_with_multiple_rows():
         'file_name': 'wooden.json'
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    output = dataframe_to_list(df_data)
-    expect = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json'), ('7', 'Woden', '/us', 'wooden.json')]
+    output = insert_data_format(df_data)
+    expect = ['8','8', 'Wooden', '/usr', 'wooden-20220717-npgz.json', '7','7', 'Woden', '/us', 'wooden.json']
     assert output == expect
 
 def test_build_insert_sql():
@@ -119,7 +119,13 @@ def test_build_insert_sql():
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     output = build_insert_sql('dim_design', df_data)
-    expect = "INSERT INTO dim_design (design_id, design_name, file_location, file_name, example) VALUES (%s,%s,%s,%s,%s)"
+    expect = "BEGIN " \
+                "IF NOT EXISTS (SELECT * FROM dim_design WHERE design_id = %s "\
+                "BEGIN " \
+                "INSERT INTO dim_design (design_id, design_name, file_location, file_name, example) "\
+                "VALUES (%s,%s,%s,%s,%s) "\
+                "END END"
+    
     assert  output == expect
 
 def test_build_insert_sql_with_different_amount_of_columns():
@@ -134,8 +140,12 @@ def test_build_insert_sql_with_different_amount_of_columns():
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     output = build_insert_sql('dim_design', df_data)
-    expect = "INSERT INTO dim_design (design_id, design_name, file_location, file_name) " \
-        "VALUES (%s,%s,%s,%s)"
+    expect = "BEGIN " \
+                "IF NOT EXISTS (SELECT * FROM dim_design WHERE design_id = %s "\
+                "BEGIN " \
+                "INSERT INTO dim_design (design_id, design_name, file_location, file_name) "\
+                "VALUES (%s,%s,%s,%s) "\
+                "END END"
     assert  output == expect
 
     test_data = [[
@@ -148,15 +158,25 @@ def test_build_insert_sql_with_different_amount_of_columns():
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     output = build_insert_sql('dim_design', df_data)
-    expect = "INSERT INTO dim_design (design_id, design_name, file_location) VALUES (%s,%s,%s)"
+    expect =    "BEGIN " \
+                "IF NOT EXISTS (SELECT * FROM dim_design WHERE design_id = %s "\
+                "BEGIN " \
+                "INSERT INTO dim_design (design_id, design_name, file_location) "\
+                "VALUES (%s,%s,%s) "\
+                "END END"
     assert  output == expect
 
 def test_insert_table_data_works_with_insert_sql():
     test_db = MockDB
     test_db.set_up_database()
     test_db.set_up_tables()
-    data_to_insert = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json')]
-    insert_table_sql = "INSERT INTO dim_design_t1 (design_id, design_name, file_location, file_name) VALUES (%s,%s,%s,%s)"
+    data_to_insert = ['8','8', 'Wooden', '/usr', 'wooden-20220717-npgz.json']
+    insert_table_sql =  "BEGIN " \
+                        "IF NOT EXISTS (SELECT * FROM dim_design_t1 WHERE design_id = %s) "\
+                        "BEGIN " \
+                        "INSERT INTO dim_design_t1 (design_id, design_name, file_location, file_name) "\
+                        "VALUES (%s,%s,%s,%s) "\
+                        "END END"
     connection = pg8000.connect(
             host='localhost',
             user='lucy',
