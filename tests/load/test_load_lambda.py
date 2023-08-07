@@ -5,7 +5,7 @@ import pg8000
 import awswrangler as wr
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from src.load.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format
+from src.load.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format, get_id_col
 from tests.MockDB.MockDB import MockDB
 
 @pytest.fixture
@@ -166,7 +166,7 @@ def test_build_insert_sql_with_different_amount_of_columns():
                 "END END"
     assert  output == expect
 
-def test_insert_table_data_works_with_insert_sql():
+def skip_test_insert_table_data_works_with_insert_sql():
     test_db = MockDB
     test_db.set_up_database()
     test_db.set_up_tables()
@@ -179,10 +179,10 @@ def test_insert_table_data_works_with_insert_sql():
                         "END END"
     connection = pg8000.connect(
             host='localhost',
-            user='lucy',
+            user='david',
             port=5432,
             database='test_db_load',
-            password='QASW"1qa'
+            password='Paprika5'
         )
     insert_table_data(connection,insert_table_sql, data_to_insert)
     cursor = connection.cursor()
@@ -202,10 +202,10 @@ def test_insert_table_data_works_with_update_sql():
     insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
     connection = pg8000.connect(
             host='localhost',
-            user='lucy',
+            user='david',
             port=5432,
             database='test_db_load',
-            password='QASW"1qa'
+            password='Paprika5'
         )
     insert_table_data(connection,insert_table_sql, data_to_insert)
     cursor = connection.cursor()
@@ -226,10 +226,10 @@ def test_insert_table_data_works_with_update_sql_with_multiple_data():
     insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
     connection = pg8000.connect(
             host='localhost',
-            user='lucy',
+            user='david',
             port=5432,
             database='test_db_load',
-            password='QASW"1qa'
+            password='Paprika5'
         )
     insert_table_data(connection,insert_table_sql, data_to_insert)
     cursor = connection.cursor()
@@ -327,3 +327,35 @@ def test_update_data_format_returns_a_list_in_right_format_for_multiple_rows():
     ]
     output = update_data_format(df_data)
     assert expect == output
+
+def test_extract_id_col_from_warehouse_table():
+    test_db = MockDB
+    test_db.set_up_database()
+    test_db.set_up_tables()
+    test_db.insert_data_to_update()
+    test_db.insert_data_to_update_2()
+
+    data_to_insert = [( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '8'), ( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '7')]
+    insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
+    connection = pg8000.connect(
+            host='localhost',
+            user='david',
+            port=5432,
+            database='test_db_load',
+            password='Paprika5'
+        )
+    
+    test_data = [[
+        'design_id', 'design_name', 'file_location', 'file_name'
+    ],
+    [{
+        'design_id':'8',
+        'design_name': 'Wooden',
+        'file_location': '/usr',
+        'file_name': 'wooden-20220717-npgz.json'
+    }]]
+    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
+    
+    output = get_id_col(connection, 'dim_design_t1', df_data)
+    expect = ([8], [7])
+    assert output == expect

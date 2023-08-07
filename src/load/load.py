@@ -37,16 +37,31 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
             user=user,
             password=password
         )
+
+        is_fact = s3_table_name.startswith('fact')
+
         # get the table from the s3 and put it in a pandas dataframe
         table = get_table_data(s3_table_name)
+
+        get_id_col(connection, wh_table_name, table)
+
         insert_table_sql = build_insert_sql(wh_table_name, table)
-        # Convert DataFrame to list tuples for executemany
+        # # Convert DataFrame to list tuples for executemany
         data_to_insert = insert_data_format(table)
-        # Execute the query using executemany to insert all rows at once
+        # # Execute the query using executemany to insert all rows at once
         insert_table_data(connection,insert_table_sql, data_to_insert)
     except Exception as error:
         logger.info["main function error", error]
         raise error
+    
+def get_id_col(connection, wh_table_name, table):
+    query = f"SELECT {table.columns[0]} FROM {wh_table_name};"
+    cursor = connection.cursor()
+    cursor.execute(query)
+    id_col = cursor.fetchall()
+    print(id_col)
+    cursor.close()
+    return id_col
 
 def get_table_data(s3_table_name):
     try:
@@ -160,3 +175,5 @@ def load_lambda_hander():
     add_new_rows('fact_payment.parquet', 'fact_payment')
     add_new_rows('fact_purchase_order.parquet', 'fact_purchase_order')
     add_new_rows('fact_sales_order.parquet', 'fact_sales_order')
+
+add_new_rows('fact_purchase_order.parquet', 'fact_purchase_order')
