@@ -424,14 +424,22 @@ def timestamp_to_date_and_time(dataframe):
         Exception: If an error occurs during the transformation process.t
     """
     try:
-        new_created = dataframe["created_at"].str.split(" ", n=1, expand=True)
-        dataframe["created_date"] = new_created[0]
-        dataframe["created_time"] = new_created[1]
-        dataframe.drop(columns=["created_at"], inplace=True)
-        new_updated = dataframe["last_updated"].str.split(" ", n=1, expand=True)
-        dataframe["last_updated_date"] = new_updated[0]
-        dataframe["last_updated_time"] = new_updated[1]
-        dataframe.drop(columns=["last_updated"], inplace=True)
+        if len(dataframe) > 0:
+            new_created = dataframe["created_at"].str.split(" ", n=1, expand=True)
+            dataframe["created_date"] = new_created[0]
+            dataframe["created_time"] = new_created[1]
+            dataframe.drop(columns=["created_at"], inplace=True)
+            new_updated = dataframe["last_updated"].str.split(" ", n=1, expand=True)
+            dataframe["last_updated_date"] = new_updated[0]
+            dataframe["last_updated_time"] = new_updated[1]
+            dataframe.drop(columns=["last_updated"], inplace=True)
+        else:
+            dataframe.drop(columns=["created_at"], inplace=True)
+            dataframe.drop(columns=["last_updated"], inplace=True)
+            dataframe["created_date"] = ""
+            dataframe["created_time"] = ""
+            dataframe["last_updated_date"] = ""
+            dataframe["last_updated_time"] = ""
         return dataframe
     except Exception as e:
         logger.error("ERROR: timestamp_to_date_and_time")
