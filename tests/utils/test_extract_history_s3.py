@@ -32,7 +32,7 @@ def test_should_correctly_upload_text_log_file(mock_client):
         bucket_name = "test_ingestion_bucket"
         extract_history_s3(bucket_name=bucket_name, prefix="ExtractHistory")
         test_bucket_contents = mock_client.list_objects_v2(Bucket=bucket_name)['Contents']
-        file_name = f"{datetime.now().strftime('%d%m%Y%H%M')}" #ddmmyyhhmmss
+        file_name = f"{datetime.now().strftime('%d%m%Y%H%M')}"
 
         assert test_bucket_contents[0]["Key"] == f"ExtractHistory/{file_name}.txt"
 

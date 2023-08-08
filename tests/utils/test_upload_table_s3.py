@@ -1,4 +1,5 @@
 from utils.utils import upload_table_s3
+from datetime import datetime
 import pytest
 import boto3
 from unittest.mock import patch
@@ -34,11 +35,13 @@ def test_should_correctly_upload_dataframe_as_csv_to_s3(mock_client):
         ["r3c1", "r3c2", "r3c3"],
     ]
     test_table_df = pd.DataFrame(data=test_data, columns=["col1", "col2", "col3"])
-    upload_table_s3(test_table_df, table_name, bucket_name)
+    job_timestamp = datetime.now()
+    folder_name = job_timestamp.strftime('%Y%m%d%H%M%S')
+    upload_table_s3(test_table_df, table_name, bucket_name, job_timestamp)
 
     test_bucket_contents = mock_client.list_objects_v2(Bucket=bucket_name)["Contents"]
 
-    assert test_bucket_contents[0]["Key"] == "test_table.csv"
+    assert test_bucket_contents[0]["Key"] == f"{folder_name}/test_table.csv"
     assert test_bucket_contents[0]["Size"] > 0
 
 
@@ -51,11 +54,13 @@ def test_should_raise_exception_if_arguments_incorrect_type():
     test_table_df = pd.DataFrame(data=test_data, columns=["col1", "col2", "col3"])
 
     with pytest.raises(TypeError):
-        upload_table_s3("string", "string", "string")
+        upload_table_s3("string", "string", "string", "string")
     with pytest.raises(TypeError):
-        upload_table_s3(test_table_df, 2, "string")
+        upload_table_s3(test_table_df, 2, "string", "string")
     with pytest.raises(TypeError):
-        upload_table_s3(test_table_df, "string", 2)
+        upload_table_s3(test_table_df, "string", 2, "string")
+    with pytest.raises(TypeError):
+        upload_table_s3(test_table_df, "string", "string", 2)
 
 @pytest.mark.filterwarnings("ignore::pytest.PytestUnraisableExceptionWarning")
 def test_should_raise_exception_if_incorrect_bucket_name(mock_client):
@@ -70,6 +75,6 @@ def test_should_raise_exception_if_incorrect_bucket_name(mock_client):
             ["r3c1", "r3c2", "r3c3"],
         ]
         test_table_df = pd.DataFrame(data=test_data, columns=["col1", "col2", "col3"])
-
+        job_timestamp = datetime.now()
         with pytest.raises(KeyError):
-            upload_table_s3(test_table_df, table_name, bucket_name)
+            upload_table_s3(test_table_df, table_name, bucket_name, job_timestamp)
