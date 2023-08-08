@@ -449,6 +449,28 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
 
 
 def create_date(dates_for_dim_date, target_bucket):
+    """
+    This function creates a dimension date table from the dates_for_dim_date set of date values, by converting the data into a pandas
+    dataframe before extracting various date-related attributes into new columns. The resulting data is then written to a parquet file
+    named 'dim_date.parquet' stored in the target s3 bucket, this progress is then logged.
+
+    Args:
+        dates_for_dim_date (set): A set containing date values to populate the dimension date table.
+        target_bucket (str): The target bucket or directory where the output data will be stored.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If any error occurs during the creation process, an exception is raised, and an error message is logged.
+    
+    Example:
+        create_date('dates-set-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """
     try:
         dates = {'date_id': sorted(list(dates_for_dim_date))}
         dim_date = pd.DataFrame(data=dates)
@@ -464,5 +486,3 @@ def create_date(dates_for_dim_date, target_bucket):
     except Exception as e:
         logger.error('ERROR: create_date')
         raise e
-    
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_date.parquet
