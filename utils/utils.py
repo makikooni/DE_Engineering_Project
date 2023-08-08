@@ -144,6 +144,26 @@ def upload_table_s3(table_df, table_name, bucket_name):
 
 
 def connect_db(db_credentials):
+    """
+    This function uses the supplied credentials to establish a database connection.
+
+    Args:
+        db_credentials (dict): A dictionary containing database connection credentials.
+
+    Returns:
+        Connection: A database connection object.
+
+    Raises:
+        TypeError: If db_credentials is not supplied as a dictionary.
+
+        KeyError: If any neccessary credentials are missing from db_credentials.
+
+        ValueError: If any neccessary credential value is not a string.
+
+        InterfaceError: If the attempt to establish a connection fails.
+
+        DatabaseError: If there's an error from the database itself.
+    """
     if not isinstance(db_credentials, dict):
         raise TypeError(f"db_credentials is {type(db_credentials)}, {dict} is required")
 
