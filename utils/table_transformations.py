@@ -163,6 +163,36 @@ def transform_transaction(file, source_bucket, target_bucket):
 
 
 def transform_staff(file1, file2, source_bucket, target_bucket):
+    """
+    This function reads data from two CSV files, located in the source s3 bucket, before joining the two tables on the 
+    'department_id' column. Specific columns are extracted, from the joined tables, and the resulting data is written 
+    to a Parquet file named 'dim_staff.parquet' stored in the target s3 bucket. Once the parquet file has been stored 
+    in the target s3 bucket, this progress is logged.
+
+    Parameters:
+        file1 (str): The name of one CSV file containing data to be transformed.
+
+        file2 (str): The name of the other CSV file containing data to be transformed.
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_staff('example-file-1-name', 'example-file-2-name', 'source-bucket-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """ 
     try:
         staff_table = read_csv_to_pandas(file1, source_bucket)
         department_table = read_csv_to_pandas(file2, source_bucket)
