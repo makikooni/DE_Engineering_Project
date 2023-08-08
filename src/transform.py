@@ -57,7 +57,7 @@ def transform_lambda_handler(event, context):
             transform_timestamp)
         transform_staff(
             f'{EXTRACT_JOB_TIMESTAMP}/staff',
-            'department',
+            f'{EXTRACT_JOB_TIMESTAMP}/department',
             INGESTION_BUCKET_NAME,
             PROCESSED_BUCKET_NAME,
             transform_timestamp)
