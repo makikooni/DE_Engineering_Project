@@ -5,7 +5,7 @@ import pg8000
 import awswrangler as wr
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from src.load.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format
+from src.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format
 from tests.MockDB.MockDB import MockDB
 
 @pytest.fixture

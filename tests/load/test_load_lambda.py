@@ -6,7 +6,7 @@ import awswrangler as wr
 import pandas as pd
 from datetime import datetime
 from pandas.testing import assert_frame_equal
-from src.load.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format, get_id_col, get_job_list
+from src.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format, get_id_col, get_job_list
 from tests.MockDB.MockDB import MockDB
 
 @pytest.fixture
@@ -77,7 +77,7 @@ def test_get_table_data(mock_client):
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     # expect = wr.s3.to_parquet(df=df_data)
-    output = get_table_data('test_dim_design.parquet', '20230808110721')
+    output = get_table_data('test_dim_design', 'processed-va-052023', '20230808110721')
     assert assert_frame_equal(output, df_data, check_dtype = False) == None
     
 def test_dataframe_to_list_returns_a_list():
