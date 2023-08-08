@@ -125,6 +125,33 @@ def transform_location(file, source_bucket, target_bucket):
 
 
 def transform_transaction(file, source_bucket, target_bucket):
+    """
+    This function transforms data read from a CSV file, located in the source S3 bucket, by extracting specific columns
+    before writing the resulting data to a Parquet file named 'dim_transaction.parquet' stored in the target S3 bucket.
+    Once the parquet file has been stored in the target s3 bucket, this progress is logged.
+
+    Parameters:
+        file (str): The name of the CSV file containing data to be transformed.
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_transaction('example-file-name', 'source-bucket-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """ 
     try:
         transaction_table = read_csv_to_pandas(file, source_bucket)
         dim_transaction_table = transaction_table.loc[:, ['transaction_id', 'transaction_type', 'sales_order_id', 'purchase_order_id']]
