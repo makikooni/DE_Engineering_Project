@@ -12,11 +12,13 @@ logger.setLevel(logging.INFO)
 
 def update_wh(s3_table_name, wh_table_name, is_dim, secret_name='warehouse'):
     # get warehouse credentails from AWS secrets
+    print(secret_name)
     secretsmanager = boto3.client('secretsmanager')
     try:
         db_credentials = secretsmanager.get_secret_value(
-            SecretId=json.dumps(secret_name)
+            SecretId=secret_name
         )
+        print(db_credentials)
     except ClientError as error:
         if error.response['Error']['Code'] == 'ResourceNotFoundException':
             raise Exception("The requested secret was not found")
@@ -110,8 +112,9 @@ def insert_table_data(connection,insert_table_sql, data_to_insert):
 
 def get_job_list():
     try:
-        ts = wr.s3.read_fwf('s3://processed-va-052023/lastjobdir/lastjob.txt')
-        return [datetime.fromtimestamp(lst[0]).strftime('%Y%m%d%H%M%S') for lst in ts.values.tolist()]
+        df = wr.s3.read_csv(path='s3://processed-va-052023/lastjob/lastjob.csv')
+        ts_list = [str(ts[0]) for ts in df.values.tolist()]
+        return ts_list
     except Exception as error:
         logger.info["no new jobs", error]
         raise error
@@ -154,7 +157,11 @@ def update_data_format(row):
         logger.info["update_data_format", error]
         raise error
 
-# def jobs_done():
+def rename_lastjob():
+    timestamp_suffix = datetime.now().strftime('%Y%m%d%H%M%S')
+    s3_client = boto3.client('s3')
+    s3_client.copy_object(Bucket='processed-va-052023', CopySource='processed-va-052023/lastjob/lastjob.csv', Key=f'lastjob/lastjob{timestamp_suffix}.csv')
+    s3_client.delete_object(Bucket='processed-va-052023', Key='lastjob/lastjob.csv')
 
 
 def load_lambda_hander():
@@ -168,5 +175,4 @@ def load_lambda_hander():
     update_wh('fact_payment.parquet', 'fact_payment', False)
     update_wh('fact_purchase_order.parquet', 'fact_purchase_order', False)
     update_wh('fact_sales_order.parquet', 'fact_sales_order', False)
-    jobs_done()
-
+    rename_lastjob()

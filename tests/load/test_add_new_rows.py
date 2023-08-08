@@ -68,12 +68,13 @@ def mock_client(create_s3_client, create_s3_resource):
     wr.s3.to_parquet(df=df_data_1, path=f's3://{processed_bucket_name}/20230808110721/{file_name}.parquet')
     wr.s3.to_parquet(df=df_data_2, path=f's3://{processed_bucket_name}/20230808110752/{file_name}.parquet')
     wr.s3.to_parquet(df=df_data_3, path=f's3://{processed_bucket_name}/20230808110813/{file_name}.parquet')
-    wr.s3.upload(local_file = './tests/load/lastjob.txt', path=f's3://{processed_bucket_name}/lastjobdir/lastjob.txt')
+    wr.s3.upload(local_file = './tests/load/lastjob.csv', path=f's3://{processed_bucket_name}/lastjob/lastjob.csv')
     yield mock_client
 
+
 def test_add_new_rows_puts_data_in_wh_with_0_rows(mock_client, secret_manager):
-    secret_manager.create_secret(Name='test_secret_name', SecretString='{"host":"local", "user"":"david", "port": 5432, "database":"test_db_load"}')
-    
+    secret_manager.create_secret(Name='test_secret_name', SecretString='{"host":"local_host", "username":"david", "password":"Paprika5", "port": 5432, "dbname":"test_db_load"}')
+    #secret_manager.list_secrets()
     test_db = MockDB
     test_db.set_up_database()
     test_db.set_up_tables()
