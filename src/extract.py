@@ -87,9 +87,14 @@ def extraction_lambda_handler(event, context):
                 connection, table_name, INGESTION_BUCKET_NAME
             )
 
-            upload_table_s3(table_df, table_name, INGESTION_BUCKET_NAME, JOB_TIMESTAMP)
+            upload_table_s3(
+                table_df,
+                table_name,
+                INGESTION_BUCKET_NAME,
+                JOB_TIMESTAMP)
 
-            logger.info(f"{table_name} table successfully extracted and uploaded!")
+            logger.info(
+                f"{table_name} table successfully extracted and uploaded!")
         connection.close()
         logger.info("#=#=#=#=#= Extract Lambda Job Complete! =#=#=#=#=#")
 

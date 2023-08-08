@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime 
+from datetime import datetime
 from utils.table_transformations import (
     transform_design, transform_payment_type,
     transform_location, transform_transaction,
@@ -27,7 +27,7 @@ def transform_lambda_handler(event, context):
     if event_obj_name[-3:] != 'txt' and \
             'ExtractHistory' not in event_obj_name:
         raise ValueError('Wrong extraction trigger file')
-    
+
     EXTRACT_JOB_TIMESTAMP = get_last_job_timestamp(INGESTION_BUCKET_NAME)
 
     try:
@@ -90,8 +90,11 @@ def transform_lambda_handler(event, context):
             PROCESSED_BUCKET_NAME,
             dates_for_dim_date,
             transform_timestamp)
-        create_date(dates_for_dim_date, PROCESSED_BUCKET_NAME, transform_timestamp)
-        
+        create_date(
+            dates_for_dim_date,
+            PROCESSED_BUCKET_NAME,
+            transform_timestamp)
+
         log_latest_job_transform(PROCESSED_BUCKET_NAME, transform_timestamp)
     except ClientError as e:
         if e.response['Error']['Code'] == '404':
