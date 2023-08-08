@@ -199,6 +199,21 @@ def connect_db(db_credentials):
 
         
 def extract_history_s3(bucket_name, prefix):
+    """
+    This function puts an file, with a prefixed and timestamped filename, in a specified s3 bucket.
+
+    Args:
+        bucket_name (str): The name of the target S3 bucket.
+
+        prefix (str): The prefix to be added to the beginning of the filename.
+
+    Raises:
+        TypeError: If either bucket_name or prefix are not strings.
+
+        KeyError: If the specified bucket does not exist.
+
+        Exception: If an error arises whilst logging to S3.
+    """
     if not isinstance(bucket_name, str):
         raise TypeError(f"bucket name {type(bucket_name)}, expected {str}")
     if not isinstance(prefix, str):
