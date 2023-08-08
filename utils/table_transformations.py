@@ -15,7 +15,7 @@ def transform_design(file, source_bucket, target_bucket):
     Once the parquet file has been stored in the target s3 bucket, this progress is logged.
 
     Parameters:
-        file (str): The name of the CSV file containing data to be transformed.
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
 
         source_bucket (str): The name of the source S3 bucket where the CSV file is located.
 
@@ -53,7 +53,7 @@ def transform_payment_type(file, source_bucket, target_bucket):
     Once the parquet file has been stored in the target s3 bucket, this progress is logged.
 
     Parameters:
-        file (str): The name of the CSV file containing data to be transformed.
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
 
         source_bucket (str): The name of the source S3 bucket where the CSV file is located.
 
@@ -92,7 +92,7 @@ def transform_location(file, source_bucket, target_bucket):
     the parquet file has been stored in the target s3 bucket, this progress is logged.
 
     Parameters:
-        file (str): The name of the CSV file containing data to be transformed.
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
 
         source_bucket (str): The name of the source S3 bucket where the CSV file is located.
 
@@ -131,7 +131,7 @@ def transform_transaction(file, source_bucket, target_bucket):
     Once the parquet file has been stored in the target s3 bucket, this progress is logged.
 
     Parameters:
-        file (str): The name of the CSV file containing data to be transformed.
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
 
         source_bucket (str): The name of the source S3 bucket where the CSV file is located.
 
@@ -170,9 +170,9 @@ def transform_staff(file1, file2, source_bucket, target_bucket):
     in the target s3 bucket, this progress is logged.
 
     Parameters:
-        file1 (str): The name of one CSV file containing data to be transformed.
+        file1 (str): The name of one CSV file containing data to be transformed (without the '.csv' extension).
 
-        file2 (str): The name of the other CSV file containing data to be transformed.
+        file2 (str): The name of the other CSV file containing data to be transformed (without the '.csv' extension).
 
         source_bucket (str): The name of the source S3 bucket where the CSV file is located.
 
@@ -213,7 +213,7 @@ def transform_currency(file, source_bucket, target_bucket):
     Once the parquet file has been stored in the target s3 bucket, this progress is logged.
 
     Parameters:
-        file (str): The name of one CSV file containing data to be transformed.
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
 
         source_bucket (str): The name of the source S3 bucket where the CSV file is located.
 
@@ -256,9 +256,9 @@ def transform_counterparty(file1, file2, source_bucket, target_bucket):
     target s3 bucket, this progress is logged.
 
     Parameters:
-        file1 (str): The name of one CSV file containing data to be transformed.
+        file1 (str): The name of one CSV file containing data to be transformed (without the '.csv' extension).
 
-        file2 (str): The name of the other CSV file containing data to be transformed.
+        file2 (str): The name of the other CSV file containing data to be transformed (without the '.csv' extension).
 
         source_bucket (str): The name of the source S3 bucket where the CSV file is located.
 
@@ -302,7 +302,7 @@ def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date
     to the dim_for_dim_dates set.
 
     Parameters:
-        file (str): The name of one CSV file containing data to be transformed.
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
 
         source_bucket (str): The name of the source S3 bucket where the CSV file is located.
 
@@ -354,7 +354,7 @@ def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_d
     to the dim_for_dim_dates set.
 
     Parameters:
-        file (str): The name of one CSV file containing data to be transformed.
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
 
         source_bucket (str): The name of the source S3 bucket where the CSV file is located.
 
@@ -405,7 +405,7 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
     to the dim_for_dim_dates set.
 
     Parameters:
-        file (str): The name of one CSV file containing data to be transformed.
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
 
         source_bucket (str): The name of the source S3 bucket where the CSV file is located.
 
