@@ -6,7 +6,7 @@ from utils.utils import (
     get_table_db,
     upload_table_s3,
     log_latest_job,
-    extract_history_s3
+    trigger_transform_lambda,
 )
 
 """
@@ -84,30 +84,20 @@ def extraction_lambda_handler(event, context):
         JOB_TIMESTAMP = connection.run("SELECT NOW()")[0][0]
 
         for table_name in table_names:
-
             table_df, query = get_table_db(
-                connection, table_name, INGESTION_BUCKET_NAME)
-
-            upload_table_s3(
-                table_df,
-                table_name,
-                INGESTION_BUCKET_NAME,
-                JOB_TIMESTAMP)
-
-            logger.info(
-                f"{table_name} table successfully extracted and uploaded!"
+                connection, table_name, INGESTION_BUCKET_NAME
             )
+
+            upload_table_s3(table_df, table_name, INGESTION_BUCKET_NAME, JOB_TIMESTAMP)
+
+            logger.info(f"{table_name} table successfully extracted and uploaded!")
         connection.close()
-        logger.info('#=#=#=#=#= Extract Lambda Job Complete! =#=#=#=#=#')
+        logger.info("#=#=#=#=#= Extract Lambda Job Complete! =#=#=#=#=#")
 
-        log_latest_job(
-            bucket_name=INGESTION_BUCKET_NAME,
-            timestamp=JOB_TIMESTAMP
-        )
+        log_latest_job(bucket_name=INGESTION_BUCKET_NAME, timestamp=JOB_TIMESTAMP)
 
-        extract_history_s3(
-            bucket_name=INGESTION_BUCKET_NAME,
-            prefix="ExtractHistory"
+        trigger_transform_lambda(
+            bucket_name=INGESTION_BUCKET_NAME, prefix="ExtractHistory"
         )
 
     except Exception as e:
