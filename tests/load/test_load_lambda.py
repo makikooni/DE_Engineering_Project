@@ -187,10 +187,10 @@ def skip_test_insert_table_data_works_with_insert_sql():
                         "VALUES (%s,%s,%s,%s) "
     connection = pg8000.connect(
             host='localhost',
-            user='lucy',
+            user='david',
             port=5432,
             database='test_db_load',
-            password='QASW"1qa'
+            password='Paprika5'
         )
     insert_table_data(connection,insert_table_sql, data_to_insert)
     cursor = connection.cursor()
@@ -210,10 +210,10 @@ def test_insert_table_data_works_with_update_sql():
     insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
     connection = pg8000.connect(
             host='localhost',
-            user='lucy',
+            user='david',
             port=5432,
             database='test_db_load',
-            password='QASW"1qa'
+            password='Paprika5'
         )
     insert_table_data(connection,insert_table_sql, data_to_insert)
     cursor = connection.cursor()
@@ -234,10 +234,10 @@ def test_insert_table_data_works_with_update_sql_with_multiple_data():
     insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
     connection = pg8000.connect(
             host='localhost',
-            user='lucy',
+            user='david',
             port=5432,
             database='test_db_load',
-            password='QASW"1qa'
+            password='Paprika5'
         )
     insert_table_data(connection,insert_table_sql, data_to_insert)
     cursor = connection.cursor()
@@ -307,10 +307,10 @@ def test_get_col_id_returns_list():
 
     connection = pg8000.connect(
             host='localhost',
-            user='lucy',
+            user='david',
             port=5432,
             database='test_db_load',
-            password='QASW"1qa'
+            password='Paprika5'
         )
     test_data = [[
         'design_id', 'design_name', 'file_location', 'file_name'

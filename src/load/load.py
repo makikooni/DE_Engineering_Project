@@ -15,7 +15,7 @@ def update_wh(s3_table_name, wh_table_name, is_dim, secret_name='warehouse'):
     secretsmanager = boto3.client('secretsmanager')
     try:
         db_credentials = secretsmanager.get_secret_value(
-            SecretId=secret_name
+            SecretId=json.dumps(secret_name)
         )
     except ClientError as error:
         if error.response['Error']['Code'] == 'ResourceNotFoundException':

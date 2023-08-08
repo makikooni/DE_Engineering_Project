@@ -4,9 +4,16 @@ import boto3
 import pg8000
 import awswrangler as wr
 import pandas as pd
+import json
 from pandas.testing import assert_frame_equal
+from moto import mock_secretsmanager
 from src.load.load import update_wh
 from tests.MockDB.MockDB import MockDB
+
+@pytest.fixture(scope='function')
+def secret_manager():
+    with mock_secretsmanager():
+        yield boto3.client('secretsmanager', region_name='eu-west-2')
 
 @pytest.fixture
 def create_s3_client():
@@ -64,18 +71,20 @@ def mock_client(create_s3_client, create_s3_resource):
     wr.s3.upload(local_file = './tests/load/lastjob.txt', path=f's3://{processed_bucket_name}/lastjobdir/lastjob.txt')
     yield mock_client
 
-def test_add_new_rows_puts_data_in_wh_with_0_rows(mock_client):
+def test_add_new_rows_puts_data_in_wh_with_0_rows(mock_client, secret_manager):
+    secret_manager.create_secret(Name='test_secret_name', SecretString='{"host":"local", "user"":"david", "port": 5432, "database":"test_db_load"}')
+    
     test_db = MockDB
     test_db.set_up_database()
     test_db.set_up_tables()
     connection = pg8000.connect(
             host='localhost',
-            user='lucy',
+            user='david',
             port=5432,
             database='test_db_load',
-            password='QASW"1qa'
+            password='Paprika5'
         )
-    update_wh('test_dim_design.parquet', 'dim_design_t1', True)
+    update_wh('test_dim_design.parquet', 'dim_design_t1', True, 'test_secret_name')
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM dim_design_t1")
     output = cursor.fetchall()
