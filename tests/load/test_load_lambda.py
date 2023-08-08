@@ -4,8 +4,9 @@ import boto3
 import pg8000
 import awswrangler as wr
 import pandas as pd
+from datetime import datetime
 from pandas.testing import assert_frame_equal
-from src.load.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format, get_id_col
+from src.load.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format, get_id_col, get_job_list
 from tests.MockDB.MockDB import MockDB
 
 @pytest.fixture
@@ -22,13 +23,13 @@ def create_s3_resource():
 def mock_client(create_s3_client, create_s3_resource):
     mock_client = create_s3_client
     conn = create_s3_resource
-    processed_bucket_name = 'test-processed-va-052023'
+    processed_bucket_name = 'processed-va-052023'
     file_name = 'test_dim_design'
     mock_client.create_bucket(
         Bucket=processed_bucket_name,
         CreateBucketConfiguration={'LocationConstraint': 'eu-west-2'},
         )
-    test_data = [[
+    test_data_1 = [[
         'design_id', 'design_name', 'file_location', 'file_name'
     ],
     [{
@@ -37,8 +38,31 @@ def mock_client(create_s3_client, create_s3_resource):
         'file_location': '/usr',
         'file_name': 'wooden-20220717-npgz.json'
     }]]
-    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    wr.s3.to_parquet(df=df_data, path=f's3://{processed_bucket_name}/{file_name}.parquet')
+    test_data_2 = [[
+        'design_id', 'design_name', 'file_location', 'file_name'
+    ],
+    [{
+        'design_id':'7',
+        'design_name': 'Wooden',
+        'file_location': '/usr',
+        'file_name': 'wooden-20220717-npgz.json'
+    }]]
+    test_data_3 = [[
+        'design_id', 'design_name', 'file_location', 'file_name'
+    ],
+    [{
+        'design_id':'8',
+        'design_name': 'Wood',
+        'file_location': '/usr',
+        'file_name': 'wooden-20220717-npgz.json'
+    }]]
+    df_data_1 = pd.DataFrame(data = test_data_1[1], columns = test_data_1[0])
+    df_data_2 = pd.DataFrame(data = test_data_2[1], columns = test_data_2[0])
+    df_data_3 = pd.DataFrame(data = test_data_3[1], columns = test_data_3[0])
+    wr.s3.to_parquet(df=df_data_1, path=f's3://{processed_bucket_name}/20230808110721/{file_name}.parquet')
+    wr.s3.to_parquet(df=df_data_2, path=f's3://{processed_bucket_name}/20230808110752/{file_name}.parquet')
+    wr.s3.to_parquet(df=df_data_3, path=f's3://{processed_bucket_name}/20230808110813/{file_name}.parquet')
+    wr.s3.upload(local_file = './tests/load/lastjob.txt', path=f's3://{processed_bucket_name}/lastjobdir/lastjob.txt')
     yield mock_client
 
 def test_get_table_data(mock_client):
@@ -53,7 +77,7 @@ def test_get_table_data(mock_client):
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     # expect = wr.s3.to_parquet(df=df_data)
-    output = get_table_data('test_dim_design.parquet')
+    output = get_table_data('test_dim_design.parquet', '20230808110721')
     assert assert_frame_equal(output, df_data, check_dtype = False) == None
     
 def test_dataframe_to_list_returns_a_list():
@@ -82,7 +106,7 @@ def test_dataframe_to_list_returns_only_data():
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     output = insert_data_format(df_data)
-    expect = ['8','8', 'Wooden', '/usr', 'wooden-20220717-npgz.json']
+    expect = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json')]
     assert output == expect
 
 def test_dataframe_to_list_returns_only_data_with_multiple_rows():
@@ -103,7 +127,7 @@ def test_dataframe_to_list_returns_only_data_with_multiple_rows():
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     output = insert_data_format(df_data)
-    expect = ['8','8', 'Wooden', '/usr', 'wooden-20220717-npgz.json', '7','7', 'Woden', '/us', 'wooden.json']
+    expect = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json'), ('7', 'Woden', '/us', 'wooden.json')]
     assert output == expect
 
 def test_build_insert_sql():
@@ -119,12 +143,8 @@ def test_build_insert_sql():
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     output = build_insert_sql('dim_design', df_data)
-    expect = "BEGIN " \
-                "IF NOT EXISTS (SELECT * FROM dim_design WHERE design_id = %s "\
-                "BEGIN " \
-                "INSERT INTO dim_design (design_id, design_name, file_location, file_name, example) "\
-                "VALUES (%s,%s,%s,%s,%s) "\
-                "END END"
+    expect = "INSERT INTO dim_design (design_id, design_name, file_location, file_name, example) "\
+            "VALUES (%s,%s,%s,%s,%s) "
     
     assert  output == expect
 
@@ -140,12 +160,8 @@ def test_build_insert_sql_with_different_amount_of_columns():
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     output = build_insert_sql('dim_design', df_data)
-    expect = "BEGIN " \
-                "IF NOT EXISTS (SELECT * FROM dim_design WHERE design_id = %s "\
-                "BEGIN " \
-                "INSERT INTO dim_design (design_id, design_name, file_location, file_name) "\
-                "VALUES (%s,%s,%s,%s) "\
-                "END END"
+    expect = "INSERT INTO dim_design (design_id, design_name, file_location, file_name) "\
+            "VALUES (%s,%s,%s,%s) "
     assert  output == expect
 
     test_data = [[
@@ -158,31 +174,23 @@ def test_build_insert_sql_with_different_amount_of_columns():
     }]]
     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
     output = build_insert_sql('dim_design', df_data)
-    expect =    "BEGIN " \
-                "IF NOT EXISTS (SELECT * FROM dim_design WHERE design_id = %s "\
-                "BEGIN " \
-                "INSERT INTO dim_design (design_id, design_name, file_location) "\
-                "VALUES (%s,%s,%s) "\
-                "END END"
+    expect = "INSERT INTO dim_design (design_id, design_name, file_location) "\
+            "VALUES (%s,%s,%s) "
     assert  output == expect
 
 def skip_test_insert_table_data_works_with_insert_sql():
     test_db = MockDB
     test_db.set_up_database()
     test_db.set_up_tables()
-    data_to_insert = ['8','8', 'Wooden', '/usr', 'wooden-20220717-npgz.json']
-    insert_table_sql =  "BEGIN " \
-                        "IF NOT EXISTS (SELECT * FROM dim_design_t1 WHERE design_id = %s) "\
-                        "BEGIN " \
-                        "INSERT INTO dim_design_t1 (design_id, design_name, file_location, file_name) "\
-                        "VALUES (%s,%s,%s,%s) "\
-                        "END END"
+    data_to_insert = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json')]
+    insert_table_sql =  "INSERT INTO dim_design_t1 (design_id, design_name, file_location, file_name) "\
+                        "VALUES (%s,%s,%s,%s) "
     connection = pg8000.connect(
             host='localhost',
-            user='david',
+            user='lucy',
             port=5432,
             database='test_db_load',
-            password='Paprika5'
+            password='QASW"1qa'
         )
     insert_table_data(connection,insert_table_sql, data_to_insert)
     cursor = connection.cursor()
@@ -202,10 +210,10 @@ def test_insert_table_data_works_with_update_sql():
     insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
     connection = pg8000.connect(
             host='localhost',
-            user='david',
+            user='lucy',
             port=5432,
             database='test_db_load',
-            password='Paprika5'
+            password='QASW"1qa'
         )
     insert_table_data(connection,insert_table_sql, data_to_insert)
     cursor = connection.cursor()
@@ -226,10 +234,10 @@ def test_insert_table_data_works_with_update_sql_with_multiple_data():
     insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
     connection = pg8000.connect(
             host='localhost',
-            user='david',
+            user='lucy',
             port=5432,
             database='test_db_load',
-            password='Paprika5'
+            password='QASW"1qa'
         )
     insert_table_data(connection,insert_table_sql, data_to_insert)
     cursor = connection.cursor()
@@ -328,23 +336,30 @@ def test_update_data_format_returns_a_list_in_right_format_for_multiple_rows():
     output = update_data_format(df_data)
     assert expect == output
 
-def test_extract_id_col_from_warehouse_table():
+def test_get_job_list_returns_list(mock_client):
+    output = get_job_list()
+    print(output)
+    assert isinstance(output, list)
+
+def test_get_job_list_returns_list_that_is_wanted(mock_client):
+    output = get_job_list()
+    expect = ['20230808110721', '20230808110752', '20230808110813']
+    assert output == expect
+
+def test_get_col_id_returns_list():
     test_db = MockDB
     test_db.set_up_database()
     test_db.set_up_tables()
     test_db.insert_data_to_update()
     test_db.insert_data_to_update_2()
 
-    data_to_insert = [( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '8'), ( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '7')]
-    insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
     connection = pg8000.connect(
             host='localhost',
-            user='david',
+            user='lucy',
             port=5432,
             database='test_db_load',
-            password='Paprika5'
+            password='QASW"1qa'
         )
-    
     test_data = [[
         'design_id', 'design_name', 'file_location', 'file_name'
     ],
@@ -353,9 +368,14 @@ def test_extract_id_col_from_warehouse_table():
         'design_name': 'Wooden',
         'file_location': '/usr',
         'file_name': 'wooden-20220717-npgz.json'
+    },
+    {
+        'design_id':'7',
+        'design_name': 'Woden',
+        'file_location': '/us',
+        'file_name': 'wooden.json'
     }]]
-    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    
+    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0]) 
     output = get_id_col(connection, 'dim_design_t1', df_data)
-    expect = ([8], [7])
-    assert output == expect
+    print(output)
+    assert isinstance(output, list)

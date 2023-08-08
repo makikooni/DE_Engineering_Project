@@ -4,12 +4,13 @@ import pg8000
 import boto3
 import awswrangler as wr
 import pandas as pd
+from datetime import datetime
 from botocore.exceptions import ClientError
 
 logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
 
-def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
+def add_new_rows(s3_table_name, wh_table_name, is_dim, secret_name='warehouse'):
     # get warehouse credentails from AWS secrets
     secretsmanager = boto3.client('secretsmanager')
     try:
@@ -38,18 +39,24 @@ def add_new_rows(s3_table_name, wh_table_name, secret_name='warehouse'):
             password=password
         )
 
-        is_fact = s3_table_name.startswith('fact')
+        # get the table from the s3 and put it in a pandas dataframe#
+        # will need to work with a list
+        new_jobs = get_job_list()
+        for ts_dir in new_jobs:
+            table = get_table_data(s3_table_name, ts_dir)
+            if is_dim:
+                lst_wh_id = get_id_col(connection, wh_table_name, table)
+                for row in table.values.tolist():
+                    if row[0] in lst_wh_id:
+                        update_data_format()
+                        build_update_sql()
 
-        # get the table from the s3 and put it in a pandas dataframe
-        table = get_table_data(s3_table_name)
-
-        get_id_col(connection, wh_table_name, table)
-
-        insert_table_sql = build_insert_sql(wh_table_name, table)
-        # # Convert DataFrame to list tuples for executemany
-        data_to_insert = insert_data_format(table)
-        # # Execute the query using executemany to insert all rows at once
-        insert_table_data(connection,insert_table_sql, data_to_insert)
+            else:
+                insert_table_sql = build_insert_sql(wh_table_name, table)
+                # # Convert DataFrame to list tuples for executemany
+                data_to_insert = insert_data_format(table)
+                # # Execute the query using executemany to insert all rows at once
+                insert_table_data(connection,insert_table_sql, data_to_insert)
     except Exception as error:
         logger.info["main function error", error]
         raise error
@@ -59,47 +66,28 @@ def get_id_col(connection, wh_table_name, table):
     cursor = connection.cursor()
     cursor.execute(query)
     id_col = cursor.fetchall()
-    print(id_col)
     cursor.close()
-    return id_col
+    return [lst[0] for lst in id_col]
 
-def get_table_data(s3_table_name):
+def get_table_data(s3_table_name, timestamp):
     try:
-        return wr.s3.read_parquet(f's3://test-processed-va-052023/{s3_table_name}')
+        return wr.s3.read_parquet(f's3://processed-va-052023/{timestamp}/{s3_table_name}')
     except Exception as error:
         logger.info["get_table_data", error]
         raise error
+
 def insert_data_format(table):
     try:
-        data = []
-        rows = table.values.tolist()
-        columns = table.columns
-        for row in rows:
-            insert_row = row
-            index = 0
-            for value in insert_row:
-                if index < len(row) and index != 0:
-                    data.append(value)
-                    index += 1
-                elif index == 0:
-                    index += 1
-                    data.append(row[0])
-                    data.append(row[0])           
-        return data
+        return [tuple(row) for row in table.itertuples(index=False)]
     except Exception as error:
         logger.info["insert_data_format", error]
         raise error
-        # return [tuple(row) for row in table.itertuples(index=False)]
+
 def build_insert_sql(wh_table_name, table):
     try:
         columns = ', '.join(table.columns)
         placeholder = ',' .join(['%s'] * len(table.columns))
-        return f"BEGIN " \
-                f"IF NOT EXISTS (SELECT * FROM {wh_table_name} WHERE {table.columns[0]} = %s "\
-                "BEGIN " \
-                f"INSERT INTO {wh_table_name} ({columns}) "\
-                f"VALUES ({placeholder}) "\
-                f"END END"
+        return f"INSERT INTO {wh_table_name} ({columns}) VALUES ({placeholder}) "
     except Exception as error:
         logger.info["build_insert_sql", error]
         raise error
@@ -114,12 +102,23 @@ def insert_table_data(connection,insert_table_sql, data_to_insert):
         logger.info["insert_table_data", error]
         raise error
 
-# def check_update_or_rows():
+def get_job_list():
+    try:
+        ts = wr.s3.read_fwf('s3://processed-va-052023/lastjobdir/lastjob.txt')
+        return [datetime.fromtimestamp(lst[0]).strftime('%Y%m%d%H%M%S') for lst in ts.values.tolist()]
+    except Exception as error:
+        logger.info["no new jobs", error]
+        raise error
+
+# def needs_update():
     '''
-    1. look in the s3 bucket
-    2. check if folder with data is new
-    3. check  
+    1. get table id
+    2. check if given data has new id
+    3. insert if has new id update if not
     '''
+
+# def change last_job.txt():
+#   change the last_job.txt ing s3 bucket
 
 def build_update_sql(wh_table_name, table):
     try:
@@ -165,15 +164,15 @@ def update_data_format(table):
         raise error
 
 def load_lambda_hander():
-    add_new_rows('dim_counterparty.parquet', 'dim_counterparty')
-    add_new_rows('dim_currency.parquet', 'dim_currency')
-    add_new_rows('dim_date.parquet', 'dim_date')
-    add_new_rows('dim_design.parquet', 'dim_design')
-    add_new_rows('dim_location.parquet', 'dim_location')
-    add_new_rows('dim_payment_type.parquet', 'dim_payment_type')
-    add_new_rows('dim_staff.parquet', 'dim_staff')
-    add_new_rows('fact_payment.parquet', 'fact_payment')
-    add_new_rows('fact_purchase_order.parquet', 'fact_purchase_order')
-    add_new_rows('fact_sales_order.parquet', 'fact_sales_order')
+    add_new_rows('dim_counterparty.parquet', 'dim_counterparty', True)
+    add_new_rows('dim_currency.parquet', 'dim_currency', True)
+    add_new_rows('dim_date.parquet', 'dim_date', True)
+    add_new_rows('dim_design.parquet', 'dim_design', True)
+    add_new_rows('dim_location.parquet', 'dim_location', True)
+    add_new_rows('dim_payment_type.parquet', 'dim_payment_type', True)
+    add_new_rows('dim_staff.parquet', 'dim_staff', True)
+    add_new_rows('fact_payment.parquet', 'fact_payment', False)
+    add_new_rows('fact_purchase_order.parquet', 'fact_purchase_order', False)
+    add_new_rows('fact_sales_order.parquet', 'fact_sales_order', False)
+    jobs_done()
 
-add_new_rows('fact_purchase_order.parquet', 'fact_purchase_order')

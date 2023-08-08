@@ -24,10 +24,10 @@ class MockDB(TestCase):
         # connecting to warehouse
         connection = pg8000.connect(
             host='localhost',
-            user='david',
+            user='lucy',
             port=5432,
             database='postgres',
-            password='Paprika5'
+            password='QASW"1qa'
         )
         cursor = connection.cursor()
         connection.autocommit = True
@@ -48,10 +48,10 @@ class MockDB(TestCase):
     # connection to database
         connection = pg8000.connect(
             host='localhost',
-            user='david',
+            user='lucy',
             port=5432,
             database='test_db_load',
-            password='Paprika5'
+            password='QASW"1qa'
         )
         cursor = connection.cursor()
         connection.autocommit = True
@@ -75,10 +75,10 @@ class MockDB(TestCase):
         # connection to database
         connection = pg8000.connect(
             host='localhost',
-            user='david',
+            user='lucy',
             port=5432,
             database='test_db_load',
-            password='Paprika5'
+            password='QASW"1qa'
         )
         # (design_id, design_name, file_location, file_name)
         cursor = connection.cursor()
@@ -97,10 +97,10 @@ class MockDB(TestCase):
         # connection to database
         connection = pg8000.connect(
             host='localhost',
-            user='david',
+            user='lucy',
             port=5432,
             database='test_db_load',
-            password='Paprika5'
+            password='QASW"1qa'
         )
         # (design_id, design_name, file_location, file_name)
         cursor = connection.cursor()
