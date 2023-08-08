@@ -1,5 +1,6 @@
 # import moto.core
 from moto import mock_s3
+from datetime import datetime
 import boto3
 import pytest
 import awswrangler as wr
@@ -41,10 +42,11 @@ def test_transform_payment_retrieves_csv_file_from_ingestion_s3_bucket_and_puts_
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_payment('test', ingestion_bucket_name, processed_bucket_name, test_set)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_payment('test', ingestion_bucket_name, processed_bucket_name, test_set, timestamp)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'fact_payment.parquet'
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == f'{timestamp}/fact_payment.parquet'
 
 
 def test_transform_payment_transforms_tables_into_correct_parquet_shchema(mock_client):
@@ -53,8 +55,9 @@ def test_transform_payment_transforms_tables_into_correct_parquet_shchema(mock_c
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_payment('test', ingestion_bucket_name, processed_bucket_name, test_set)
-    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/fact_payment.parquet')
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_payment('test', ingestion_bucket_name, processed_bucket_name, test_set, timestamp)
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/{timestamp}/fact_payment.parquet')
 
     assert len(df) == 3
     assert list(df.columns) == ['payment_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'transaction_id', 'counterparty_id', 'payment_amount', 'currency_id', 'payment_type_id', 'paid', 'payment_date']
@@ -66,7 +69,8 @@ def test_transform_payment_adds_relevent_data_to_set(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_payment('test', ingestion_bucket_name, processed_bucket_name, test_set)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_payment('test', ingestion_bucket_name, processed_bucket_name, test_set, timestamp)
 
     assert test_set == {34, '2a', '14a', 10, '27a', '15a', '3a', 22, '26a'}
 
@@ -77,15 +81,16 @@ def test_transform_payment_raises_exception_when_agruments_invalid(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     with pytest.raises(Exception):
-        transform_payment('wrong', ingestion_bucket_name, processed_bucket_name, test_set)
+        transform_payment('wrong', ingestion_bucket_name, processed_bucket_name, test_set, timestamp)
 
     with pytest.raises(Exception):
-        transform_payment('test', 'wrong', processed_bucket_name, test_set)
+        transform_payment('test', 'wrong', processed_bucket_name, test_set, timestamp)
 
     with pytest.raises(Exception):
-        transform_payment('test', ingestion_bucket_name, 'wrong', test_set)
+        transform_payment('test', ingestion_bucket_name, 'wrong', test_set, timestamp)
 
     with pytest.raises(Exception):
-        transform_payment('test', ingestion_bucket_name, processed_bucket_name, 'wrong')
+        transform_payment('test', ingestion_bucket_name, processed_bucket_name, 'wrong', timestamp)

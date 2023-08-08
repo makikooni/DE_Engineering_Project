@@ -1,5 +1,6 @@
 # import moto.core
 from moto import mock_s3
+from datetime import datetime
 import boto3
 import pytest
 import awswrangler as wr
@@ -37,18 +38,20 @@ def test_transform_transaction_retrieves_csv_file_from_ingestion_s3_bucket_and_p
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_transaction('test', ingestion_bucket_name, processed_bucket_name)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_transaction('test', ingestion_bucket_name, processed_bucket_name, timestamp)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_transaction.parquet'
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == f'{timestamp}/dim_transaction.parquet'
 
 
 def test_transform_transaction_transforms_tables_into_correct_parquet_shchema(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_transaction('test', ingestion_bucket_name, processed_bucket_name)
-    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_transaction.parquet')
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_transaction('test', ingestion_bucket_name, processed_bucket_name, timestamp)
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/{timestamp}/dim_transaction.parquet')
 
     assert len(df) == 3
     assert list(df.columns) == ['transaction_id', 'transaction_type', 'sales_order_id', 'purchase_order_id']
@@ -58,12 +61,13 @@ def test_transform_transaction_raises_exception_when_agruments_invalid(mock_clie
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     with pytest.raises(Exception):
-        transform_transaction('wrong', ingestion_bucket_name, processed_bucket_name)
+        transform_transaction('wrong', ingestion_bucket_name, processed_bucket_name, timestamp)
     
     with pytest.raises(Exception):
-        transform_transaction('test', 'wrong', processed_bucket_name)
+        transform_transaction('test', 'wrong', processed_bucket_name, timestamp)
 
     with pytest.raises(Exception):
-        transform_transaction('test', ingestion_bucket_name, 'wrong')
+        transform_transaction('test', ingestion_bucket_name, 'wrong', timestamp)
