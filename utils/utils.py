@@ -163,15 +163,15 @@ def read_csv_to_pandas(file, source_bucket):
         
         source_bucket (str): The name of the source S3 bucket containing the CSV file.
 
+    Returns:
+        pandas.DataFrame: The contents of the CSV file as a pandas DataFrame.
+
     Raises:
         KeyError: If the specified bucket cannot be found in S3.
 
         RuntimeError: If the Lambda function lacks the necessary policy to access the S3 resource.
         
         Exception: If an unknown error occurs during the reading process.
-
-    Returns:
-        pandas.DataFrame: The contents of the CSV file as a pandas DataFrame.
     """
     try:
         return wr.s3.read_csv(path=f's3://{source_bucket}/{file}.csv')
@@ -198,6 +198,22 @@ def read_csv_to_pandas(file, source_bucket):
 
 
 def write_df_to_parquet(df, file, target_bucket):
+    """
+    This function writes a pandas DataFrame to Parquet format and saves it to an S3 bucket.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to be written to Parquet.
+
+        file (str): The desired name for the Parquet file (without the '.parquet' extension).
+
+        target_bucket (str): The name of the target S3 bucket for storing the Parquet file.
+
+    Returns:
+        None: This function doesn't return a value, but it writes the DataFrame to Parquet.
+
+    Raises:
+        Exception: If an error occurs during the writing process.
+    """
     try:
        return wr.s3.to_parquet(df=df, path=f's3://{target_bucket}/{file}.parquet')
     except Exception as e:
@@ -206,6 +222,20 @@ def write_df_to_parquet(df, file, target_bucket):
         
 
 def timestamp_to_date_and_time(dataframe):
+    """
+    This function extracts and separates date and time data, from timestamp data columns labelled 
+    'created_at' and 'last_updated', into new date and time columns each before dropping the 
+    original timestamp column.
+
+    Args:
+        dataframe (pandas.DataFrame): The DataFrame containing timestamp columns.
+
+    Returns:
+        pandas.DataFrame: The input DataFrame with additional date and time columns.
+
+    Raises:
+        Exception: If an error occurs during the transformation process.
+    """
     try:
         new_created = dataframe['created_at'].str.split(" ", n = 1, expand = True)
         dataframe['created_date']= new_created[0]
