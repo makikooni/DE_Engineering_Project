@@ -77,10 +77,6 @@ def extraction_lambda_handler(event, context):
     db_credentials = get_secret(AWS_SECRET_DB_CREDENTIALS_NAME)
     table_names = get_secret(AWS_SECRET_TABLES_NAMES).keys()
 
-    # 4. test log_latest_job
-    # 5. update tests for get_table_db
-    # 6. test query_controller
-
     try:
         connection = connect_db(db_credentials)
         logger.info(f"Successfully connected to {DBNAME} database!")
