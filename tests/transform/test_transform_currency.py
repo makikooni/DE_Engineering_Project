@@ -1,4 +1,5 @@
 from moto import mock_s3
+from datetime import datetime
 import boto3
 import pytest
 import awswrangler as wr
@@ -32,18 +33,20 @@ def test_transform_currency_retrieves_csv_file_from_ingestion_s3_bucket_and_puts
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_currency('test', ingestion_bucket_name, processed_bucket_name)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_currency('test', ingestion_bucket_name, processed_bucket_name, timestamp)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_currency.parquet'
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == f'{timestamp}/dim_currency.parquet'
 
 
 def test_transform_currency_transforms_tables_into_correct_parquet_shchema(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_currency('test', ingestion_bucket_name, processed_bucket_name)
-    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_currency.parquet')
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_currency('test', ingestion_bucket_name, processed_bucket_name,timestamp)
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/{timestamp}/dim_currency.parquet')
     assert len(df) == 3
     assert list(df.columns) == ['currency_id', 'currency_code', 'currency_name']
 
@@ -52,12 +55,12 @@ def test_transform_currency_raises_exception_when_agruments_invalid(mock_client)
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     with pytest.raises(Exception):
-        transform_currency('wrong', ingestion_bucket_name, processed_bucket_name)
+        transform_currency('wrong', ingestion_bucket_name, processed_bucket_name, timestamp)
     
     with pytest.raises(Exception):
-        transform_currency('test', 'wrong', processed_bucket_name)
+        transform_currency('test', 'wrong', processed_bucket_name, timestamp)
 
     with pytest.raises(Exception):
-        transform_currency('test', ingestion_bucket_name, 'wrong')
+        transform_currency('test', ingestion_bucket_name, 'wrong', timestamp)

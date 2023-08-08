@@ -1,5 +1,6 @@
 # import moto.core
 from moto import mock_s3
+from datetime import datetime
 import boto3
 import pytest
 import awswrangler as wr
@@ -39,18 +40,20 @@ def test_transform_staff_retrieves_csv_file_from_ingestion_s3_bucket_and_puts_pa
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_staff('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_staff('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name, timestamp)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_staff.parquet'
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == f'{timestamp}/dim_staff.parquet'
 
 
 def test_transform_staff_transforms_tables_into_correct_parquet_shchema(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_staff('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name)
-    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_staff.parquet')
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_staff('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name, timestamp)
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/{timestamp}/dim_staff.parquet')
     assert len(df) == 3
     assert list(df.columns) == ['staff_id', 'first_name', 'last_name', 'department_name', 'location', 'email_address']
 
@@ -59,15 +62,16 @@ def test_transform_staff_raises_exception_when_agruments_invalid(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     with pytest.raises(Exception):
-        transform_staff('wrong', 'test_2', ingestion_bucket_name, processed_bucket_name)
+        transform_staff('wrong', 'test_2', ingestion_bucket_name, processed_bucket_name, timestamp)
 
     with pytest.raises(Exception):
-        transform_staff('test_1', 'wrong', ingestion_bucket_name, processed_bucket_name)
+        transform_staff('test_1', 'wrong', ingestion_bucket_name, processed_bucket_name, timestamp)
 
     with pytest.raises(Exception):
-        transform_staff('test_1', 'test_2', 'wrong', processed_bucket_name)
+        transform_staff('test_1', 'test_2', 'wrong', processed_bucket_name, timestamp)
 
     with pytest.raises(Exception):
-        transform_staff('test_1', 'test_2', ingestion_bucket_name, 'wrong')
+        transform_staff('test_1', 'test_2', ingestion_bucket_name, 'wrong', timestamp)

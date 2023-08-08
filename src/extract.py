@@ -4,7 +4,8 @@ from utils.utils import (
     connect_db,
     get_table_db,
     upload_table_s3,
-    extract_history_s3
+    log_latest_job_extract,
+    trigger_transform_lambda,
 )
 
 """
@@ -80,21 +81,30 @@ def extraction_lambda_handler(event, context):
         connection = connect_db(db_credentials)
         logger.info(f"Successfully connected to {DBNAME} database!")
 
+        JOB_TIMESTAMP = connection.run("SELECT NOW()")[0][0]
+
         for table_name in table_names:
-
-            table_df, query = get_table_db(connection, table_name)
-
-            upload_table_s3(table_df, table_name, INGESTION_BUCKET_NAME)
-
-            logger.info(
-                f"{table_name} table successfully extracted and uploaded!"
+            table_df, query = get_table_db(
+                connection, table_name, INGESTION_BUCKET_NAME
             )
 
-        logger.info('#=#=#=#=#= Extract Lambda Job Complete! =#=#=#=#=#')
+            upload_table_s3(
+                table_df,
+                table_name,
+                INGESTION_BUCKET_NAME,
+                JOB_TIMESTAMP)
 
-        extract_history_s3(
-            bucket_name=INGESTION_BUCKET_NAME,
-            prefix="ExtractHistory"
+            logger.info(
+                f"{table_name} table successfully extracted and uploaded!")
+        connection.close()
+        logger.info("#=#=#=#=#= Extract Lambda Job Complete! =#=#=#=#=#")
+
+        log_latest_job_extract(
+            bucket_name=INGESTION_BUCKET_NAME, timestamp=JOB_TIMESTAMP
+        )
+
+        trigger_transform_lambda(
+            bucket_name=INGESTION_BUCKET_NAME, prefix="ExtractHistory"
         )
 
     except Exception as e:

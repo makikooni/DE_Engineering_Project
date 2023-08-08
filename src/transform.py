@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from utils.table_transformations import (
     transform_design, transform_payment_type,
     transform_location, transform_transaction,
@@ -6,6 +7,7 @@ from utils.table_transformations import (
     transform_payment, transform_purchase_order,
     transform_counterparty, transform_sales_order,
     create_date)
+from utils.utils import get_last_job_timestamp, log_latest_job_transform
 from botocore.exceptions import ClientError
 
 logger = logging.getLogger('MyLogger')
@@ -57,56 +59,75 @@ def transform_lambda_handler(event, context):
     if event_obj_name[-3:] != 'txt' and \
             'ExtractHistory' not in event_obj_name:
         raise ValueError('Wrong extraction trigger file')
+
+    last_timestamp = get_last_job_timestamp(INGESTION_BUCKET_NAME)
+    EXTRACT_JOB_TIMESTAMP = last_timestamp.strftime("%Y%m%d%H%M%S")
     try:
         dates_for_dim_date = set()
 
-        transform_design(
-            'design',
-            INGESTION_BUCKET_NAME,
-            PROCESSED_BUCKET_NAME)
-        transform_payment_type(
-            'payment_type',
-            INGESTION_BUCKET_NAME,
-            PROCESSED_BUCKET_NAME)
-        transform_location(
-            'address',
-            INGESTION_BUCKET_NAME,
-            PROCESSED_BUCKET_NAME)
-        transform_transaction(
-            'transaction',
-            INGESTION_BUCKET_NAME,
-            PROCESSED_BUCKET_NAME)
-        transform_staff(
-            'staff',
-            'department',
-            INGESTION_BUCKET_NAME,
-            PROCESSED_BUCKET_NAME)
-        transform_currency(
-            'currency',
-            INGESTION_BUCKET_NAME,
-            PROCESSED_BUCKET_NAME)
-        transform_counterparty(
-            'counterparty',
-            'address',
-            INGESTION_BUCKET_NAME,
-            PROCESSED_BUCKET_NAME)
-        transform_sales_order(
-            'sales_order',
-            INGESTION_BUCKET_NAME,
-            PROCESSED_BUCKET_NAME,
-            dates_for_dim_date)
-        transform_purchase_order(
-            'purchase_order',
-            INGESTION_BUCKET_NAME,
-            PROCESSED_BUCKET_NAME,
-            dates_for_dim_date)
-        transform_payment(
-            'payment',
-            INGESTION_BUCKET_NAME,
-            PROCESSED_BUCKET_NAME,
-            dates_for_dim_date)
-        create_date(dates_for_dim_date, PROCESSED_BUCKET_NAME)
+        transform_timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
+        transform_design(
+            f'{EXTRACT_JOB_TIMESTAMP}/design',
+            INGESTION_BUCKET_NAME,
+            PROCESSED_BUCKET_NAME,
+            transform_timestamp)
+        transform_payment_type(
+            f'{EXTRACT_JOB_TIMESTAMP}/payment_type',
+            INGESTION_BUCKET_NAME,
+            PROCESSED_BUCKET_NAME,
+            transform_timestamp)
+        transform_location(
+            f'{EXTRACT_JOB_TIMESTAMP}/address',
+            INGESTION_BUCKET_NAME,
+            PROCESSED_BUCKET_NAME,
+            transform_timestamp)
+        transform_transaction(
+            f'{EXTRACT_JOB_TIMESTAMP}/transaction',
+            INGESTION_BUCKET_NAME,
+            PROCESSED_BUCKET_NAME,
+            transform_timestamp)
+        transform_staff(
+            f'{EXTRACT_JOB_TIMESTAMP}/staff',
+            f'{EXTRACT_JOB_TIMESTAMP}/department',
+            INGESTION_BUCKET_NAME,
+            PROCESSED_BUCKET_NAME,
+            transform_timestamp)
+        transform_currency(
+            f'{EXTRACT_JOB_TIMESTAMP}/currency',
+            INGESTION_BUCKET_NAME,
+            PROCESSED_BUCKET_NAME,
+            transform_timestamp)
+        transform_counterparty(
+            f'{EXTRACT_JOB_TIMESTAMP}/counterparty',
+            f'{EXTRACT_JOB_TIMESTAMP}/address',
+            INGESTION_BUCKET_NAME,
+            PROCESSED_BUCKET_NAME,
+            transform_timestamp)
+        transform_sales_order(
+            f'{EXTRACT_JOB_TIMESTAMP}/sales_order',
+            INGESTION_BUCKET_NAME,
+            PROCESSED_BUCKET_NAME,
+            dates_for_dim_date,
+            transform_timestamp)
+        transform_purchase_order(
+            f'{EXTRACT_JOB_TIMESTAMP}/purchase_order',
+            INGESTION_BUCKET_NAME,
+            PROCESSED_BUCKET_NAME,
+            dates_for_dim_date,
+            transform_timestamp)
+        transform_payment(
+            f'{EXTRACT_JOB_TIMESTAMP}/payment',
+            INGESTION_BUCKET_NAME,
+            PROCESSED_BUCKET_NAME,
+            dates_for_dim_date,
+            transform_timestamp)
+        create_date(
+            dates_for_dim_date,
+            PROCESSED_BUCKET_NAME,
+            transform_timestamp)
+
+        log_latest_job_transform(PROCESSED_BUCKET_NAME, transform_timestamp)
     except ClientError as e:
         if e.response['Error']['Code'] == '404':
             logger.error('Bucket does not exist')
@@ -116,16 +137,3 @@ def transform_lambda_handler(event, context):
         else:
             logger.error('transform_lambda_handler ')
             raise e
-###############################
-# logger = logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
-
-
-# def transform_lambda_handler(event, context):
-#     logger.info("#=#=#=#=#=#=#=# TRANSFORM LAMBDA =#=#=#=#=#=#=#=#")
-#     logger.info("Hello from the Transform Lambda :)")
-
-# import json
-# with open("tests/transform/test_valid_event.json") as v:
-#     event = json.loads(v.read())
-# transform_lambda_handler(event, {})

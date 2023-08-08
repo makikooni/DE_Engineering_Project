@@ -1,4 +1,4 @@
-from utils.utils import extract_history_s3
+from utils.utils import trigger_transform_lambda
 from datetime import datetime
 import pytest
 import boto3
@@ -30,23 +30,25 @@ def test_should_correctly_upload_text_log_file(mock_client):
     with patch("utils.utils.boto3.client") as mocked_client:
         mocked_client.return_value = mock_client
         bucket_name = "test_ingestion_bucket"
-        extract_history_s3(bucket_name=bucket_name, prefix="ExtractHistory")
-        test_bucket_contents = mock_client.list_objects_v2(Bucket=bucket_name)['Contents']
-        file_name = f"{datetime.now().strftime('%d%m%Y%H%M')}" #ddmmyyhhmmss
+        trigger_transform_lambda(bucket_name=bucket_name, prefix="ExtractHistory")
+        test_bucket_contents = mock_client.list_objects_v2(Bucket=bucket_name)[
+            "Contents"
+        ]
+        file_name = f"{datetime.now().strftime('%d%m%Y%H%M')}"
 
         assert test_bucket_contents[0]["Key"] == f"ExtractHistory/{file_name}.txt"
 
 
 def test_should_raise_exception_if_incorrect_inputs():
     with pytest.raises(TypeError):
-        extract_history_s3(bucket_name="bucketname", prefix=2)
+        trigger_transform_lambda(bucket_name="bucketname", prefix=2)
     with pytest.raises(TypeError):
-        extract_history_s3(bucket_name=["bucket"], prefix="prefix")
+        trigger_transform_lambda(bucket_name=["bucket"], prefix="prefix")
 
 
-def test_should_raise_exception_if_incorrect_bucket_name(mock_client):    
+def test_should_raise_exception_if_incorrect_bucket_name(mock_client):
     with patch("utils.utils.boto3.client") as mocked_client:
         mocked_client.return_value = mock_client
 
     with pytest.raises(ClientError):
-        extract_history_s3(bucket_name="hello", prefix="ExtractHistory")
+        trigger_transform_lambda(bucket_name="hello", prefix="ExtractHistory")

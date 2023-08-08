@@ -10,6 +10,7 @@ from botocore.exceptions import ClientError
 logger = logging.getLogger("UtilsLogger")
 logger.setLevel(logging.INFO)
 
+
 def get_secret(secret_name):
     """
     This function retrieves a secret value from AWS Secrets Manager.
@@ -63,7 +64,7 @@ def get_secret(secret_name):
             logger.error(e)
 
 
-def get_table_db(connection, table_name):
+def get_table_db(connection, table_name, bucket_name):
     """
     This function retrieves data from a database table through a database connection object.
 
@@ -80,15 +81,18 @@ def get_table_db(connection, table_name):
 
         InterfaceError: If the query cannot be executed.
     """
+
     if not isinstance(table_name, str):
         raise TypeError(f"table name is {type(table_name)}, expected {str}")
     if not isinstance(connection, Connection):
         raise TypeError(
             f"connection object is {type(connection)}, expected {Connection}"
         )
+    if not isinstance(bucket_name, str):
+        raise TypeError(f"ingestion bucket name is {type(bucket_name)}, expected {str}")
 
     try:
-        query = f"SELECT * FROM {identifier(table_name)};"
+        query = query_controller(table_name, bucket_name)
 
         table_data = connection.run(query)
         column_names = [col["name"] for col in connection.columns]
@@ -101,7 +105,7 @@ def get_table_db(connection, table_name):
         raise InterfaceError
 
 
-def upload_table_s3(table_df, table_name, bucket_name):
+def upload_table_s3(table_df, table_name, bucket_name, time_stamp):
     """
     This fucntion uploads a pandas.DataFrame to a target S3 bucket as a CSV file.
 
@@ -122,15 +126,22 @@ def upload_table_s3(table_df, table_name, bucket_name):
         
         Exception: If there's an error during the write and upload process.t
     """
+
     if not isinstance(table_df, pd.DataFrame):
         raise TypeError(f"table dataframe {type(table_df)}, expected {pd.DataFrame}")
     if not isinstance(table_name, str):
         raise TypeError(f"table name is {type(table_name)}, expected {str}")
     if not isinstance(bucket_name, str):
         raise TypeError(f"ingestion bucket name is {type(bucket_name)}, expected {str}")
+    if not isinstance(time_stamp, datetime):
+        raise TypeError(f"time stamp is {type(time_stamp)}, expected {datetime}")
+
+    folder_name = time_stamp.strftime("%Y%m%d%H%M%S")
 
     try:
-        wr.s3.to_csv(table_df, f"s3://{bucket_name}/{table_name}.csv", index=False)
+        wr.s3.to_csv(
+            table_df, f"s3://{bucket_name}/{folder_name}/{table_name}.csv", index=False
+        )
 
     except Exception as e:
         error = e.response["Error"]
@@ -196,8 +207,86 @@ def connect_db(db_credentials):
         logger.error(f"DatabaseError: please contact your database administrator")
         raise DatabaseError
 
-        
-def extract_history_s3(bucket_name, prefix):
+def query_controller(table_name, bucket_name):
+    last_job_timestamp = get_last_job_timestamp(bucket_name)
+
+    if last_job_timestamp == False:
+        return f"SELECT * FROM {identifier(table_name)};"
+    else:
+        return f"SELECT * FROM {identifier(table_name)} WHERE last_updated > {literal(last_job_timestamp)};"
+
+
+def get_last_job_timestamp(bucket_name):
+    try:
+        key = "lastjob.txt"
+        s3 = boto3.client("s3")
+        response = s3.get_object(Bucket=bucket_name, Key=key)
+        body = response.get("Body")
+        timestamp_str = body.read().decode()
+        return datetime.fromtimestamp(float(timestamp_str))
+
+    except s3.exceptions.NoSuchKey as e:
+        return False
+    except s3.exceptions.NoSuchBucket as e:
+        logger.error(f"The S3 bucket {bucket_name} does not exist.")
+        raise e
+
+
+def log_latest_job_extract(bucket_name, timestamp):
+    if not isinstance(bucket_name, str):
+        raise TypeError(f"bucket name {type(bucket_name)}, expected {str}")
+    if not isinstance(timestamp, datetime):
+        raise TypeError(f"timestamp {type(timestamp)}, expected {datetime}")
+
+    try:
+        s3 = boto3.client("s3")
+
+        s3.put_object(
+            Body=str(timestamp.timestamp()), Bucket=bucket_name, Key=f"lastjob.txt"
+        )
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "ResourceNotFoundException":
+            logger.error(
+                f"ResourceNotFoundException: the bucket {bucket_name} cannot be found in S3"
+            )
+            raise KeyError(
+                f"ResourceNotFoundException: the bucket {bucket_name} cannot be found in S3"
+            )
+        elif e.response["Error"]["Code"] == "AccessDeniedException":
+            logger.error(
+                f"AccessDeniedException: the lambda does not have an identity-based policy to access S3 resource"
+            )
+            raise RuntimeError(
+                f"AccessDeniedException: the lambda does not have an identity-based policy to access S3 resource"
+            )
+        else:
+            logger.error("ERROR: Unknown error whilst logging extract history to S3")
+            raise e
+
+def log_latest_job_transform(bucket_name, timestamp):
+    if not isinstance(bucket_name, str):
+        raise TypeError(f"bucket name {type(bucket_name)}, expected {str}")
+    if not isinstance(timestamp, str):
+        raise TypeError(f"timestamp {type(timestamp)}, expected {str}")
+
+    try:
+        timestamp_df = wr.s3.read_csv(path=f"s3://{bucket_name}/lastjob/lastjob.csv")
+        timestamp_df.loc[len(timestamp_df)] = [timestamp]
+        wr.s3.to_csv(
+            timestamp_df, f"s3://{bucket_name}/lastjob/lastjob.csv", index=False
+        )
+    except wr.exceptions.NoFilesFound as e:
+        # create df with timestamp
+        timestamp_df = pd.DataFrame(data=[[timestamp]])
+        # upload as csv
+        wr.s3.to_csv(
+            timestamp_df, f"s3://{bucket_name}/lastjob/lastjob.csv", index=False
+        )
+    except Exception as e:
+        logger.error("ERROR: Unknown error whilst logging extract history to S3")
+        raise e
+
+def trigger_transform_lambda(bucket_name, prefix):
     """
     This function puts an file, with a prefixed and timestamped filename, in a specified s3 bucket.
 
@@ -223,13 +312,11 @@ def extract_history_s3(bucket_name, prefix):
 
     try:
         log_string = "SUCCESS"
-        file_name = f"{datetime.now().strftime('%d%m%Y%H%M')}" #ddmmyyhhmmss
-        s3 = boto3.client('s3')
-        
+        file_name = f"{datetime.now().strftime('%d%m%Y%H%M')}"  # ddmmyyhhmmss
+        s3 = boto3.client("s3")
+
         s3.put_object(
-            Body=log_string, 
-            Bucket=bucket_name, 
-            Key=f'{prefix}/{file_name}.txt'
+            Body=log_string, Bucket=bucket_name, Key=f"{prefix}/{file_name}.txt"
         )
     except ClientError as e:
         if e.response["Error"]["Code"] == "ResourceNotFoundException":
@@ -249,8 +336,8 @@ def extract_history_s3(bucket_name, prefix):
         else:
             logger.error("ERROR: Unknown error whilst logging extract history to S3")
             raise e
-            
-            
+
+
 def read_csv_to_pandas(file, source_bucket):
     """
     This function reads a CSV file from an S3 bucket and returns its content as a pandas DataFrame.
@@ -271,7 +358,7 @@ def read_csv_to_pandas(file, source_bucket):
         Exception: If an unknown error occurs during the reading process.
     """
     try:
-        return wr.s3.read_csv(path=f's3://{source_bucket}/{file}.csv')
+        return wr.s3.read_csv(path=f"s3://{source_bucket}/{file}.csv")
     except ClientError as e:
         if e.response["Error"]["Code"] == "ResourceNotFoundException":
             logger.error(
@@ -294,7 +381,7 @@ def read_csv_to_pandas(file, source_bucket):
             raise e
 
 
-def write_df_to_parquet(df, file, target_bucket):
+def write_df_to_parquet(df, file, target_bucket, folder_name):
     """
     This function writes a pandas DataFrame to Parquet format and saves it to an S3 bucket.
 
@@ -311,12 +398,15 @@ def write_df_to_parquet(df, file, target_bucket):
     Raises:
         Exception: If an error occurs during the writing process.
     """
+
     try:
-       return wr.s3.to_parquet(df=df, path=f's3://{target_bucket}/{file}.parquet')
+        return wr.s3.to_parquet(
+            df=df, path=f"s3://{target_bucket}/{folder_name}/{file}.parquet"
+        )
     except Exception as e:
-        logger.error('ERROR: write_df_to_parquet')
+        logger.error("ERROR: write_df_to_parquet")
         raise e
-        
+
 
 def timestamp_to_date_and_time(dataframe):
     """
@@ -334,17 +424,17 @@ def timestamp_to_date_and_time(dataframe):
         Exception: If an error occurs during the transformation process.t
     """
     try:
-        new_created = dataframe['created_at'].str.split(" ", n = 1, expand = True)
-        dataframe['created_date']= new_created[0]
-        dataframe['created_time']= new_created[1]
-        dataframe.drop(columns =['created_at'], inplace = True)
-        new_updated = dataframe['last_updated'].str.split(" ", n = 1, expand = True)
-        dataframe['last_updated_date']= new_updated[0]
-        dataframe['last_updated_time']= new_updated[1]
-        dataframe.drop(columns =['last_updated'], inplace = True)
+        new_created = dataframe["created_at"].str.split(" ", n=1, expand=True)
+        dataframe["created_date"] = new_created[0]
+        dataframe["created_time"] = new_created[1]
+        dataframe.drop(columns=["created_at"], inplace=True)
+        new_updated = dataframe["last_updated"].str.split(" ", n=1, expand=True)
+        dataframe["last_updated_date"] = new_updated[0]
+        dataframe["last_updated_time"] = new_updated[1]
+        dataframe.drop(columns=["last_updated"], inplace=True)
         return dataframe
     except Exception as e:
-        logger.error('ERROR: timestamp_to_date_and_time')
+        logger.error("ERROR: timestamp_to_date_and_time")
         raise e
 
 
@@ -369,5 +459,5 @@ def add_to_dates_set(set, cols_to_add):
             for row in col:
                 set.add(row)
     except Exception as e:
-        logger.error('ERROR: add_to_dates_set')
+        logger.error("ERROR: add_to_dates_set")
         raise e
