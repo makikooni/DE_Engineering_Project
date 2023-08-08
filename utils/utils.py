@@ -234,7 +234,7 @@ def timestamp_to_date_and_time(dataframe):
         pandas.DataFrame: The input DataFrame with additional date and time columns.
 
     Raises:
-        Exception: If an error occurs during the transformation process.
+        Exception: If an error occurs during the transformation process.t
     """
     try:
         new_created = dataframe['created_at'].str.split(" ", n = 1, expand = True)
@@ -252,6 +252,21 @@ def timestamp_to_date_and_time(dataframe):
 
 
 def add_to_dates_set(set, cols_to_add):
+    """
+    This function adds date values, from cols_to_add, to a set for collecting 
+    dimension dates to be used later in the creation of the dim_dates table.
+
+    Args:
+        date_set (set): The set containing date values to be updated.
+
+        cols_to_add (list): A list of pandas.Series containing date values.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If an error occurs during the addition process.
+    """ 
     try:
         for col in cols_to_add:
             for row in col:
