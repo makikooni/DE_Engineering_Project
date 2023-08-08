@@ -117,9 +117,3 @@ def extraction_lambda_handler(event, context):
     except Exception as e:
         logger.error(e)
         raise RuntimeError
-
-
-with open("tests/extract/valid_event.json") as v:
-    event = json.loads(v.read())
-
-    extraction_lambda_handler(event, {})
