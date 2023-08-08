@@ -295,6 +295,40 @@ def transform_counterparty(file1, file2, source_bucket, target_bucket):
 
 
 def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date):
+    """
+    This function transforms data read from a CSV file, located in the source S3 bucket, by splitting and extracting specific 
+    columns before writing the resulting data to a Parquet file named 'fact_sales_order.parquet' stored in the target S3 bucket.
+    Once the parquet file has been stored in the target s3 bucket, this progress is logged, after which the dates data are added 
+    to the dim_for_dim_dates set.
+
+    Parameters:
+        file (str): The name of one CSV file containing data to be transformed.
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+        dates_for_dim_date (set): A set of dates to be used in the create_date() function.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_sales_order('example-file-name', 'source-bucket-name', 'target-bucket-name', 'dates-set-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+
+        This function also relies on, and utilises, the timestamp_to_date_and_time() utility function which splits the data from the 'created_at' 
+        column into new columns of 'created_date' and 'created_time' whilst also splitting the data from the 'last_updated' column into new 
+        columns of 'last_updated_date' and 'last_updated_time'.
+    """
     try:
         sales_order_table = read_csv_to_pandas(file, source_bucket)
         
