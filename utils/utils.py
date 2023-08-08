@@ -6,6 +6,7 @@ from pg8000.native import Connection, InterfaceError, DatabaseError, identifier,
 import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
+from pprint import pprint
 
 logger = logging.getLogger("UtilsLogger")
 logger.setLevel(logging.INFO)
@@ -18,7 +19,13 @@ def get_secret(secret_name):
         secret_name (str): The name of the secret to retrieve.
 
     Returns:
-        dict: A dictionary containing the secret value.
+        dict: A dictionary containing the secret value. The expected data structure follows:
+            {'dbname': 'example_dbname',
+            'engine': 'example_engine',
+            'host': 'example_host',
+            'password': 'example_password',
+            'port': 'example_port',
+            'username': 'example_user'}
 
     Raises:
         TypeError: If secret_name argument entered is not a string.
