@@ -155,6 +155,24 @@ def extract_history_s3(bucket_name, prefix):
             
             
 def read_csv_to_pandas(file, source_bucket):
+    """
+    This function reads a CSV file from an S3 bucket and returns its content as a pandas DataFrame.
+
+    Args:
+        file (str): The name of the CSV file to be read (without the '.csv' extension).
+        
+        source_bucket (str): The name of the source S3 bucket containing the CSV file.
+
+    Raises:
+        KeyError: If the specified bucket cannot be found in S3.
+
+        RuntimeError: If the Lambda function lacks the necessary policy to access the S3 resource.
+        
+        Exception: If an unknown error occurs during the reading process.
+
+    Returns:
+        pandas.DataFrame: The contents of the CSV file as a pandas DataFrame.
+    """
     try:
         return wr.s3.read_csv(path=f's3://{source_bucket}/{file}.csv')
     except ClientError as e:
