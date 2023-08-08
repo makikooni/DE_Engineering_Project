@@ -11,10 +11,27 @@ logger = logging.getLogger("UtilsLogger")
 logger.setLevel(logging.INFO)
 
 def get_secret(secret_name):
+    """
+    This function retrieves a secret value from AWS Secrets Manager.
+
+    Args:
+        secret_name (str): The name of the secret to retrieve.
+
+    Returns:
+        dict: A dictionary containing the secret value.
+
+    Raises:
+        TypeError: If secret_name argument entered is not a string.
+
+        KeyError: If the secret_name secret cannot be found.
+
+        RuntimeError: If access to the SecretsManager resource is denied.
+    """
     if not isinstance(secret_name, str):
         raise TypeError(f"secret_name is {type(secret_name)}, {str} is required")
 
     secretsmanager = boto3.client("secretsmanager")
+
     try:
         response = secretsmanager.get_secret_value(SecretId=secret_name)
         secret_value = json.loads(response["SecretString"].replace("'", '"'))
