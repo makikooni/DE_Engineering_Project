@@ -1,4 +1,3 @@
-import json
 import logging
 from utils.utils import (
     get_secret,
