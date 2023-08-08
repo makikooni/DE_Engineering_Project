@@ -65,6 +65,22 @@ def get_secret(secret_name):
 
 
 def get_table_db(connection, table_name):
+    """
+    This function retrieves data from a database table through a database connection object.
+
+    Args:
+        connection (Connection): A database connection object.
+
+        table_name (str): The name of the table to retrieve data from.
+
+    Returns:
+        tuple: A tuple consisting of the data in pandas.DataFrame format and the SQL query string.
+
+    Raises:
+        TypeError: If table_name is not a string, or, if connection is not an instance of pg8000.native Connection.
+
+        InterfaceError: If the query cannot be executed.
+    """
     if not isinstance(table_name, str):
         raise TypeError(f"table name is {type(table_name)}, expected {str}")
     if not isinstance(connection, Connection):
