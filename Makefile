@@ -34,6 +34,9 @@ define execute_in_env
 	$(ACTIVATE_ENV) && $1
 endef
 
+runpy:
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} python ${file})
+
 ## install all python packages and dependencies
 requirements:
 	$(call execute_in_env, $(PIP) install -r ./requirements.txt)
@@ -60,6 +63,10 @@ coverage:
 pytest:
 	$(call execute_in_env, $(PIP) install pytest)
 
+## Install pytest
+moto:
+	$(call execute_in_env, $(PIP) install moto)
+
 ## Install autopep8
 autopep:
 	$(call execute_in_env, $(PIP) install autopep8)
@@ -74,7 +81,7 @@ security-test:
 
 ## Run the flake8 code check
 run-flake:
-	$(call execute_in_env, flake8  ./src/*/*.py)
+	$(call execute_in_env, flake8  ./src/*.py)
 
 ## NEED TO INCLUDE THIS ONCE TESTS HAVE BEEN WRITTEN
 # $(call execute_in_env, flake8  ./src/*/*.py ./tests/*/*.py)
@@ -99,4 +106,4 @@ check-coverage:
 ## Run all checks
 run-checks: security-test run-flake unit-tests check-coverage
 
-# this comment is simply to test that github actions is working when a pull request is merged to the main branch
+#change to run cicd

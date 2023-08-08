@@ -17,4 +17,4 @@ venv/
 .terraform*
 terraform/terraform*
 *.tfstate*
-function.zip
+extraction_function.zip
