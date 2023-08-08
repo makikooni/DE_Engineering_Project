@@ -103,6 +103,23 @@ def get_table_db(connection, table_name):
 
 
 def upload_table_s3(table_df, table_name, bucket_name):
+    """
+    This fucntion uploads a pandas.DataFrame to a target S3 bucket as a CSV file.
+
+    Args:
+        table_df (pandas.DataFrame): The DataFrame containing the data to be uploaded.
+
+        table_name (str): The defined name of the CSV file to be stored in the target s3 bucket (without .CSV extension).
+
+        bucket_name (str): The name of the target S3 bucket.
+
+    Raises:
+        TypeError: If table_df is not a pandas.DataFrame, or, if either table_name or bucket_name are not strings.
+
+        KeyError: If the specified bucket does not exist.
+        
+        Exception: If there's an error during the write and upload process.
+    """
     if not isinstance(table_df, pd.DataFrame):
         raise TypeError(f"table dataframe {type(table_df)}, expected {pd.DataFrame}")
     if not isinstance(table_name, str):
