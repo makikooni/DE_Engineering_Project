@@ -278,62 +278,14 @@ def test_build_update_sql_returns_string_desired_string():
     assert output == expect
 
 def test_update_data_format_returns_a_list():
-    test_data = [[
-        'design_id', 'design_name', 'file_location', 'file_name'
-    ],
-    [{
-        'design_id':'8',
-        'design_name': 'Wooden',
-        'file_location': '/usr',
-        'file_name': 'wooden-20220717-npgz.json'
-    }]]
-    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    output = update_data_format(df_data)
+    test_data =['8','Wooden','/usr','wooden-20220717-npgz.json']
+    output = update_data_format(test_data)
     assert isinstance(output, list)
 
 def test_update_data_format_returns_a_list_in_right_format():
-    test_data = [[
-        'design_id', 'design_name', 'file_location', 'file_name'
-    ],
-    [{
-        'design_id':'8',
-        'design_name': 'Wooden',
-        'file_location': '/usr',
-        'file_name': 'wooden-20220717-npgz.json'
-    }]]
-    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    expect = ['design_name', 'Wooden', 'file_location', '/usr', 'file_name', 'wooden-20220717-npgz.json', 'design_id', '8']
-    output = update_data_format(df_data)
-    assert expect == output
-
-def test_update_data_format_returns_a_list_in_right_format_for_multiple_rows():
-    test_data = [[
-        'design_id', 'design_name', 'file_location', 'file_name'
-    ],
-    [{
-        'design_id':'8',
-        'design_name': 'Wooden',
-        'file_location': '/usr',
-        'file_name': 'wooden-20220717-npgz.json'
-    },
-    {
-        'design_id':'7',
-        'design_name': 'Woden',
-        'file_location': '/us',
-        'file_name': 'wooden.json'
-    }]]
-    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0])
-    expect = [
-        'design_name', 'Wooden', 
-        'file_location', '/usr', 
-        'file_name', 'wooden-20220717-npgz.json', 
-        'design_id', '8',
-        'design_name', 'Woden',
-        'file_location', '/us',
-        'file_name', 'wooden.json',
-        'design_id', '7'
-    ]
-    output = update_data_format(df_data)
+    test_data =['8','Wooden','/usr','wooden-20220717-npgz.json']
+    expect = ['Wooden', '/usr', 'wooden-20220717-npgz.json', '8']
+    output = update_data_format(test_data)
     assert expect == output
 
 def test_get_job_list_returns_list(mock_client):

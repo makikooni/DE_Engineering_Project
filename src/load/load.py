@@ -10,7 +10,7 @@ from botocore.exceptions import ClientError
 logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
 
-def add_new_rows(s3_table_name, wh_table_name, is_dim, secret_name='warehouse'):
+def update_wh(s3_table_name, wh_table_name, is_dim, secret_name='warehouse'):
     # get warehouse credentails from AWS secrets
     secretsmanager = boto3.client('secretsmanager')
     try:
@@ -48,9 +48,15 @@ def add_new_rows(s3_table_name, wh_table_name, is_dim, secret_name='warehouse'):
                 lst_wh_id = get_id_col(connection, wh_table_name, table)
                 for row in table.values.tolist():
                     if row[0] in lst_wh_id:
-                        update_data_format()
-                        build_update_sql()
-
+                        update_data = update_data_format(row)
+                        query = build_update_sql(wh_table_name, table)
+                        insert_table_data(connection, query, update_data)
+                    else:
+                        insert_table_sql = build_insert_sql(wh_table_name, table)
+                        # # Convert DataFrame to list tuples for executemany
+                        data_to_insert = insert_data_format(table)
+                        # # Execute the query using executemany to insert all rows at once
+                        insert_table_data(connection,insert_table_sql, data_to_insert)
             else:
                 insert_table_sql = build_insert_sql(wh_table_name, table)
                 # # Convert DataFrame to list tuples for executemany
@@ -110,16 +116,6 @@ def get_job_list():
         logger.info["no new jobs", error]
         raise error
 
-# def needs_update():
-    '''
-    1. get table id
-    2. check if given data has new id
-    3. insert if has new id update if not
-    '''
-
-# def change last_job.txt():
-#   change the last_job.txt ing s3 bucket
-
 def build_update_sql(wh_table_name, table):
     try:
         ph_SET = ''
@@ -141,38 +137,36 @@ def build_update_sql(wh_table_name, table):
         logger.info["build_update_sql", error]
         raise error
 
-def update_data_format(table):
+def update_data_format(row):
     try:
         data = []
-        rows = table.values.tolist()
-        columns = table.columns
-        for row in rows:
-            update_row = row
-            index = 0
-            for value in update_row:
-                if index < len(row) and index != 0:
-                    data.append(columns[index])
-                    data.append(value)
-                    index += 1
-                elif index == 0:
-                    index += 1
-            data.append(columns[0])
-            data.append(row[0])
+        index = 0
+        for value in row:
+            if index < len(row) and index != 0:
+                data.append(value)
+                index += 1
+            elif index == 0:
+                index += 1
+        data.append(row[0])
+        print(data)
         return data
     except Exception as error:
         logger.info["update_data_format", error]
         raise error
 
+# def jobs_done():
+
+
 def load_lambda_hander():
-    add_new_rows('dim_counterparty.parquet', 'dim_counterparty', True)
-    add_new_rows('dim_currency.parquet', 'dim_currency', True)
-    add_new_rows('dim_date.parquet', 'dim_date', True)
-    add_new_rows('dim_design.parquet', 'dim_design', True)
-    add_new_rows('dim_location.parquet', 'dim_location', True)
-    add_new_rows('dim_payment_type.parquet', 'dim_payment_type', True)
-    add_new_rows('dim_staff.parquet', 'dim_staff', True)
-    add_new_rows('fact_payment.parquet', 'fact_payment', False)
-    add_new_rows('fact_purchase_order.parquet', 'fact_purchase_order', False)
-    add_new_rows('fact_sales_order.parquet', 'fact_sales_order', False)
+    update_wh('dim_counterparty.parquet', 'dim_counterparty', True)
+    update_wh('dim_currency.parquet', 'dim_currency', True)
+    update_wh('dim_date.parquet', 'dim_date', True)
+    update_wh('dim_design.parquet', 'dim_design', True)
+    update_wh('dim_location.parquet', 'dim_location', True)
+    update_wh('dim_payment_type.parquet', 'dim_payment_type', True)
+    update_wh('dim_staff.parquet', 'dim_staff', True)
+    update_wh('fact_payment.parquet', 'fact_payment', False)
+    update_wh('fact_purchase_order.parquet', 'fact_purchase_order', False)
+    update_wh('fact_sales_order.parquet', 'fact_sales_order', False)
     jobs_done()
 
