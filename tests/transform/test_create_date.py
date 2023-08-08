@@ -1,4 +1,3 @@
-# import moto.core
 from moto import mock_s3
 import boto3
 import pytest
@@ -8,16 +7,14 @@ from utils.table_transformations import create_date
 
 @pytest.fixture
 def create_s3_client():
+
     with mock_s3():
         yield boto3.client('s3', region_name='eu-west-2')
 
 
 @pytest.fixture
 def mock_client(create_s3_client):
-        '''
-        fixture creates 'test-ingestion-va-052023' bucket in 
-        mock aws account and uploads 'test.txt' file to it
-        '''
+
         mock_client = create_s3_client
         processed_bucket_name = 'mock-test-processed-va-052023'
         mock_client.create_bucket(

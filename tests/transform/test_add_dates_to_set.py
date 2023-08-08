@@ -4,9 +4,6 @@ from utils.utils import add_to_dates_set
 
 
 def test_function_correctly_adds_unique_dates_to_set():
-    """
-    This test ensures the function collects only unique dates within the supplied set
-    """
      
     test_set = set()
     df1 = pd.DataFrame({'created_date': ['1', '2', '3']})
@@ -19,10 +16,6 @@ def test_function_correctly_adds_unique_dates_to_set():
 
 
 def test_function_raises_exception_when_given_invalid_arguments():
-
-    """
-    This test ensures the function raises an exception when passed invalid arguments
-    """
     
     col_list = []
 
