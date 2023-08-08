@@ -22,7 +22,7 @@ def transform_design(file, source_bucket, target_bucket):
         target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
@@ -60,7 +60,7 @@ def transform_payment_type(file, source_bucket, target_bucket):
         target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
@@ -99,7 +99,7 @@ def transform_location(file, source_bucket, target_bucket):
         target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
@@ -138,7 +138,7 @@ def transform_transaction(file, source_bucket, target_bucket):
         target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
@@ -179,7 +179,7 @@ def transform_staff(file1, file2, source_bucket, target_bucket):
         target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
@@ -220,7 +220,7 @@ def transform_currency(file, source_bucket, target_bucket):
         target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
@@ -265,7 +265,7 @@ def transform_counterparty(file1, file2, source_bucket, target_bucket):
         target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
@@ -311,7 +311,7 @@ def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date
         dates_for_dim_date (set): A set of dates to be used in the create_date() function.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
@@ -363,7 +363,7 @@ def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_d
         dates_for_dim_date (set): A set of dates to be used in the create_date() function.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
@@ -414,7 +414,7 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
         dates_for_dim_date (set): A set of dates to be used in the create_date() function.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
@@ -460,7 +460,7 @@ def create_date(dates_for_dim_date, target_bucket):
         target_bucket (str): The target bucket or directory where the output data will be stored.
 
     Returns:
-        None
+        None.
 
     Raises:
         Exception: If any error occurs during the creation process, an exception is raised, and an error message is logged.

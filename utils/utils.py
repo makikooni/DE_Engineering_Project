@@ -207,6 +207,9 @@ def extract_history_s3(bucket_name, prefix):
 
         prefix (str): The prefix to be added to the beginning of the filename.
 
+    Returns:
+        None.
+
     Raises:
         TypeError: If either bucket_name or prefix are not strings.
 

@@ -35,7 +35,7 @@ def transform_lambda_handler(event, context):
             Runtime information about the lambda function.
 
     Returns:
-        No return
+        None.
     
     Raises:
         ValueError: 
