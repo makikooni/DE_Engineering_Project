@@ -19,27 +19,24 @@ def transform_lambda_handler(event, context):
 
 
     Args:
-        event (dict): 
-            The event data; containing information about the triggered S3 object. The expected data structure follows:
-                {
-                    'Records': [
-                        {
-                            's3': {
-                                'bucket': {'name': 'bucket-name'},
-                                'object': {'key': 'object-key'}
-                            }
+        event (dict): The event data; containing information about the triggered S3 object. The expected data structure follows:
+            {
+                'Records': [
+                    {
+                        's3': {
+                            'bucket': {'name': 'bucket-name'},
+                            'object': {'key': 'object-key'}
                         }
-                    ]
-                }
+                    }
+                ]
+            }
 
         context (LambdaContext): 
             Runtime information about the lambda function.
 
-
     Returns:
         No return
-
-        
+    
     Raises:
         ValueError: 
             Raised in the case when event_bucket_name does not match INGESTION_BUCKET_NAME or when 

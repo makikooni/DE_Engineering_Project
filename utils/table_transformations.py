@@ -450,12 +450,13 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date):
 
 def create_date(dates_for_dim_date, target_bucket):
     """
-    This function creates a dimension date table from the dates_for_dim_date set of date values, by converting the data into a pandas
+    This function creates a dimension date table, from the dates_for_dim_date set of date values, by converting the data into a pandas
     dataframe before extracting various date-related attributes into new columns. The resulting data is then written to a parquet file
     named 'dim_date.parquet' stored in the target s3 bucket, this progress is then logged.
 
     Args:
         dates_for_dim_date (set): A set containing date values to populate the dimension date table.
+        
         target_bucket (str): The target bucket or directory where the output data will be stored.
 
     Returns:
