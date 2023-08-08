@@ -5,7 +5,7 @@
 resource "aws_cloudwatch_event_rule" "extraction_schedule" {
     name = "extraction_schedule"
     description = "Triggers the extract lambda at specified interval"
-    schedule_expression = "rate(5 minutes)"
+    schedule_expression = "rate(3 minutes)"
 }
 
 resource "aws_cloudwatch_event_target" "extract_schedule_extraction_lambda" {
