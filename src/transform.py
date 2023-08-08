@@ -28,7 +28,7 @@ def transform_lambda_handler(event, context):
             'ExtractHistory' not in event_obj_name:
         raise ValueError('Wrong extraction trigger file')
 
-    EXTRACT_JOB_TIMESTAMP = get_last_job_timestamp(INGESTION_BUCKET_NAME)
+    EXTRACT_JOB_TIMESTAMP = get_last_job_timestamp(INGESTION_BUCKET_NAME).strftime("%Y%m%d%H%M%S")
 
     try:
         dates_for_dim_date = set()
