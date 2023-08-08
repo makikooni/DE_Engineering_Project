@@ -113,12 +113,15 @@ def upload_table_s3(table_df, table_name, bucket_name):
 
         bucket_name (str): The name of the target S3 bucket.
 
+    Returns:
+        None.
+
     Raises:
         TypeError: If table_df is not a pandas.DataFrame, or, if either table_name or bucket_name are not strings.
 
         KeyError: If the specified bucket does not exist.
         
-        Exception: If there's an error during the write and upload process.
+        Exception: If there's an error during the write and upload process.t
     """
     if not isinstance(table_df, pd.DataFrame):
         raise TypeError(f"table dataframe {type(table_df)}, expected {pd.DataFrame}")
