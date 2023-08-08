@@ -2,7 +2,7 @@ import awswrangler as wr
 from datetime import datetime
 import logging
 import json
-from pg8000.native import Connection, InterfaceError, DatabaseError, identifier
+from pg8000.native import Connection, InterfaceError, DatabaseError, identifier, literal
 import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
