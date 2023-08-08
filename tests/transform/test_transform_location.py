@@ -1,4 +1,5 @@
 # import moto.core
+from datetime import datetime
 from moto import mock_s3
 import boto3
 import pytest
@@ -37,19 +38,22 @@ def test_transform_location_retrieves_csv_file_from_ingestion_s3_bucket_and_puts
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
-    transform_location('test', ingestion_bucket_name, processed_bucket_name)
+    transform_location('test', ingestion_bucket_name, processed_bucket_name, timestamp)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_location.parquet'
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == f'{timestamp}/dim_location.parquet'
 
 
 def test_transform_location_transforms_tables_into_correct_parquet_shchema(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_location('test', ingestion_bucket_name, processed_bucket_name)
-    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_location.parquet')
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+
+    transform_location('test', ingestion_bucket_name, processed_bucket_name, timestamp)
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/{timestamp}/dim_location.parquet')
     assert len(df) == 3
     assert list(df.columns) == ['location_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']
 
@@ -58,12 +62,13 @@ def test_transform_location_raises_exception_when_agruments_invalid(mock_client)
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     with pytest.raises(Exception):
-        transform_location('wrong', ingestion_bucket_name, processed_bucket_name)
+        transform_location('wrong', ingestion_bucket_name, processed_bucket_name, timestamp)
     
     with pytest.raises(Exception):
-        transform_location('test', 'wrong', processed_bucket_name)
+        transform_location('test', 'wrong', processed_bucket_name, timestamp)
 
     with pytest.raises(Exception):
-        transform_location('test', ingestion_bucket_name, 'wrong')
+        transform_location('test', ingestion_bucket_name, 'wrong', timestamp)

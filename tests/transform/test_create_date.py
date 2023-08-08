@@ -1,5 +1,6 @@
 # import moto.core
 from moto import mock_s3
+from datetime import datetime
 import boto3
 import pytest
 import awswrangler as wr
@@ -32,19 +33,22 @@ def test_create_date_puts_parquet_file_in_processed_s3_bucket(mock_client):
     test_set = set(['2022-12-01', '2022-12-20', '2023-06-14','2023-08-01'])
 
     processed_bucket_name = 'mock-test-processed-va-052023'
-    create_date(test_set, processed_bucket_name)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+
+    create_date(test_set, processed_bucket_name, timestamp)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_date.parquet'
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == f'{timestamp}/dim_date.parquet'
 
 
 def test_create_date_transforms_set_data_into_correct_parquet_schema(mock_client):
     
     test_set = set(['2022-12-01', '2022-12-20', '2023-06-14','2023-08-01'])
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     processed_bucket_name = 'mock-test-processed-va-052023'
-    create_date(test_set, processed_bucket_name)
-    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_date.parquet')
+    create_date(test_set, processed_bucket_name, timestamp)
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/{timestamp}/dim_date.parquet')
     assert len(df) == 4
     assert list(df.columns) == ['date_id', 'year', 'month', 'day', 'day_of_week', 'day_name', 'month_name', 'quarter']
 
@@ -54,9 +58,10 @@ def test_transform_design_raises_exception_when_agruments_invalid(mock_client):
     test_set = set(['2022-12-01', '2022-12-20', '2023-06-14','2023-08-01'])
 
     processed_bucket_name = 'mock-test-processed-va-052023'
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     with pytest.raises(Exception):
-        create_date('wrong', processed_bucket_name)
+        create_date('wrong', processed_bucket_name, timestamp)
     
     with pytest.raises(Exception):
-        create_date(test_set, 'wrong')
+        create_date(test_set, 'wrong', timestamp)

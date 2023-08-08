@@ -1,5 +1,6 @@
 # import moto.core
 from moto import mock_s3
+from datetime import datetime
 import boto3
 import pytest
 import awswrangler as wr
@@ -41,10 +42,11 @@ def test_transform_purchase_order_retrieves_csv_file_from_ingestion_s3_bucket_an
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_purchase_order('test', ingestion_bucket_name, processed_bucket_name, test_set)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_purchase_order('test', ingestion_bucket_name, processed_bucket_name, test_set, timestamp)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'fact_purchase_order.parquet'
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == f'{timestamp}/fact_purchase_order.parquet'
 
 
 def test_transform_purchase_order_transforms_tables_into_correct_parquet_shchema(mock_client):
@@ -53,8 +55,9 @@ def test_transform_purchase_order_transforms_tables_into_correct_parquet_shchema
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_purchase_order('test', ingestion_bucket_name, processed_bucket_name, test_set)
-    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/fact_purchase_order.parquet')
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_purchase_order('test', ingestion_bucket_name, processed_bucket_name, test_set, timestamp)
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/{timestamp}/fact_purchase_order.parquet')
     assert len(df) == 3
     assert list(df.columns) == ['purchase_order_id', 'created_date', 'created_time', 'last_updated_date', 'last_updated_time', 'staff_id', 'counterparty_id', 'item_code', 'item_quantity', 'item_unit_price', 'currency_id', 'agreed_delivery_date', 'agreed_payment_date', 'agreed_delivery_location_id']
 
@@ -65,7 +68,8 @@ def test_transform_payment_adds_relevent_data_to_set(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_purchase_order('test', ingestion_bucket_name, processed_bucket_name, test_set)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_purchase_order('test', ingestion_bucket_name, processed_bucket_name, test_set, timestamp)
 
     assert test_set == {34, 35, '14a', '3a', 10, '15a', '2a', 11, 22, 23, '26a', '27a'}
 
@@ -76,15 +80,16 @@ def test_transform_purchase_order_raises_exception_when_agruments_invalid(mock_c
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
     with pytest.raises(Exception):
-        transform_purchase_order('wrong', ingestion_bucket_name, processed_bucket_name, test_set)
+        transform_purchase_order('wrong', ingestion_bucket_name, processed_bucket_name, test_set, timestamp)
 
     with pytest.raises(Exception):
-        transform_purchase_order('test', 'wrong', processed_bucket_name, test_set)
+        transform_purchase_order('test', 'wrong', processed_bucket_name, test_set, timestamp)
 
     with pytest.raises(Exception):
-        transform_purchase_order('test', ingestion_bucket_name, 'wrong', test_set)
+        transform_purchase_order('test', ingestion_bucket_name, 'wrong', test_set, timestamp)
 
     with pytest.raises(Exception):
-        transform_purchase_order('test', ingestion_bucket_name, processed_bucket_name, 'wrong')
+        transform_purchase_order('test', ingestion_bucket_name, processed_bucket_name, 'wrong', timestamp)

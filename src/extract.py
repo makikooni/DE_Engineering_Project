@@ -5,7 +5,7 @@ from utils.utils import (
     connect_db,
     get_table_db,
     upload_table_s3,
-    log_latest_job,
+    log_latest_job_extract,
     trigger_transform_lambda,
 )
 
@@ -94,7 +94,9 @@ def extraction_lambda_handler(event, context):
         connection.close()
         logger.info("#=#=#=#=#= Extract Lambda Job Complete! =#=#=#=#=#")
 
-        log_latest_job(bucket_name=INGESTION_BUCKET_NAME, timestamp=JOB_TIMESTAMP)
+        log_latest_job_extract(
+            bucket_name=INGESTION_BUCKET_NAME, timestamp=JOB_TIMESTAMP
+        )
 
         trigger_transform_lambda(
             bucket_name=INGESTION_BUCKET_NAME, prefix="ExtractHistory"
@@ -103,9 +105,3 @@ def extraction_lambda_handler(event, context):
     except Exception as e:
         logger.error(e)
         raise RuntimeError
-
-
-with open("tests/extract/valid_event.json") as v:
-    event = json.loads(v.read())
-
-    extraction_lambda_handler(event, {})

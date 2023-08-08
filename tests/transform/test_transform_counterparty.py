@@ -1,5 +1,6 @@
 # import moto.core
 from moto import mock_s3
+from datetime import datetime
 import boto3
 import pytest
 import awswrangler as wr
@@ -39,18 +40,20 @@ def test_transform_counterparty_retrieves_csv_file_from_ingestion_s3_bucket_and_
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_counterparty('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name)
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_counterparty('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name, timestamp)
 
     assert len(mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents']) == 1
-    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == 'dim_counterparty.parquet'
+    assert mock_client.list_objects_v2(Bucket=processed_bucket_name)['Contents'][0]['Key'] == f'{timestamp}/dim_counterparty.parquet'
 
 
 def test_transform_counterparty_transforms_tables_into_correct_parquet_shchema(mock_client):
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
-    transform_counterparty('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name)
-    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/dim_counterparty.parquet')
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    transform_counterparty('test_1', 'test_2', ingestion_bucket_name, processed_bucket_name, timestamp)
+    df = wr.s3.read_parquet(path=f's3://{processed_bucket_name}/{timestamp}/dim_counterparty.parquet')
     assert len(df) == 3
     assert list(df.columns) == ['counterparty_id', 'counterparty_legal_name', 'counterparty_legal_address_line_1', 'counterparty_legal_address_line_2', 'counterparty_legal_district', 'counterparty_legal_city', 'counterparty_legal_postal_code', 'counterparty_legal_country', 'counterparty_legal_phone_number']
 
@@ -59,15 +62,15 @@ def test_transform_counterparty_raises_exception_when_agruments_invalid(mock_cli
 
     ingestion_bucket_name = 'mock-test-ingestion-va-052023'
     processed_bucket_name = 'mock-test-processed-va-052023'
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    with pytest.raises(Exception):
+        transform_counterparty('wrong', 'test_2', ingestion_bucket_name, processed_bucket_name, timestamp)
 
     with pytest.raises(Exception):
-        transform_counterparty('wrong', 'test_2', ingestion_bucket_name, processed_bucket_name)
+        transform_counterparty('test_1', 'wrong', ingestion_bucket_name, processed_bucket_name, timestamp)
 
     with pytest.raises(Exception):
-        transform_counterparty('test_1', 'wrong', ingestion_bucket_name, processed_bucket_name)
+        transform_counterparty('test_1', 'test_2', 'wrong', processed_bucket_name, timestamp)
 
     with pytest.raises(Exception):
-        transform_counterparty('test_1', 'test_2', 'wrong', processed_bucket_name)
-
-    with pytest.raises(Exception):
-        transform_counterparty('test_1', 'test_2', ingestion_bucket_name, 'wrong')
+        transform_counterparty('test_1', 'test_2', ingestion_bucket_name, 'wrong', timestamp)

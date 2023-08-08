@@ -152,7 +152,7 @@ def get_last_job_timestamp(bucket_name):
         raise e
 
 
-def log_latest_job(bucket_name, timestamp):
+def log_latest_job_extract(bucket_name, timestamp):
     if not isinstance(bucket_name, str):
         raise TypeError(f"bucket name {type(bucket_name)}, expected {str}")
     if not isinstance(timestamp, datetime):
@@ -183,6 +183,28 @@ def log_latest_job(bucket_name, timestamp):
             logger.error("ERROR: Unknown error whilst logging extract history to S3")
             raise e
 
+def log_latest_job_transform(bucket_name, timestamp):
+    if not isinstance(bucket_name, str):
+        raise TypeError(f"bucket name {type(bucket_name)}, expected {str}")
+    if not isinstance(timestamp, str):
+        raise TypeError(f"timestamp {type(timestamp)}, expected {str}")
+
+    try:
+        timestamp_df = wr.s3.read_csv(path=f"s3://{bucket_name}/lastjob/lastjob.csv")
+        timestamp_df.loc[len(timestamp_df)] = [timestamp]
+        wr.s3.to_csv(
+            timestamp_df, f"s3://{bucket_name}/lastjob/lastjob.csv", index=False
+        )
+    except wr.exceptions.NoFilesFound as e:
+        # create df with timestamp
+        timestamp_df = pd.DataFrame(data=[[timestamp]])
+        # upload as csv
+        wr.s3.to_csv(
+            timestamp_df, f"s3://{bucket_name}/lastjob/lastjob.csv", index=False
+        )
+    except Exception as e:
+        logger.error("ERROR: Unknown error whilst logging extract history to S3")
+        raise e
 
 def trigger_transform_lambda(bucket_name, prefix):
     if not isinstance(bucket_name, str):
@@ -243,9 +265,11 @@ def read_csv_to_pandas(file, source_bucket):
             raise e
 
 
-def write_df_to_parquet(df, file, target_bucket):
+def write_df_to_parquet(df, file, target_bucket, folder_name):
     try:
-        return wr.s3.to_parquet(df=df, path=f"s3://{target_bucket}/{file}.parquet")
+        return wr.s3.to_parquet(
+            df=df, path=f"s3://{target_bucket}/{folder_name}/{file}.parquet"
+        )
     except Exception as e:
         logger.error("ERROR: write_df_to_parquet")
         raise e
