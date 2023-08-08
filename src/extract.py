@@ -18,7 +18,8 @@ logger.setLevel(logging.INFO)
 
 
 def extraction_lambda_handler(event, context):
-    """Handles scheduled event and transfers data from database to s3.
+    """
+    Handles scheduled event and transfers data from database to s3.
 
       On receipt of a Cloudwatch scheduled event:
         - connects to totesys database

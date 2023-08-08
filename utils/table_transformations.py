@@ -9,6 +9,34 @@ logger.setLevel(logging.INFO)
 
 
 def transform_design(file, source_bucket, target_bucket, timestamp):
+    """
+    This function transforms data read from a CSV file, located in the source S3 bucket, by extracting specific columns
+    before writing the resulting data to a Parquet file named 'dim_design.parquet' stored in the target S3 bucket.
+    Once the parquet file has been stored in the target s3 bucket, this progress is logged.
+
+    Parameters:
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_design('example-file-name', 'source-bucket-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """
+    
     try:
         design_table = read_csv_to_pandas(file, source_bucket)
         dim_design_table = design_table.loc[:, ['design_id', 'design_name', 'file_location', 'file_name']]
@@ -20,6 +48,34 @@ def transform_design(file, source_bucket, target_bucket, timestamp):
 
 
 def transform_payment_type(file, source_bucket, target_bucket, timestamp):
+    """
+    This function transforms data read from a CSV file, located in the source S3 bucket, by extracting specific columns
+    before writing the resulting data to a Parquet file named 'dim_payment_type.parquet' stored in the target S3 bucket.
+    Once the parquet file has been stored in the target s3 bucket, this progress is logged.
+
+    Parameters:
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_payment_type('example-file-name', 'source-bucket-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """  
+
     try:
         payment_type_table = read_csv_to_pandas(file, source_bucket)
         dim_payment_type_table = payment_type_table.loc[:, ['payment_type_id', 'payment_type_name']]
@@ -30,7 +86,37 @@ def transform_payment_type(file, source_bucket, target_bucket, timestamp):
         raise e
 
 
+
 def transform_location(file, source_bucket, target_bucket, timestamp):
+    """
+    This function transforms data read from a CSV file, located in the source S3 bucket, by extracting 
+    specific columns and renaming the 'address_id' column to 'location_id' before writing the 
+    resulting data to a Parquet file named 'dim_location.parquet' stored in the target S3 bucket. Once 
+    the parquet file has been stored in the target s3 bucket, this progress is logged.
+
+    Parameters:
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_location('example-file-name', 'source-bucket-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """ 
+
     try:
         address_table = read_csv_to_pandas(file, source_bucket)
         dim_address_table = address_table.loc[:, ['address_id', 'address_line_1', 'address_line_2', 'district', 'city', 'postal_code', 'country', 'phone']]
@@ -43,6 +129,34 @@ def transform_location(file, source_bucket, target_bucket, timestamp):
 
 
 def transform_transaction(file, source_bucket, target_bucket, timestamp):
+    """
+    This function transforms data read from a CSV file, located in the source S3 bucket, by extracting specific columns
+    before writing the resulting data to a Parquet file named 'dim_transaction.parquet' stored in the target S3 bucket.
+    Once the parquet file has been stored in the target s3 bucket, this progress is logged.
+
+    Parameters:
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_transaction('example-file-name', 'source-bucket-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """ 
+
     try:
         transaction_table = read_csv_to_pandas(file, source_bucket)
         dim_transaction_table = transaction_table.loc[:, ['transaction_id', 'transaction_type', 'sales_order_id', 'purchase_order_id']]
@@ -54,6 +168,37 @@ def transform_transaction(file, source_bucket, target_bucket, timestamp):
 
 
 def transform_staff(file1, file2, source_bucket, target_bucket, timestamp):
+    """
+    This function reads data from two CSV files, located in the source s3 bucket, before joining the two tables on the 
+    'department_id' column. Specific columns are extracted, from the joined tables, and the resulting data is written 
+    to a Parquet file named 'dim_staff.parquet' stored in the target s3 bucket. Once the parquet file has been stored 
+    in the target s3 bucket, this progress is logged.
+
+    Parameters:
+        file1 (str): The name of one CSV file containing data to be transformed (without the '.csv' extension).
+
+        file2 (str): The name of the other CSV file containing data to be transformed (without the '.csv' extension).
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_staff('example-file-1-name', 'example-file-2-name', 'source-bucket-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """ 
+
     try:
         staff_table = read_csv_to_pandas(file1, source_bucket)
         department_table = read_csv_to_pandas(file2, source_bucket)
@@ -67,6 +212,35 @@ def transform_staff(file1, file2, source_bucket, target_bucket, timestamp):
 
 
 def transform_currency(file, source_bucket, target_bucket, timestamp):
+    """
+    This function reads a currency table from a CSV data file, located in the source s3 bucket. Specific columns 
+    are then extracted before the data is enriched with currency names based on their currency codes, the 
+    resulting data is then written to a Parquet file named 'dim_currency.parquet' stored in the target s3 bucket.
+    Once the parquet file has been stored in the target s3 bucket, this progress is logged.
+
+    Parameters:
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_currency('example-file-name', 'source-bucket-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """
+
     try:
         currency_table = read_csv_to_pandas(file, source_bucket)
         dim_currency_table = currency_table.loc[:, ['currency_id', 'currency_code']]
@@ -81,6 +255,38 @@ def transform_currency(file, source_bucket, target_bucket, timestamp):
 
 
 def transform_counterparty(file1, file2, source_bucket, target_bucket, timestamp):
+    """
+    This function reads data from two CSV files, located in the source s3 bucket, before joining the two tables on 
+    the 'legal_address_id' column, derived from file1, and the 'address_id column, derived from file2. Specific 
+    columns are extracted, from the joined tables, and the resulting data is written to a Parquet file named 
+    'dim_counterparty.parquet' stored in the target s3 bucket. Once the parquet file has been stored in the 
+    target s3 bucket, this progress is logged.
+
+    Parameters:
+        file1 (str): The name of one CSV file containing data to be transformed (without the '.csv' extension).
+
+        file2 (str): The name of the other CSV file containing data to be transformed (without the '.csv' extension).
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_counterparty('example-file-1-name', 'example-file-2-name', 'source-bucket-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """
+
     try:
         counterparty_table = read_csv_to_pandas(file1, source_bucket)
         address_table_for_counterparty = read_csv_to_pandas(file2, source_bucket)
@@ -97,6 +303,41 @@ def transform_counterparty(file1, file2, source_bucket, target_bucket, timestamp
 
 
 def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date, timestamp):
+    """
+    This function transforms data read from a CSV file, located in the source S3 bucket, by splitting and extracting specific 
+    columns before writing the resulting data to a Parquet file named 'fact_sales_order.parquet' stored in the target S3 bucket.
+    Once the parquet file has been stored in the target s3 bucket, this progress is logged, after which the dates data are added 
+    to the dim_for_dim_dates set.
+
+    Parameters:
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+        dates_for_dim_date (set): A set of dates to be used in the create_date() function.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_sales_order('example-file-name', 'source-bucket-name', 'target-bucket-name', 'dates-set-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+
+        This function also relies on, and utilises, the timestamp_to_date_and_time() utility function which splits the data from the 'created_at' 
+        column into new columns of 'created_date' and 'created_time' whilst also splitting the data from the 'last_updated' column into new 
+        columns of 'last_updated_date' and 'last_updated_time'.
+    """
+
     try:
         sales_order_table = read_csv_to_pandas(file, source_bucket)
         
@@ -115,6 +356,41 @@ def transform_sales_order(file, source_bucket, target_bucket, dates_for_dim_date
 
 
 def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_date, timestamp):
+    """
+    This function transforms data read from a CSV file, located in the source S3 bucket, by splitting and extracting specific 
+    columns before writing the resulting data to a Parquet file named 'fact_purchase_order.parquet' stored in the target S3 bucket.
+    Once the parquet file has been stored in the target s3 bucket, this progress is logged, after which the dates data are added 
+    to the dim_for_dim_dates set.
+
+    Parameters:
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+        dates_for_dim_date (set): A set of dates to be used in the create_date() function.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_purchase_order('example-file-name', 'source-bucket-name', 'target-bucket-name', 'dates-set-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+
+        This function also relies on, and utilises, the timestamp_to_date_and_time() utility function which splits the data from the 'created_at' 
+        column into new columns of 'created_date' and 'created_time' whilst also splitting the data from the 'last_updated' column into new 
+        columns of 'last_updated_date' and 'last_updated_time'.
+    """
+
     try:
         purchase_order_table = read_csv_to_pandas(file, source_bucket)
 
@@ -132,6 +408,41 @@ def transform_purchase_order(file, source_bucket, target_bucket, dates_for_dim_d
 
 
 def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date, timestamp):
+    """
+    This function transforms data read from a CSV file, located in the source S3 bucket, by splitting and extracting specific 
+    columns before writing the resulting data to a Parquet file named 'fact_payment.parquet' stored in the target S3 bucket.
+    Once the parquet file has been stored in the target s3 bucket, this progress is logged, after which the dates data are added 
+    to the dim_for_dim_dates set.
+
+    Parameters:
+        file (str): The name of the CSV file containing data to be transformed (without the '.csv' extension).
+
+        source_bucket (str): The name of the source S3 bucket where the CSV file is located.
+
+        target_bucket (str): The name of the target S3 bucket to store the resulting Parquet file.
+
+        dates_for_dim_date (set): A set of dates to be used in the create_date() function.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the transformation process, an exception is raised, and an error message is logged.
+
+    Example:
+        transform_payment('example-file-name', 'source-bucket-name', 'target-bucket-name', 'dates-set-name')
+
+    Note:
+        This function relies on, and utilises, the read_csv_to_pandas() utility function which returns a pandas dataframe read from a csv file.
+
+        This function also relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+
+        This function also relies on, and utilises, the timestamp_to_date_and_time() utility function which splits the data from the 'created_at' 
+        column into new columns of 'created_date' and 'created_time' whilst also splitting the data from the 'last_updated' column into new 
+        columns of 'last_updated_date' and 'last_updated_time'.
+    """
+
     try:
         payment_table = read_csv_to_pandas(file, source_bucket)
 
@@ -149,6 +460,30 @@ def transform_payment(file, source_bucket, target_bucket, dates_for_dim_date, ti
 
 
 def create_date(dates_for_dim_date, target_bucket, timestamp):
+    """
+    This function creates a dimension date table, from the dates_for_dim_date set of date values, by converting the data into a pandas
+    dataframe before extracting various date-related attributes into new columns. The resulting data is then written to a parquet file
+    named 'dim_date.parquet' stored in the target s3 bucket, this progress is then logged.
+
+    Args:
+        dates_for_dim_date (set): A set containing date values to populate the dimension date table.
+        
+        target_bucket (str): The target bucket or directory where the output data will be stored.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception: If any error occurs during the creation process, an exception is raised, and an error message is logged.
+    
+    Example:
+        create_date('dates-set-name', 'target-bucket-name')
+
+    Note:
+        This function relies on, and utilises, the write_df_to_parquet() utility function which writes a parquet file, read from a pandas
+        dataframe, and stores it in the s3 target bucket.
+    """
+
     try:
         dates = {'date_id': sorted(list(dates_for_dim_date))}
         dim_date = pd.DataFrame(data=dates)
@@ -164,5 +499,3 @@ def create_date(dates_for_dim_date, target_bucket, timestamp):
     except Exception as e:
         logger.error('ERROR: create_date')
         raise e
-    
-    # run in terminal to view pq table --> parquet-tools show s3://processed-va-052023/dim_date.parquet

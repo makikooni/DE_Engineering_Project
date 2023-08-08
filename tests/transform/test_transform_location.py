@@ -1,4 +1,3 @@
-# import moto.core
 from datetime import datetime
 from moto import mock_s3
 import boto3

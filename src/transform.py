@@ -15,6 +15,38 @@ logger.setLevel(logging.INFO)
 
 
 def transform_lambda_handler(event, context):
+    """
+    Entry point for the transformation Lambda function: triggered by a put object event within the s3 ingestion bucket.
+    It processes the data through a series of transformation functions and stores the results in the s3 processed bucket.
+
+
+    Args:
+        event (dict): The event data; containing information about the triggered S3 object. The expected data structure follows:
+            {
+                'Records': [
+                    {
+                        's3': {
+                            'bucket': {'name': 'bucket-name'},
+                            'object': {'key': 'object-key'}
+                        }
+                    }
+                ]
+            }
+
+        context (LambdaContext): 
+            Runtime information about the lambda function.
+
+    Returns:
+        None.
+    
+    Raises:
+        ValueError: 
+            Raised in the case when event_bucket_name does not match INGESTION_BUCKET_NAME or when 
+            event_obj_name (derived from the event object) does not conform to the expected filename structure.
+
+        ClientError: 
+            Raised if an issue with s3 operations arises.
+    """
     INGESTION_BUCKET_NAME = "ingestion-va-052023"
     PROCESSED_BUCKET_NAME = 'processed-va-052023'
 

@@ -2,7 +2,7 @@ import awswrangler as wr
 from datetime import datetime
 import logging
 import json
-from pg8000.native import Connection, InterfaceError, DatabaseError, identifier, literal
+from pg8000.native import Connection, InterfaceError, DatabaseError, identifier
 import boto3
 import pandas as pd
 from botocore.exceptions import ClientError
@@ -12,10 +12,33 @@ logger.setLevel(logging.INFO)
 
 
 def get_secret(secret_name):
+    """
+    This function retrieves a secret value from AWS Secrets Manager.
+
+    Args:
+        secret_name (str): The name of the secret to retrieve.
+
+    Returns:
+        dict: A dictionary containing the secret value. The expected data structure follows:
+            {'dbname': 'example_dbname',
+            'engine': 'example_engine',
+            'host': 'example_host',
+            'password': 'example_password',
+            'port': 'example_port',
+            'username': 'example_user'}
+
+    Raises:
+        TypeError: If secret_name argument entered is not a string.
+
+        KeyError: If the secret_name secret cannot be found.
+
+        RuntimeError: If access to the SecretsManager resource is denied.
+    """
     if not isinstance(secret_name, str):
         raise TypeError(f"secret_name is {type(secret_name)}, {str} is required")
 
     secretsmanager = boto3.client("secretsmanager")
+
     try:
         response = secretsmanager.get_secret_value(SecretId=secret_name)
         secret_value = json.loads(response["SecretString"].replace("'", '"'))
@@ -42,6 +65,23 @@ def get_secret(secret_name):
 
 
 def get_table_db(connection, table_name, bucket_name):
+    """
+    This function retrieves data from a database table through a database connection object.
+
+    Args:
+        connection (Connection): A database connection object.
+
+        table_name (str): The name of the table to retrieve data from.
+
+    Returns:
+        tuple: A tuple consisting of the data in pandas.DataFrame format and the SQL query string.
+
+    Raises:
+        TypeError: If table_name is not a string, or, if connection is not an instance of pg8000.native Connection.
+
+        InterfaceError: If the query cannot be executed.
+    """
+
     if not isinstance(table_name, str):
         raise TypeError(f"table name is {type(table_name)}, expected {str}")
     if not isinstance(connection, Connection):
@@ -66,6 +106,27 @@ def get_table_db(connection, table_name, bucket_name):
 
 
 def upload_table_s3(table_df, table_name, bucket_name, time_stamp):
+    """
+    This fucntion uploads a pandas.DataFrame to a target S3 bucket as a CSV file.
+
+    Args:
+        table_df (pandas.DataFrame): The DataFrame containing the data to be uploaded.
+
+        table_name (str): The defined name of the CSV file to be stored in the target s3 bucket (without .CSV extension).
+
+        bucket_name (str): The name of the target S3 bucket.
+
+    Returns:
+        None.
+
+    Raises:
+        TypeError: If table_df is not a pandas.DataFrame, or, if either table_name or bucket_name are not strings.
+
+        KeyError: If the specified bucket does not exist.
+        
+        Exception: If there's an error during the write and upload process.t
+    """
+
     if not isinstance(table_df, pd.DataFrame):
         raise TypeError(f"table dataframe {type(table_df)}, expected {pd.DataFrame}")
     if not isinstance(table_name, str):
@@ -93,6 +154,26 @@ def upload_table_s3(table_df, table_name, bucket_name, time_stamp):
 
 
 def connect_db(db_credentials):
+    """
+    This function uses the supplied credentials to establish a database connection.
+
+    Args:
+        db_credentials (dict): A dictionary containing database connection credentials.
+
+    Returns:
+        Connection: A database connection object.
+
+    Raises:
+        TypeError: If db_credentials is not supplied as a dictionary.
+
+        KeyError: If any neccessary credentials are missing from db_credentials.
+
+        ValueError: If any neccessary credential value is not a string.
+
+        InterfaceError: If the attempt to establish a connection fails.
+
+        DatabaseError: If there's an error from the database itself.
+    """
     if not isinstance(db_credentials, dict):
         raise TypeError(f"db_credentials is {type(db_credentials)}, {dict} is required")
 
@@ -125,7 +206,6 @@ def connect_db(db_credentials):
     except DatabaseError:
         logger.error(f"DatabaseError: please contact your database administrator")
         raise DatabaseError
-
 
 def query_controller(table_name, bucket_name):
     last_job_timestamp = get_last_job_timestamp(bucket_name)
@@ -207,6 +287,24 @@ def log_latest_job_transform(bucket_name, timestamp):
         raise e
 
 def trigger_transform_lambda(bucket_name, prefix):
+    """
+    This function puts an file, with a prefixed and timestamped filename, in a specified s3 bucket.
+
+    Args:
+        bucket_name (str): The name of the target S3 bucket.
+
+        prefix (str): The prefix to be added to the beginning of the filename.
+
+    Returns:
+        None.
+
+    Raises:
+        TypeError: If either bucket_name or prefix are not strings.
+
+        KeyError: If the specified bucket does not exist.
+
+        Exception: If an error arises whilst logging to S3.
+    """
     if not isinstance(bucket_name, str):
         raise TypeError(f"bucket name {type(bucket_name)}, expected {str}")
     if not isinstance(prefix, str):
@@ -241,6 +339,24 @@ def trigger_transform_lambda(bucket_name, prefix):
 
 
 def read_csv_to_pandas(file, source_bucket):
+    """
+    This function reads a CSV file from an S3 bucket and returns its content as a pandas DataFrame.
+
+    Args:
+        file (str): The name of the CSV file to be read (without the '.csv' extension).
+        
+        source_bucket (str): The name of the source S3 bucket containing the CSV file.
+
+    Returns:
+        pandas.DataFrame: The contents of the CSV file as a pandas DataFrame.
+
+    Raises:
+        KeyError: If the specified bucket cannot be found in S3.
+
+        RuntimeError: If the Lambda function lacks the necessary policy to access the S3 resource.
+        
+        Exception: If an unknown error occurs during the reading process.
+    """
     try:
         return wr.s3.read_csv(path=f"s3://{source_bucket}/{file}.csv")
     except ClientError as e:
@@ -266,6 +382,23 @@ def read_csv_to_pandas(file, source_bucket):
 
 
 def write_df_to_parquet(df, file, target_bucket, folder_name):
+    """
+    This function writes a pandas DataFrame to Parquet format and saves it to an S3 bucket.
+
+    Args:
+        df (pandas.DataFrame): The DataFrame to be written to Parquet.
+
+        file (str): The desired name for the Parquet file (without the '.parquet' extension).
+
+        target_bucket (str): The name of the target S3 bucket for storing the Parquet file.
+
+    Returns:
+        None: This function doesn't return a value, but it writes the DataFrame to Parquet.
+
+    Raises:
+        Exception: If an error occurs during the writing process.
+    """
+
     try:
         return wr.s3.to_parquet(
             df=df, path=f"s3://{target_bucket}/{folder_name}/{file}.parquet"
@@ -276,6 +409,20 @@ def write_df_to_parquet(df, file, target_bucket, folder_name):
 
 
 def timestamp_to_date_and_time(dataframe):
+    """
+    This function extracts and separates date and time data, from timestamp data columns labelled 
+    'created_at' and 'last_updated', into new date and time columns each before dropping the 
+    original timestamp column.
+
+    Args:
+        dataframe (pandas.DataFrame): The DataFrame containing timestamp columns.
+
+    Returns:
+        pandas.DataFrame: The input DataFrame with additional date and time columns.
+
+    Raises:
+        Exception: If an error occurs during the transformation process.t
+    """
     try:
         new_created = dataframe["created_at"].str.split(" ", n=1, expand=True)
         dataframe["created_date"] = new_created[0]
@@ -292,6 +439,21 @@ def timestamp_to_date_and_time(dataframe):
 
 
 def add_to_dates_set(set, cols_to_add):
+    """
+    This function adds date values, from cols_to_add, to a set for collecting 
+    dimension dates to be used later in the creation of the dim_dates table.
+
+    Args:
+        date_set (set): The set containing date values to be updated.
+
+        cols_to_add (list): A list of pandas.Series containing date values.
+
+    Returns:
+        None
+
+    Raises:
+        Exception: If an error occurs during the addition process.
+    """ 
     try:
         for col in cols_to_add:
             for row in col:

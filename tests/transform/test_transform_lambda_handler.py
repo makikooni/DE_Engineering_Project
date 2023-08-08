@@ -1,10 +1,6 @@
-from moto import mock_s3
-from moto.core import patch_client
 import pytest
-import boto3
 import json
 from unittest.mock import patch
-from botocore.exceptions import ClientError
 from src.transform import transform_lambda_handler
 
 
@@ -61,10 +57,7 @@ def test_ensures_internal_methods_are_each_called_once(valid_event):
 def test_function_does_not_execute_if_event_key_is_not_extraction_complete_file(
     invalid_event,
 ):
-    """
-    This test demonstrates the transformation_lambda_handler function only
-    runs when the event key given is the extraction complete file
-    """
+
     with patch("src.transform.transform_design") as mock_transform_design, patch(
         "src.transform.transform_payment_type"
     ) as mock_transform_payment_type, patch(
@@ -91,9 +84,7 @@ def test_function_does_not_execute_if_event_key_is_not_extraction_complete_file(
 
 
 def test_raises_excpetion_when_bucket_does_not_exist(invalid_event):
-    """
-    Demonstrates the function raises an exception when passed an invalid bucket name
-    """
+
     invalid_event["Records"][0]["s3"]["object"]["key"] = "ExtractHistory/1.txt"
     with pytest.raises(ValueError):
         transform_lambda_handler(invalid_event, {})
