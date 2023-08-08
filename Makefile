@@ -34,7 +34,7 @@ define execute_in_env
 	$(ACTIVATE_ENV) && $1
 endef
 
-runpy:
+pyrun:
 	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} python ${file})
 
 ## install all python packages and dependencies
@@ -88,7 +88,7 @@ run-flake:
 
 ## Run autopep8 code formatting
 run-autopep:
-	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} autopep8 --in-place -a ${file_name})
+	$(call execute_in_env, PYTHONPATH=${PYTHONPATH} autopep8 --in-place -a ${file})
 
 
 ## Run a single test

@@ -1,9 +1,11 @@
+import json
 import logging
 from utils.utils import (
     get_secret,
     connect_db,
     get_table_db,
     upload_table_s3,
+    log_latest_job,
     extract_history_s3
 )
 
@@ -75,21 +77,37 @@ def extraction_lambda_handler(event, context):
     db_credentials = get_secret(AWS_SECRET_DB_CREDENTIALS_NAME)
     table_names = get_secret(AWS_SECRET_TABLES_NAMES).keys()
 
+    # 4. test log_latest_job
+    # 5. update tests for get_table_db
+    # 6. test query_controller
+
     try:
         connection = connect_db(db_credentials)
         logger.info(f"Successfully connected to {DBNAME} database!")
 
+        JOB_TIMESTAMP = connection.run("SELECT NOW()")[0][0]
+
         for table_name in table_names:
 
-            table_df, query = get_table_db(connection, table_name)
+            table_df, query = get_table_db(
+                connection, table_name, INGESTION_BUCKET_NAME)
 
-            upload_table_s3(table_df, table_name, INGESTION_BUCKET_NAME)
+            upload_table_s3(
+                table_df,
+                table_name,
+                INGESTION_BUCKET_NAME,
+                JOB_TIMESTAMP)
 
             logger.info(
                 f"{table_name} table successfully extracted and uploaded!"
             )
-
+        connection.close()
         logger.info('#=#=#=#=#= Extract Lambda Job Complete! =#=#=#=#=#')
+
+        log_latest_job(
+            bucket_name=INGESTION_BUCKET_NAME,
+            timestamp=JOB_TIMESTAMP
+        )
 
         extract_history_s3(
             bucket_name=INGESTION_BUCKET_NAME,
@@ -99,3 +117,9 @@ def extraction_lambda_handler(event, context):
     except Exception as e:
         logger.error(e)
         raise RuntimeError
+
+
+with open("tests/extract/valid_event.json") as v:
+    event = json.loads(v.read())
+
+    extraction_lambda_handler(event, {})
