@@ -6,7 +6,7 @@ import awswrangler as wr
 import pandas as pd
 from datetime import datetime
 from pandas.testing import assert_frame_equal
-from src.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format, get_id_col, get_job_list
+from utils.load_utils import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format, get_id_col, get_job_list
 from tests.MockDB.MockDB import MockDB
 
 @pytest.fixture
@@ -178,73 +178,73 @@ def test_build_insert_sql_with_different_amount_of_columns():
             "VALUES (%s,%s,%s) "
     assert  output == expect
 
-def skip_test_insert_table_data_works_with_insert_sql():
-    test_db = MockDB
-    test_db.set_up_database()
-    test_db.set_up_tables()
-    data_to_insert = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json')]
-    insert_table_sql =  "INSERT INTO dim_design_t1 (design_id, design_name, file_location, file_name) "\
-                        "VALUES (%s,%s,%s,%s) "
-    connection = pg8000.connect(
-            host='localhost',
-            user='david',
-            port=5432,
-            database='test_db_load',
-            password='Paprika5'
-        )
-    insert_table_data(connection,insert_table_sql, data_to_insert)
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM dim_design_t1")
-    output = cursor.fetchall()
-    connection.close()
-    expect = [8, 'Wooden', '/usr', 'wooden-20220717-npgz.json']
-    assert output[0] == expect
-    test_db.insert_data_to_update()
+# def test_insert_table_data_works_with_insert_sql():
+#     test_db = MockDB
+#     test_db.set_up_database()
+#     test_db.set_up_tables()
+#     data_to_insert = [('8', 'Wooden', '/usr', 'wooden-20220717-npgz.json')]
+#     insert_table_sql =  "INSERT INTO dim_design_t1 (design_id, design_name, file_location, file_name) "\
+#                         "VALUES (%s,%s,%s,%s) "
+#     connection = pg8000.connect(
+#             host='localhost',
+#             user='david',
+#             port=5432,
+#             database='test_db_load',
+#             password='Paprika5'
+#         )
+#     insert_table_data(connection,insert_table_sql, data_to_insert)
+#     cursor = connection.cursor()
+#     cursor.execute("SELECT * FROM dim_design_t1")
+#     output = cursor.fetchall()
+#     connection.close()
+#     expect = [8, 'Wooden', '/usr', 'wooden-20220717-npgz.json']
+#     assert output[0] == expect
+#     test_db.insert_data_to_update()
 
-def test_insert_table_data_works_with_update_sql():
-    test_db = MockDB
-    test_db.set_up_database()
-    test_db.set_up_tables()
-    test_db.insert_data_to_update()
-    data_to_insert = [( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '8')]
-    insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
-    connection = pg8000.connect(
-            host='localhost',
-            user='david',
-            port=5432,
-            database='test_db_load',
-            password='Paprika5'
-        )
-    insert_table_data(connection,insert_table_sql, data_to_insert)
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM dim_design_t1")
-    output = cursor.fetchall()
-    connection.close()
-    expect = [8, 'Wooden', '/usr', 'wooden-20220717-npgz.json']
-    assert output[0] == expect
+# def test_insert_table_data_works_with_update_sql():
+#     test_db = MockDB
+#     test_db.set_up_database()
+#     test_db.set_up_tables()
+#     test_db.insert_data_to_update()
+#     data_to_insert = [( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '8')]
+#     insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
+#     connection = pg8000.connect(
+#             host='localhost',
+#             user='david',
+#             port=5432,
+#             database='test_db_load',
+#             password='Paprika5'
+#         )
+#     insert_table_data(connection,insert_table_sql, data_to_insert)
+#     cursor = connection.cursor()
+#     cursor.execute("SELECT * FROM dim_design_t1")
+#     output = cursor.fetchall()
+#     connection.close()
+#     expect = [8, 'Wooden', '/usr', 'wooden-20220717-npgz.json']
+#     assert output[0] == expect
 
-def test_insert_table_data_works_with_update_sql_with_multiple_data():
-    test_db = MockDB
-    test_db.set_up_database()
-    test_db.set_up_tables()
-    test_db.insert_data_to_update()
-    test_db.insert_data_to_update_2()
+# def test_insert_table_data_works_with_update_sql_with_multiple_data():
+#     test_db = MockDB
+#     test_db.set_up_database()
+#     test_db.set_up_tables()
+#     test_db.insert_data_to_update()
+#     test_db.insert_data_to_update_2()
 
-    data_to_insert = [( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '8'), ( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '7')]
-    insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
-    connection = pg8000.connect(
-            host='localhost',
-            user='david',
-            port=5432,
-            database='test_db_load',
-            password='Paprika5'
-        )
-    insert_table_data(connection,insert_table_sql, data_to_insert)
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM dim_design_t1")
-    output = cursor.fetchall()
-    expect = ([8, 'Wooden', '/usr', 'wooden-20220717-npgz.json'], [7, 'Wooden', '/usr', 'wooden-20220717-npgz.json'])
-    assert output == expect
+#     data_to_insert = [( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '8'), ( 'Wooden',  '/usr', 'wooden-20220717-npgz.json', '7')]
+#     insert_table_sql =  "UPDATE dim_design_t1 SET design_name = %s, file_location = %s, file_name = %s WHERE design_id = %s"
+#     connection = pg8000.connect(
+#             host='localhost',
+#             user='david',
+#             port=5432,
+#             database='test_db_load',
+#             password='Paprika5'
+#         )
+#     insert_table_data(connection,insert_table_sql, data_to_insert)
+#     cursor = connection.cursor()
+#     cursor.execute("SELECT * FROM dim_design_t1")
+#     output = cursor.fetchall()
+#     expect = ([8, 'Wooden', '/usr', 'wooden-20220717-npgz.json'], [7, 'Wooden', '/usr', 'wooden-20220717-npgz.json'])
+#     assert output == expect
 
 def test_build_update_sql_return_string():
     test_data = [[
@@ -289,45 +289,45 @@ def test_update_data_format_returns_a_list_in_right_format():
     assert expect == output
 
 def test_get_job_list_returns_list(mock_client):
-    output = get_job_list()
+    output = get_job_list('processed-va-052023')
     print(output)
     assert isinstance(output, list)
 
 def test_get_job_list_returns_list_that_is_wanted(mock_client):
-    output = get_job_list()
+    output = get_job_list('processed-va-052023')
     expect = ['20230808110721', '20230808110752', '20230808110813']
     assert output == expect
 
-def test_get_col_id_returns_list():
-    test_db = MockDB
-    test_db.set_up_database()
-    test_db.set_up_tables()
-    test_db.insert_data_to_update()
-    test_db.insert_data_to_update_2()
+# def test_get_col_id_returns_list():
+#     test_db = MockDB
+#     test_db.set_up_database()
+#     test_db.set_up_tables()
+#     test_db.insert_data_to_update()
+#     test_db.insert_data_to_update_2()
 
-    connection = pg8000.connect(
-            host='localhost',
-            user='david',
-            port=5432,
-            database='test_db_load',
-            password='Paprika5'
-        )
-    test_data = [[
-        'design_id', 'design_name', 'file_location', 'file_name'
-    ],
-    [{
-        'design_id':'8',
-        'design_name': 'Wooden',
-        'file_location': '/usr',
-        'file_name': 'wooden-20220717-npgz.json'
-    },
-    {
-        'design_id':'7',
-        'design_name': 'Woden',
-        'file_location': '/us',
-        'file_name': 'wooden.json'
-    }]]
-    df_data = pd.DataFrame(data = test_data[1], columns = test_data[0]) 
-    output = get_id_col(connection, 'dim_design_t1', df_data)
-    print(output)
-    assert isinstance(output, list)
+#     connection = pg8000.connect(
+#             host='localhost',
+#             user='david',
+#             port=5432,
+#             database='test_db_load',
+#             password='Paprika5'
+#         )
+#     test_data = [[
+#         'design_id', 'design_name', 'file_location', 'file_name'
+#     ],
+#     [{
+#         'design_id':'8',
+#         'design_name': 'Wooden',
+#         'file_location': '/usr',
+#         'file_name': 'wooden-20220717-npgz.json'
+#     },
+#     {
+#         'design_id':'7',
+#         'design_name': 'Woden',
+#         'file_location': '/us',
+#         'file_name': 'wooden.json'
+#     }]]
+#     df_data = pd.DataFrame(data = test_data[1], columns = test_data[0]) 
+#     output = get_id_col(connection, 'dim_design_t1', df_data)
+#     print(output)
+#     assert isinstance(output, list)

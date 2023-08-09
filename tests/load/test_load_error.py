@@ -1,12 +1,10 @@
 import pytest
 from moto import mock_s3
 import boto3
-import pg8000
 import awswrangler as wr
 import pandas as pd
 from pandas.testing import assert_frame_equal
-from src.load import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format
-from tests.MockDB.MockDB import MockDB
+from utils.load_utils import get_table_data, insert_data_format, build_insert_sql, insert_table_data, build_update_sql, update_data_format
 
 @pytest.fixture
 def create_s3_client():
@@ -48,7 +46,7 @@ def test_get_table_data_error(mock_client):
 def test_dataframe_to_list():
     not_data = []
     with pytest.raises(Exception):
-        dataframe_to_list(not_data)
+        insert_data_format(not_data)
 
 def test_build_insert_sql():
     not_data = []

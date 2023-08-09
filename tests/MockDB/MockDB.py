@@ -113,8 +113,3 @@ class MockDB(TestCase):
             connection.close()
         except Exception as err:
             print("Error with inserting test data of update on id 7", err)
-
-New_database = MockDB()
-New_database.set_up_database()
-New_database.set_up_tables()
-New_database.insert_data_to_update()
