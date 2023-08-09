@@ -45,7 +45,6 @@ def build_insert_sql(wh_table_name, table):
 
 def insert_table_data(connection,insert_table_sql, data_to_insert):
     try:
-        print(insert_table_sql)
         cursor = connection.cursor()
         cursor.executemany(insert_table_sql, data_to_insert)
         connection.commit()
