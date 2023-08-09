@@ -114,7 +114,7 @@ resource "aws_iam_role_policy_attachment" "transform_lambda_sm_policy_attachment
 # Load
 
 resource "aws_iam_role_policy_attachment" "load_lambda_sm_policy_attachment" {
-    role = aws_iam_role.extract_lambda_role.name
+    role = aws_iam_role.load_lambda_role.name
     policy_arn = aws_iam_policy.sm_policy_resource.arn
 }
 
