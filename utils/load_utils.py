@@ -1,7 +1,7 @@
 import boto3
 import awswrangler as wr
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, date
 import logging
 from botocore.exceptions import ClientError
 logger = logging.getLogger('LoadUtilsLogger')
@@ -14,20 +14,24 @@ def get_id_col(connection, wh_table_name, table_df):
     cursor.execute(query)
     id_col = cursor.fetchall()
     cursor.close()
-    return [lst[0] for lst in id_col]
+    if len(id_col) !=0 and isinstance(id_col[0][0], date):
+        new_id_col = [lst[0].strftime('%Y-%m-%d') for lst in id_col]
+    else:
+        new_id_col = [lst[0] for lst in id_col]
+    return new_id_col
 
 def get_table_data(s3_table_name, bucket_name, timestamp):
     try:
         return wr.s3.read_parquet(f's3://{bucket_name}/{timestamp}/{s3_table_name}.parquet')
     except Exception as error:
-        logger.error["get_table_data", error]
+        logger.error("get_table_data")
         raise error
 
 def insert_data_format(table):
     try:
         return [tuple(row) for row in table.itertuples(index=False)]
     except Exception as error:
-        logger.error["insert_data_format", error]
+        logger.error("insert_data_format")
         raise error
 
 def build_insert_sql(wh_table_name, table):
@@ -36,7 +40,7 @@ def build_insert_sql(wh_table_name, table):
         placeholder = ',' .join(['%s'] * len(table.columns))
         return f"INSERT INTO {wh_table_name} ({columns}) VALUES ({placeholder}) "
     except Exception as error:
-        logger.error["build_insert_sql", error]
+        logger.error("build_insert_sql")
         raise error
 
 def insert_table_data(connection,insert_table_sql, data_to_insert):
@@ -46,16 +50,17 @@ def insert_table_data(connection,insert_table_sql, data_to_insert):
         connection.commit()
         cursor.close()
     except Exception as error:
-        logger.error["insert_table_data", error]
+        logger.error("insert_table_data")
         raise error
 
 def get_job_list(bucket_name):
     try:
         df = wr.s3.read_csv(path=f's3://{bucket_name}/lastjob/lastjob.csv')
         ts_list = [str(ts[0]) for ts in df.values.tolist()]
+        logger.info("successfully retrieved job list")
         return ts_list
     except Exception as error:
-        logger.error["no new jobs", error]
+        logger.error("no new jobs")
         raise error
 
 def build_update_sql(wh_table_name, table):
@@ -76,7 +81,7 @@ def build_update_sql(wh_table_name, table):
                 index += 1
         return f"UPDATE {wh_table_name} SET {ph_SET} WHERE {ph_WHERE}"
     except Exception as error:
-        logger.error["build_update_sql", error]
+        logger.error("build_update_sql")
         raise error
 
 def update_data_format(row):
@@ -92,7 +97,7 @@ def update_data_format(row):
         data.append(row[0])
         return data
     except Exception as error:
-        logger.error["update_data_format", error]
+        logger.error("update_data_format")
         raise error
 
 def rename_lastjob(bucket_name):
