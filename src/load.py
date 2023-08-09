@@ -11,40 +11,40 @@ from botocore.exceptions import ClientError
 logger = logging.getLogger('MyLogger')
 logger.setLevel(logging.INFO)
 
-def update_wh(s3_table_name, wh_table_name, is_dim, secret_name='warehouse'):
-    # get warehouse credentails from AWS secrets
-    db_creds = get_secret(secret_name)
-    try:
-        connection = connect_db(db_creds)
+# def update_wh(s3_table_name, wh_table_name, is_dim, secret_name='warehouse'):
+#     # get warehouse credentails from AWS secrets
+#     db_creds = get_secret(secret_name)
+#     try:
+#         connection = connect_db(db_creds)
 
-        # get the table from the s3 and put it in a pandas dataframe#
-        # will need to work with a list
-        new_jobs = get_job_list()
-        for ts_dir in new_jobs:
-            table_df = get_table_data(s3_table_name, ts_dir)
-            if is_dim:
-                lst_wh_id = get_id_col(connection, wh_table_name, table_df)
-                for row in table.values.tolist():
-                    if row[0] in lst_wh_id:
-                        update_data = update_data_format(row)
-                        query = build_update_sql(wh_table_name, table)
-                        insert_table_data(connection, query, update_data)
-                    else:
-                        insert_table_sql = build_insert_sql(wh_table_name, table)
-                        # # Convert DataFrame to list tuples for executemany
-                        data_to_insert = insert_data_format(table)
-                        # # Execute the query using executemany to insert all rows at once
-                        insert_table_data(connection,insert_table_sql, data_to_insert)
-            else:
-                insert_table_sql = build_insert_sql(wh_table_name, table)
-                # # Convert DataFrame to list tuples for executemany
-                data_to_insert = insert_data_format(table)
-                # # Execute the query using executemany to insert all rows at once
-                insert_table_data(connection,insert_table_sql, data_to_insert)
-        connection.close()
-    except Exception as error:
-        logger.error["main function error", error]
-        raise error
+#         # get the table from the s3 and put it in a pandas dataframe#
+#         # will need to work with a list
+#         new_jobs = get_job_list()
+#         for ts_dir in new_jobs:
+#             table_df = get_table_data(s3_table_name, ts_dir)
+#             if is_dim:
+#                 lst_wh_id = get_id_col(connection, wh_table_name, table_df)
+#                 for row in table.values.tolist():
+#                     if row[0] in lst_wh_id:
+#                         update_data = update_data_format(row)
+#                         query = build_update_sql(wh_table_name, table)
+#                         insert_table_data(connection, query, update_data)
+#                     else:
+#                         insert_table_sql = build_insert_sql(wh_table_name, table)
+#                         # # Convert DataFrame to list tuples for executemany
+#                         data_to_insert = insert_data_format(table)
+#                         # # Execute the query using executemany to insert all rows at once
+#                         insert_table_data(connection,insert_table_sql, data_to_insert)
+#             else:
+#                 insert_table_sql = build_insert_sql(wh_table_name, table)
+#                 # # Convert DataFrame to list tuples for executemany
+#                 data_to_insert = insert_data_format(table)
+#                 # # Execute the query using executemany to insert all rows at once
+#                 insert_table_data(connection,insert_table_sql, data_to_insert)
+#         connection.close()
+#     except Exception as error:
+#         logger.error["main function error", error]
+#         raise error
     
 def get_id_col(connection, wh_table_name, table_df):
     query = f"SELECT {table_df.columns[0]} FROM {wh_table_name};"
@@ -65,7 +65,7 @@ def insert_data_format(table):
     try:
         return [tuple(row) for row in table.itertuples(index=False)]
     except Exception as error:
-        logger.info["insert_data_format", error]
+        logger.error["insert_data_format", error]
         raise error
 
 def build_insert_sql(wh_table_name, table):
@@ -74,7 +74,7 @@ def build_insert_sql(wh_table_name, table):
         placeholder = ',' .join(['%s'] * len(table.columns))
         return f"INSERT INTO {wh_table_name} ({columns}) VALUES ({placeholder}) "
     except Exception as error:
-        logger.info["build_insert_sql", error]
+        logger.error["build_insert_sql", error]
         raise error
 
 def insert_table_data(connection,insert_table_sql, data_to_insert):
@@ -84,7 +84,7 @@ def insert_table_data(connection,insert_table_sql, data_to_insert):
         connection.commit()
         cursor.close()
     except Exception as error:
-        logger.info["insert_table_data", error]
+        logger.error["insert_table_data", error]
         raise error
 
 def get_job_list():
@@ -114,7 +114,7 @@ def build_update_sql(wh_table_name, table):
                 index += 1
         return f"UPDATE {wh_table_name} SET {ph_SET} WHERE {ph_WHERE}"
     except Exception as error:
-        logger.info["build_update_sql", error]
+        logger.error["build_update_sql", error]
         raise error
 
 def update_data_format(row):
@@ -128,10 +128,9 @@ def update_data_format(row):
             elif index == 0:
                 index += 1
         data.append(row[0])
-        print(data)
         return data
     except Exception as error:
-        logger.info["update_data_format", error]
+        logger.error["update_data_format", error]
         raise error
 
 def rename_lastjob(bucket_name):
