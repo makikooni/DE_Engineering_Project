@@ -238,6 +238,21 @@ def query_controller(table_name, bucket_name):
 
 
 def get_last_job_timestamp(bucket_name):
+    """
+    This function retrieves the timestamp of the most recent job from a text
+    file named 'lastjob.txt' stored in the specified S3 bucket, returning
+    False if the bucket does not exist.
+
+    Args:
+        bucket_name (str): Name of the S3 bucket containing the 'lastjob.txt' file.
+
+    Returns:
+        datetime or False: Datetime object including the timestamp of the last job, 
+        or, False in the case where the 'lastjob.txt' file cannot be found.
+
+    Raises:
+        KeyError: If the specified s3 bucket does not exist.
+    """
     try:
         key = "lastjob.txt"
         s3 = boto3.client("s3")
