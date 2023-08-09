@@ -85,8 +85,8 @@ data "aws_iam_policy_document" "sm_document" {
 
     resources = [
       "${local.db_secrets_arn}",
-      "${local.table_names_secrets_arn}"
-      "${local.warehouse_db_secret_arn}"
+      "${local.table_names_secrets_arn}",
+      "${local.warehouse_db_secret_arn}",
       "${local.warehouse_table_names_arn}"
     ]
   }
