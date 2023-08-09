@@ -8,10 +8,6 @@ from utils.utils import (
     trigger_transform_lambda,
 )
 
-"""
-Defines lambda function responsible for extracting the data
-from the database and depositing it in the ingestion bucket
-"""
 
 logger = logging.getLogger("ExtractionLogger")
 logger.setLevel(logging.INFO)
@@ -19,25 +15,47 @@ logger.setLevel(logging.INFO)
 
 def extraction_lambda_handler(event, context):
     """
-    Handles scheduled event and transfers data from database to s3.
-
-      On receipt of a Cloudwatch scheduled event:
-        - connects to totesys database
-        - extracts each table
-        - uploads each table as a csv to ingestion zone
-
+    Entry point for Extraction Lambda.
+    Verifies CloudWatch scheduled event trigger, and required event keys, 
+    before connecting to the Terriffic Totes RDBMS using credentials retrieved
+    from AWS Secrets Manager. Then extracts tables from RDBMS, storing them as
+    CSV files in our ingestion s3 bucket, and logs the extraction progress. 
+    
     Args:
-        event:
-            a valid Cloudwatch scheudle event
-        context:
-            a valid AWS lambda Python context object
+        event (dict): event data containing info about CloudWatch event which 
+        triggered the lambda function. The expected data structure follows:
+            {
+                "id": "12345678",
+                "detail-type": "DatabaseExtraction",
+                "source": "aws.source-database",
+                "account": "123456789012",
+                "time": "2001-01-01T12:34:56Z",
+                "region": "eu-west-2",
+                "resources": [
+                    "arn:aws:events:eu-west-2:123456789012:rule/extraction_schedule"
+                ],
+                "detail": {
+                    "table_name": "table-name",
+                    "database": "database-name"
+                }
+            }
+        
+        context (LambdaContext): 
+            Runtime information about the lambda function.
+        
+    Returns:
+        None.
 
-    Raises:
-        ValueError:
-            Event resources arn does not match the expected arn.
-        RuntimeError:
-            An unexpected error occurred in execution. Other errors
-            result in an informative log message.
+    Raises: 
+        ValueError: 
+            Raised when the event's trigger does not match the anticipated 
+            CloudWatch trigger ARN.
+        
+        KeyError: 
+            Raised if any of the required event keys are not present. 
+        
+        RuntimeError: 
+            Raised if an error occurs during either the extraction or upload processes.
     """
     DBNAME = "totesys"
     AWS_SECRET_TABLES_NAMES = "ingestion/db/table-names"
