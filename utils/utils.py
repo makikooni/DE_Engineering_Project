@@ -321,6 +321,23 @@ def log_latest_job_extract(bucket_name, timestamp):
             raise e
 
 def log_latest_job_transform(bucket_name, timestamp):
+    """
+    This function appends the supplied timestamp of the latest transformation 
+    job to a CSV file named 'lastjob.csv' stored in a specific directory within
+    the specified S3 bucket. In the case the file doesn't exist, the function 
+    creates it.
+
+    Args:
+        bucket_name (str): Name of the S3 bucket where the CSV file will be stored.
+
+        timestamp (str): Timestamp of the latest transformation job, as a string.
+
+    Raises:
+        TypeError: If either the provided bucket name or timestamp is not a string.
+
+        Exception: If an unknown error occurs whilst interacting with S3,
+        or, when writing the CSV.
+    """
     if not isinstance(bucket_name, str):
         raise TypeError(f"bucket name {type(bucket_name)}, expected {str}")
     if not isinstance(timestamp, str):
