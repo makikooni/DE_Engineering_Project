@@ -67,7 +67,6 @@ def load_lambda_handler(event, context):
                                 query = build_insert_sql(table_name, table_df)
                                 data = [
                                     tuple(row)]  # insert_data_format(table_df)
-                                print(data)
                             insert_table_data(connection, query, data)
                     else:
                         query = build_insert_sql(table_name, table_df)

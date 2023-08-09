@@ -142,7 +142,7 @@ data "aws_iam_policy_document" "s3_processed_document" {
   # Allow the uploading and downloading of an object, and listing of buckets from the S3 resources
   statement {
 
-    actions = ["s3:PutObject", "s3:GetObject", "s3:ListBucket"]
+    actions = ["s3:PutObject", "s3:DeleteObject", "s3:GetObject", "s3:ListBucket"]
     
     resources = [
       "${aws_s3_bucket.processed_zone.arn}/*",
