@@ -208,6 +208,27 @@ def connect_db(db_credentials):
         raise DatabaseError
 
 def query_controller(table_name, bucket_name):
+    """
+    This function constructs an SQL query, based on the last extraction 
+    timestamp of the given table, to fetch date from that table. If 
+    no record of the last extraction timestamp is present; 
+    last_job_timestamp equates to False, and the query retrieves
+    all rows from that table. Otherwise, the function retrieves only
+    rows with a timestamp greater than the last_job_timestamp.
+
+    Args:
+        table_name (str): Name of the database table to query.
+
+        bucket_name (str): Name of the ingestion s3 bucket.
+
+    Returns:
+        str: SQL query string to fetch specific data from the table.
+
+    Note:
+        This function relies on, and utilises, the get_last_job_timestamp()
+        utility function which returns a correctly formatted timestamp in
+        regards to the last data stored in the ingestion s3 bucket.
+    """
     last_job_timestamp = get_last_job_timestamp(bucket_name)
 
     if last_job_timestamp == False:
@@ -233,6 +254,27 @@ def get_last_job_timestamp(bucket_name):
 
 
 def log_latest_job_extract(bucket_name, timestamp):
+    """
+    This function writes the supplied timestamp, of the most recent extraction 
+    job, to an S3 object named 'lastjob.txt' in the specified S3 bucket.
+
+    Args:
+        bucket_name (str): Name of the ingestion s3 bucket to store the timestamp.
+
+        timestamp (datetime): Timestamp of most recent extraction job.
+
+    Returns:
+        None.
+
+    Raises:
+        TypeError: If the supplied bucket name is not a string, 
+        or, if the timestamp is not a datetime object.
+
+        KeyError: If the specified s3 bucket does not exist.
+
+        RuntimeError: If the Lambda function lacks the neccessary S3 access policy, 
+        and also; in the case of other unknown errors.
+    """
     if not isinstance(bucket_name, str):
         raise TypeError(f"bucket name {type(bucket_name)}, expected {str}")
     if not isinstance(timestamp, datetime):
