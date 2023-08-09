@@ -28,6 +28,7 @@ resource "aws_lambda_function" "load_lambda" {
   handler = "load.load_lambda_handler"
   runtime = "python3.9"
   layers = [aws_lambda_layer_version.lambda_layer.arn, "arn:aws:lambda:eu-west-2:336392948345:layer:AWSSDKPandas-Python39:8"]
-  timeout = 60  # 1 minute
+  timeout = 900  # 15 minute
+  memory_size = 10240  # ~10 GB
   depends_on = [null_resource.load_zip]
 }
