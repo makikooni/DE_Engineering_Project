@@ -77,7 +77,7 @@ def load_lambda_handler(event, context):
 
                     logger.info(
                         f'successfully loaded {table_name} to the warehouse')
-                    # print(f'successfully loaded {table_name} to the warehouse')
+                # print(f'successfully loaded {table_name} to the warehouse')
                 else:
                     logger.info(f'SKIPPING: {table_name} - no data to add')
                     # print(f'SKIPPING: {table_name} - no data to add')

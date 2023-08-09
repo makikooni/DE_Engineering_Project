@@ -16,13 +16,13 @@ logger.setLevel(logging.INFO)
 def extraction_lambda_handler(event, context):
     """
     Entry point for Extraction Lambda.
-    Verifies CloudWatch scheduled event trigger, and required event keys, 
+    Verifies CloudWatch scheduled event trigger, and required event keys,
     before connecting to the Terriffic Totes RDBMS using credentials retrieved
     from AWS Secrets Manager. Then extracts tables from RDBMS, storing them as
-    CSV files in our ingestion s3 bucket, and logs the extraction progress. 
-    
+    CSV files in our ingestion s3 bucket, and logs the extraction progress.
+
     Args:
-        event (dict): event data containing info about CloudWatch event which 
+        event (dict): event data containing info about CloudWatch event which
         triggered the lambda function. The expected data structure follows:
             {
                 "id": "12345678",
@@ -39,23 +39,24 @@ def extraction_lambda_handler(event, context):
                     "database": "database-name"
                 }
             }
-        
-        context (LambdaContext): 
+
+        context (LambdaContext):
             Runtime information about the lambda function.
-        
+
     Returns:
         None.
 
-    Raises: 
-        ValueError: 
-            Raised when the event's trigger does not match the anticipated 
+    Raises:
+        ValueError:
+            Raised when the event's trigger does not match the anticipated
             CloudWatch trigger ARN.
-        
-        KeyError: 
-            Raised if any of the required event keys are not present. 
-        
-        RuntimeError: 
-            Raised if an error occurs during either the extraction or upload processes.
+
+        KeyError:
+            Raised if any of the required event keys are not present.
+
+        RuntimeError:
+            Raised if an error occurs during either the extraction or
+            upload processes.
     """
     DBNAME = "totesys"
     AWS_SECRET_TABLES_NAMES = "ingestion/db/table-names"
