@@ -146,6 +146,21 @@ def insert_table_data(connection, query, data):
         raise error
 
 def get_job_list(bucket_name):
+    """
+    Extracts list of timestamps from lastjob.csv, stored in processed s3 bucket,
+    logs progress and returns list.
+
+    Args:
+        bucket_name (str):
+            name of processed s3 bucket.
+    
+    Returns:
+        list: list of timstamps.
+    
+    Raises:
+        Exception:
+            Raised if no new jobs, or, data conversion is unsuccessful.
+    """
     try:
         df = wr.s3.read_csv(path=f's3://{bucket_name}/lastjob/lastjob.csv')
         ts_list = [str(ts[0]) for ts in df.values.tolist()]
