@@ -210,6 +210,20 @@ def build_update_sql(wh_table_name, table):
         raise error
 
 def update_data_format(row):
+    """
+    Formats row data for updating rows in warehouse.
+
+    Args:
+        row (list):
+            list of data from a specfic table row.
+    
+    Returns:
+        list: list of correctly formatted data.
+
+    Raises:
+        Exception:
+            Raised if data formatting is unsuccessful.
+    """
     try:
         data = []
         index = 0
