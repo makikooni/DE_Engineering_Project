@@ -14,6 +14,44 @@ logger.setLevel(logging.INFO)
 
 
 def load_lambda_handler(event, context):
+    """
+    Entry point for Load Lambda, triggered by CloudWatch scheduled event.
+    Retrieves warehouse credentials, and list of table names, from 
+    AWS Secrets, as well as a list of timestamps from 'lastjob.csv' 
+    file in processed s3 bucket. 
+    
+    Then establishes connection with warehouse before iterating through
+    list of table names. With each iteration, function iterates through 
+    list of timestamps, reading data from processed s3 bucket as pandas 
+    dataframe:
+
+        - For dim_tables: peforms neccessary data transformations 
+        before comparing each row id to warehouse, discerning inserts from 
+        updates, building queries and configuring row structure, 
+        before updating warehouse. 
+        
+        - For fact tables; queries are built and 
+        data formatted before updating warehouse.
+
+        - Logging progress to CloudWatch.
+
+    Connection to warehouse is then closed and lastjob.csv is renamed with 
+    timestamp to keep record and indicate successful load.
+
+    Args:
+        event (dict): 
+            event data containing info about triggered S3 object.
+
+        context (LambdaContext): 
+            runtime information about the lambda function.
+
+    Returns:
+        None.
+
+    Raises:
+        Exception:
+            Raised if an unforseen errors arrise during execution.
+    """
     PROCESSED_BUCKET_NAME = 'processed-va-052023'
     WAREHOUSE_DB_NAME = 'warehouse'
     WAREHOUSE_TABLE_NAMES = 'warehouse_table_names'
