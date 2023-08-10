@@ -18,7 +18,7 @@ def get_id_col(connection, wh_table_name, table_df):
             containing data regarding warehouse connection.
         
         wh_table_name (str):
-            name of current table.
+            name of current warehouse table.
 
         table_df (pandas.DataFrame):
             dataframe of current table.
@@ -71,6 +71,10 @@ def insert_data_format(table):
     Args:
         table (pandas.DataFrame):
             dataframe containing data to be processed.
+
+    Returns:
+        list:
+            list of tuples.
     
     Raises:
         Exception:
@@ -83,6 +87,26 @@ def insert_data_format(table):
         raise error
 
 def build_insert_sql(wh_table_name, table):
+    """
+    Builds SQL query for iserting data into the warehouse by joining table 
+    column names into comma separated string, and joining placeholders into 
+    comma separated string, before constructing the SQL query and returning it.
+
+    Args:
+        wh_table_name (str):
+            name of current warehouse table.  
+
+        table (pandas.DataFrame): 
+            dataframe containing current incoming table data.
+
+    Returns:
+        str: 
+            SQL query as string.
+
+    Raises:
+        Execption:
+            Raised if execution unsuccessful.
+    """
     try:
         columns = ', '.join(table.columns)
         placeholder = ',' .join(['%s'] * len(table.columns))
