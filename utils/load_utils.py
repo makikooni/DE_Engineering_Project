@@ -240,6 +240,16 @@ def update_data_format(row):
         raise error
 
 def rename_lastjob(bucket_name):
+    """
+    Creates copy of lastjob.csv file from the processed s3 bucket, names it with the relevant timestamp 
+    and also stores it in the processed s3 bucket. It then deletes the lastjob.csv file.
+
+    Args:
+        bucket_name (str): name of processed s3 bucket.
+        
+    Returns:
+        None.
+    """
     timestamp_suffix = datetime.now().strftime('%Y%m%d%H%M%S')
     s3_client = boto3.client('s3')
     s3_client.copy_object(Bucket=bucket_name, CopySource=f'{bucket_name}/lastjob/lastjob.csv', Key=f'lastjob/lastjob_{timestamp_suffix}.csv')
