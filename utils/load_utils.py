@@ -171,6 +171,24 @@ def get_job_list(bucket_name):
         raise error
 
 def build_update_sql(wh_table_name, table):
+    """
+    Builds an SQL query by iterating through list of table columns 
+    to calculate neccessary query perameter values and returns it.
+
+    Args:
+        wh_table_name (str):
+            name of current warehouse table.
+
+        table (pandas.DataFrame):
+            dataframe of current table.
+        
+    Returns:
+        str: SQL query string.
+    
+    Raises:
+        Exception:
+            Raised if query construction is unsuccessful.
+    """
     try:
         ph_SET = ''
         ph_WHERE = ''
