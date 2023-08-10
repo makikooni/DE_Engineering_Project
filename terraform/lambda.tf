@@ -1,3 +1,5 @@
+#=#=#=#=#=#=#=#=#=#=#=#=# Lambda Functions
+
 resource "aws_lambda_function" "extract_lambda" {
   filename = "${local.extract_function_zip_path}"
   function_name = "${local.extract_lambda_name}"

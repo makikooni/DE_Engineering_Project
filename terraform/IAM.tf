@@ -1,4 +1,4 @@
-#=#=#=#=#=#=#=#=#=#=#=#=# IAM Role - Extract
+#=#=#=#=#=#=#=#=#=#=#=#=# IAM Role
 resource "aws_iam_role" "extract_lambda_role" {
     name = "${local.extract_lambda_name}_role"
     description = "this role is for the extract lambda"

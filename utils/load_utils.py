@@ -254,3 +254,4 @@ def rename_lastjob(bucket_name):
     s3_client = boto3.client('s3')
     s3_client.copy_object(Bucket=bucket_name, CopySource=f'{bucket_name}/lastjob/lastjob.csv', Key=f'lastjob/lastjob_{timestamp_suffix}.csv')
     s3_client.delete_object(Bucket=bucket_name, Key='lastjob/lastjob.csv')
+    logger.info(f'successfully renamed lastjob.csv to lastjob_{timestamp_suffix}.csv')

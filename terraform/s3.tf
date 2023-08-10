@@ -29,7 +29,6 @@ resource "aws_s3_bucket_notification" "ingestion_s3_notification" {
   depends_on = [aws_lambda_permission.allow_ingestion_s3_invoke_transform_lambda]
 }
 
-
 # Transform
 
 resource "aws_s3_bucket" "processed_zone" {
