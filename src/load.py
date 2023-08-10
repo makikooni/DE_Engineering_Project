@@ -51,6 +51,14 @@ def load_lambda_handler(event, context):
     Raises:
         Exception:
             Raised if an unforseen errors arrise during execution.
+
+    Note:
+        This function relies on, and utilises, the following utility functions: 
+            get_id_col, get_table_data,
+            insert_data_format, build_insert_sql,
+            insert_table_data, get_job_list,
+            build_update_sql, update_data_format,
+            rename_lastjob, get_secret.
     """
     PROCESSED_BUCKET_NAME = 'processed-va-052023'
     WAREHOUSE_DB_NAME = 'warehouse'
