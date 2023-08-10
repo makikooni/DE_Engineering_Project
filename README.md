@@ -10,12 +10,11 @@
 ![Static Badge](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)
 
 
-The project creates applications to Extract, Transform and Load data from a operational totesys database and archives it in a data lake, and makes it available in a remodelled OLAP data warehouse hosted in AWS.
+The project creates applications to Extract, Transform and Load data from a operational database for our client Terriffic Totes. The data is archived in a data lake, and is made available in a remodelled OLAP data warehouse hosted in AWS.
 
 - [ETL Totesys Project -Various Artists](#etl-totesys-project--various-artists)
   - [Features](#features)
   - [Technologies](#technologies)
-  - [ETL Architecture](#etl-architecture)
   - [Installation](#installation)
     - [Project requirements](#project-requirements)
     - [Python dependencies](#python-dependencies)
@@ -43,14 +42,14 @@ The project uses a number of technologies and AWS serviuce
 - **CI/CD:** GitHub Actions
 - **Project management:** GitHub Projects
 
-## ETL Architecture
+<!-- ## ETL Architecture
 visual
 - **Extract:** Application to continually ingest new and updated data from tables in <code>totesys</code> database and store in *ingestion* S3 bucket as <code>csv</code> files
 
 - **Transform:** Application to remodel tables into a predefined schema suitable for a OLAP data warehouse and store data in *processed* S3 bucket in <code>parquet</code> format
 
 - **Load:** Application to load data into data warehouse at defined intervals
-
+ -->
 
 ## Installation
 The installation steps below make extensive use of the [Makefile](Makefile).
