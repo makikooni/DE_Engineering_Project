@@ -115,10 +115,30 @@ def build_insert_sql(wh_table_name, table):
         logger.error("build_insert_sql")
         raise error
 
-def insert_table_data(connection,insert_table_sql, data_to_insert):
+def insert_table_data(connection, query, data):
+    """
+    Function adds data to warehouse.
+
+    Args:
+        connection (pg8000 connection object): 
+            containing data regarding warehouse connection.
+        
+        query (str): 
+            SQL query string.
+
+        data (list): 
+            data to be sent to warehouse as list of tuples.
+    
+    Returns:
+        None.
+
+    Raises:
+        Exception:
+            Raised if data entry is unsuccessful.
+    """
     try:
         cursor = connection.cursor()
-        cursor.executemany(insert_table_sql, data_to_insert)
+        cursor.executemany(query, data)
         connection.commit()
         cursor.close()
     except Exception as error:
