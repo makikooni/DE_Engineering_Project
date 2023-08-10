@@ -18,13 +18,11 @@ def load_lambda_handler(event, context):
     WAREHOUSE_DB_NAME = 'warehouse'
     WAREHOUSE_TABLE_NAMES = 'warehouse_table_names'
 
-    db_creds = get_secret(WAREHOUSE_DB_NAME)
     new_jobs = get_job_list(PROCESSED_BUCKET_NAME)
+    rename_lastjob(PROCESSED_BUCKET_NAME)
+    db_creds = get_secret(WAREHOUSE_DB_NAME)
     table_names = list(get_secret(WAREHOUSE_TABLE_NAMES).keys())
-# table_names = ['fact_payment', 'fact_purchase_order', 'fact_sales_order' ]
-# table_names = [ 'dim_date', 'dim_design', 'dim_staff', 'dim_counterparty',
-# 'dim_currency', 'dim_location', 'dim_payment_type', 'dim_transaction']
-# new_jobs = ["20230809105942"]
+
     try:
         connection = pg8000.connect(
             host=db_creds['host'],
@@ -34,20 +32,16 @@ def load_lambda_handler(event, context):
             password=db_creds['password']
         )
         logger.info('successfully connected to database')
-        # print(f'successfully connected to database')
 
         for table_name in table_names:
 
             for ts_dir in new_jobs:
-                # if ts_dir != "20230809105942":
 
                 logger.info(f'looping over {table_name} in directory {ts_dir}')
-                # print(f'looping over {table_name} in directory {ts_dir}')
 
                 table_df = get_table_data(
                     table_name, PROCESSED_BUCKET_NAME, ts_dir)
                 logger.info(f'successfully retrieved {table_name} dataframe')
-                # print(f'successfully retrieved {table_name} dataframe')
 
                 if table_name == 'dim_transaction':
                     table_df.replace({np.nan: -1}, inplace=True)
@@ -66,24 +60,20 @@ def load_lambda_handler(event, context):
                             else:
                                 query = build_insert_sql(table_name, table_df)
                                 data = [
-                                    tuple(row)]  # insert_data_format(table_df)
+                                    tuple(row)]
                             insert_table_data(connection, query, data)
                     else:
                         query = build_insert_sql(table_name, table_df)
                         data = insert_data_format(table_df)
                         insert_table_data(connection, query, data)
-                        # print(f'successfully loaded {table_name}...')
 
                     logger.info(
                         f'successfully loaded {table_name} to the warehouse')
-                # print(f'successfully loaded {table_name} to the warehouse')
                 else:
                     logger.info(f'SKIPPING: {table_name} - no data to add')
-                    # print(f'SKIPPING: {table_name} - no data to add')
 
         connection.close()
 
-        rename_lastjob(PROCESSED_BUCKET_NAME)
     except Exception as error:
         logger.error("main function error")
         raise error
