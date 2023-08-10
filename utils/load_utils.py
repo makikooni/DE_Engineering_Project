@@ -9,6 +9,24 @@ logger.setLevel(logging.INFO)
 
 
 def get_id_col(connection, wh_table_name, table_df):
+    """
+    Function queries database to retrieve list of column id tuples, formatting 
+    data in the case of date ids, and extracting ids from tuples into list.
+
+    Args:
+        connection (pg8000 connection object): 
+            containing data regarding warehouse connection.
+        
+        wh_table_name (str):
+            name of current table.
+
+        table_df (pandas.DataFrame):
+            dataframe of current table.
+
+    Returns:
+        new_id_col (list): 
+            correctly formatted list of column ids
+    """
     query = f"SELECT {table_df.columns[0]} FROM {wh_table_name};"
     cursor = connection.cursor()
     cursor.execute(query)
@@ -105,4 +123,3 @@ def rename_lastjob(bucket_name):
     s3_client = boto3.client('s3')
     s3_client.copy_object(Bucket=bucket_name, CopySource=f'{bucket_name}/lastjob/lastjob.csv', Key=f'lastjob/lastjob_{timestamp_suffix}.csv')
     s3_client.delete_object(Bucket=bucket_name, Key='lastjob/lastjob.csv')
-
