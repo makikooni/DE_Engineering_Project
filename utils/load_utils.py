@@ -39,6 +39,25 @@ def get_id_col(connection, wh_table_name, table_df):
     return new_id_col
 
 def get_table_data(s3_table_name, bucket_name, timestamp):
+    """
+    Reads data from parquet file stored in processed s3 bucket and 
+    returns it as pandas.DataFrame.
+
+    Args:
+        s3_table_name (str): 
+            name of current table.
+        
+        bucket_name (str): 
+            name of processed s3 bucket.
+        
+        timstamp (str):
+            specific timestamp to locate correct directory within processed 
+            s3 bucket.
+    
+    Raises:
+        Exception:
+            Raised if data reading is unsuccessful.
+    """
     try:
         return wr.s3.read_parquet(f's3://{bucket_name}/{timestamp}/{s3_table_name}.parquet')
     except Exception as error:
@@ -46,6 +65,17 @@ def get_table_data(s3_table_name, bucket_name, timestamp):
         raise error
 
 def insert_data_format(table):
+    """
+    Converts data in each row into a tuple, returning it as a list of tuples.
+
+    Args:
+        table (pandas.DataFrame):
+            dataframe containing data to be processed.
+    
+    Raises:
+        Exception:
+            Raised if data conversion is unsuccessful.
+    """
     try:
         return [tuple(row) for row in table.itertuples(index=False)]
     except Exception as error:
