@@ -16,33 +16,33 @@ logger.setLevel(logging.INFO)
 def load_lambda_handler(event, context):
     """
     Entry point for Load Lambda, triggered by CloudWatch scheduled event.
-    Retrieves warehouse credentials, and list of table names, from 
-    AWS Secrets, as well as a list of timestamps from 'lastjob.csv' 
-    file in processed s3 bucket. 
-    
+    Retrieves warehouse credentials, and list of table names, from
+    AWS Secrets, as well as a list of timestamps from 'lastjob.csv'
+    file in processed s3 bucket.
+
     Then establishes connection with warehouse before iterating through
-    list of table names. With each iteration, function iterates through 
-    list of timestamps, reading data from processed s3 bucket as pandas 
+    list of table names. With each iteration, function iterates through
+    list of timestamps, reading data from processed s3 bucket as pandas
     dataframe:
 
-        - For dim_tables: peforms neccessary data transformations 
-        before comparing each row id to warehouse, discerning inserts from 
-        updates, building queries and configuring row structure, 
-        before updating warehouse. 
-        
-        - For fact tables; queries are built and 
+        - For dim_tables: peforms neccessary data transformations
+        before comparing each row id to warehouse, discerning inserts from
+        updates, building queries and configuring row structure,
+        before updating warehouse.
+
+        - For fact tables; queries are built and
         data formatted before updating warehouse.
 
         - Logging progress to CloudWatch.
 
-    Connection to warehouse is then closed and lastjob.csv is renamed with 
+    Connection to warehouse is then closed and lastjob.csv is renamed with
     timestamp to keep record and indicate successful load.
 
     Args:
-        event (dict): 
+        event (dict):
             event data containing info about triggered S3 object.
 
-        context (LambdaContext): 
+        context (LambdaContext):
             runtime information about the lambda function.
 
     Returns:
@@ -53,7 +53,7 @@ def load_lambda_handler(event, context):
             Raised if an unforseen errors arrise during execution.
 
     Note:
-        This function relies on, and utilises, the following utility functions: 
+        This function relies on, and utilises, the following utility functions:
             get_id_col, get_table_data,
             insert_data_format, build_insert_sql,
             insert_table_data, get_job_list,

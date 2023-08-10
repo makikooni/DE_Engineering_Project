@@ -51,13 +51,13 @@ def transform_lambda_handler(event, context):
             Raised if an issue with s3 operations arises.
 
     Note:
-        This function relies on, and utilises, the following utility functions: 
+        This function relies on, and utilises, the following utility functions:
             transform_design, transform_payment_type,
             transform_location, transform_transaction,
             transform_currency, transform_staff,
             transform_payment, transform_purchase_order,
             transform_counterparty, transform_sales_order,
-            create_date, get_last_job_timestamp, 
+            create_date, get_last_job_timestamp,
             log_latest_job_transform
     """
     INGESTION_BUCKET_NAME = "ingestion-va-052023"
