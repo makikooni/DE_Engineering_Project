@@ -57,6 +57,12 @@ def extraction_lambda_handler(event, context):
         RuntimeError:
             Raised if an error occurs during either the extraction or
             upload processes.
+
+    Note:
+        This function relies on, and utilises, the following utility functions:
+            get_secret, connect_db,
+            get_table_db, upload_table_s3,
+            log_latest_job_extract, trigger_transform_lambda
     """
     DBNAME = "totesys"
     AWS_SECRET_TABLES_NAMES = "ingestion/db/table-names"
