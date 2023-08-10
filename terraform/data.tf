@@ -1,3 +1,5 @@
+#=#=#=#=#=#=#=#=#=#=#=#=# Data
+
 data "aws_caller_identity" "current" {}
 
 data "aws_region" "current" {}
@@ -17,6 +19,8 @@ locals {
   utils_path = "${path.root}/../utils"
 }
 
+# Extract
+
 resource "null_resource" "extraction_zip" {
   provisioner "local-exec" {
     command = <<EOT
@@ -28,6 +32,8 @@ resource "null_resource" "extraction_zip" {
   }
 }
 
+# Transform
+
 resource "null_resource" "transform_zip" {
   provisioner "local-exec" {
     command = <<EOT
@@ -38,6 +44,8 @@ resource "null_resource" "transform_zip" {
     EOT
   }
 }
+
+# Load
 
 resource "null_resource" "load_zip" {
   provisioner "local-exec" {
