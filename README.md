@@ -124,5 +124,10 @@ The project uses GitHub Actions for CI/CD and you can see more details in the [t
 - [Lucy Adams](http://www.github.com/tricia-mcmillan)
 - [Weronika Falinska](http://www.github.com/makikooni)
 
+
+## Links
+[Archived Northcoders page](https://web.archive.org/web/20240713164214/https://northcoders.com/project-phase/various-artists)
+
+
 ## Project status
 Closed on 11th August 2023.
